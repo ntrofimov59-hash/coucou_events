@@ -1,0 +1,178 @@
+---
+export const prerender = true;
+
+import Layout from "@/layouts/Layout.astro";
+import ContactForm from "@/components/forms/ContactForm.astro";
+import { CONTACT } from "@/config/site";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "ru" } = Astro.params;
+
+const emailHref = `mailto:${CONTACT.email}`;
+const phoneHref =
+  CONTACT.phoneHref || `tel:${String(CONTACT.phone || "").replace(/\s/g, "")}`;
+
+const t = {
+  ru: {
+    metaTitle: "Контакты | Coucou",
+    metaDesc:
+      "Свяжитесь с Coucou, чтобы организовать мероприятие в Ереване, Барселоне, на Бали или в другом городе мира. Ответим в течение рабочего дня.",
+    title: "Контакты",
+    subtitle:
+      "Свяжитесь с нами любым удобным способом — ответим в течение рабочего дня, в каком бы часовом поясе вы ни находились.",
+    phone: "Телефон",
+    email: "E-mail",
+    workingHours: "Режим работы",
+  },
+  eng: {
+    metaTitle: "Contacts | Coucou",
+    metaDesc:
+      "Get in touch with Coucou to organize an event in Yerevan, Barcelona, Bali, or anywhere in the world. We will reply within a business day.",
+    title: "Contacts",
+    subtitle:
+      "Get in touch with us in any convenient way — we will reply within a business day, no matter what time zone you are in.",
+    phone: "Phone",
+    email: "E-mail",
+    workingHours: "Working Hours",
+  },
+  esp: {
+    metaTitle: "Contactos | Coucou",
+    metaDesc:
+      "Póngase en contacto con Coucou para organizar un evento en Ereván, Barcelona, Bali o cualquier parte del mundo. Responderemos en un día hábil.",
+    title: "Contactos",
+    subtitle:
+      "Contáctenos de la manera que le resulte más cómoda; responderemos dentro del día hábil, sin importar en qué zona horaria se encuentre.",
+    phone: "Teléfono",
+    email: "E-mail",
+    workingHours: "Horario de trabajo",
+  },
+  arm: {
+    metaTitle: "Կապ | Coucou",
+    metaDesc:
+      "Կապվեք Coucou-ի հետ՝ Երևանում, Բարսելոնայում, Բալիում կամ աշխարհի ցանկացած այլ վայրում միջոցառում կազմակերպելու համար:",
+    title: "Կապ",
+    subtitle:
+      "Կապվեք մեզ հետ ցանկացած հարմար եղանակով. մենք կպատասխանենք աշխատանքային օրվա ընթացքում՝ անկախ ձեր գտնվելու վայրից:",
+    phone: "Հեռախոսահամար",
+    email: "Էլ. հասցե",
+    workingHours: "Աշխատանքային ժամեր",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  metaTitle: "Контакты | Coucou",
+  metaDesc: "Свяжитесь с Coucou, чтобы организовать мероприятие.",
+  title: "Контакты",
+  subtitle: "Свяжитесь с нами любым удобным способом.",
+  phone: "Телефон",
+  email: "E-mail",
+  workingHours: "Режим работы",
+};
+---
+
+<Layout title={t.metaTitle} description={t.metaDesc} lang={lang}>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="ru" href="/ru/contacts" />
+    <link rel="alternate" hreflang="en" href="/eng/contacts" />
+    <link rel="alternate" hreflang="es" href="/esp/contacts" />
+    <link rel="alternate" hreflang="hy" href="/arm/contacts" />
+    <link rel="alternate" hreflang="x-default" href="/ru/contacts" />
+  </Fragment>
+
+  <section class="contacts-page" lang={lang}>
+    <div class="container">
+      <h1>{t.title}</h1>
+      <p class="subtitle">{t.subtitle}</p>
+
+      <div class="contacts-grid">
+        <div class="glass contacts-info">
+          <div class="info-item">
+            <span class="label">{t.phone}</span>
+            <a href={phoneHref}>{CONTACT.phone}</a>
+          </div>
+          <div class="info-item">
+            <span class="label">{t.email}</span>
+            <a href={emailHref}>{CONTACT.email}</a>
+          </div>
+          <div class="info-item">
+            <span class="label">{t.workingHours}</span>
+            <span>{CONTACT.workingHours}</span>
+          </div>
+        </div>
+
+        <div class="glass contacts-form-wrapper">
+          <ContactForm lang={lang} />
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .contacts-page {
+    padding: 6rem 0;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  h1 {
+    color: var(--fg);
+    margin-bottom: 1.5rem;
+  }
+  .subtitle {
+    color: var(--fg-soft);
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+  }
+  .contacts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 2rem;
+  }
+  .contacts-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    padding: 2.5rem;
+    border-radius: 20px;
+    height: fit-content;
+  }
+  .contacts-form-wrapper {
+    padding: 2.5rem;
+    border-radius: 20px;
+  }
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .info-item .label {
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .info-item a,
+  .info-item span {
+    color: var(--fg);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .info-item a:hover {
+    color: var(--accent-text);
+  }
+  @media (max-width: 768px) {
+    .contacts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

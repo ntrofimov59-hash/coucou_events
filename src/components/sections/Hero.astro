@@ -1,0 +1,371 @@
+---
+import Button from "@/components/ui/Button.astro";
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = "ru" } = Astro.props;
+
+const t = {
+  ru: {
+    eyebrow: "Coucou Events",
+    slides: [
+      {
+        titleHtml: "АРЕНДА<br />ШАТРОВ",
+        titleText: "АРЕНДА ШАТРОВ",
+        subtitle:
+          "Премиальные шатры и мобильные конструкции для мероприятий любого масштаба",
+        image:
+          "/images/hero/hero-main-1-tents.webp",
+      },
+      {
+        titleHtml: "КОРПОРАТИВЫ<br />МИРОВОГО УРОВНЯ",
+        titleText: "КОРПОРАТИВЫ МИРОВОГО УРОВНЯ",
+        subtitle: "Тимбилдинг, гала-ужины и деловые мероприятия в 14 странах",
+        image:
+          "/images/hero/hero-main-2-corporate.webp",
+      },
+      {
+        titleHtml: "ЧАСТНЫЕ<br />ПРАЗДНИКИ",
+        titleText: "ЧАСТНЫЕ ПРАЗДНИКИ",
+        subtitle: "Юбилеи, дни рождения и эксклюзивные вечеринки под ключ",
+        image:
+          "/images/hero/hero-main-3-private.webp",
+      },
+    ],
+    btnOrder: "Заказать мероприятие",
+    btnPortfolio: "Портфолио",
+  },
+  eng: {
+    eyebrow: "Coucou Events",
+    slides: [
+      {
+        titleHtml: "TENT<br />RENTAL",
+        titleText: "TENT RENTAL",
+        subtitle: "Premium tents and mobile structures for events of any scale",
+        image:
+          "/images/hero/hero-main-1-tents.webp",
+      },
+      {
+        titleHtml: "WORLD-CLASS<br />CORPORATES",
+        titleText: "WORLD-CLASS CORPORATES",
+        subtitle:
+          "Team building, gala dinners, and business events across 14 countries",
+        image:
+          "/images/hero/hero-main-2-corporate.webp",
+      },
+      {
+        titleHtml: "PRIVATE<br />CELEBRATIONS",
+        titleText: "PRIVATE CELEBRATIONS",
+        subtitle: "Anniversaries, birthdays, and exclusive turnkey parties",
+        image:
+          "/images/hero/hero-main-3-private.webp",
+      },
+    ],
+    btnOrder: "Book Event",
+    btnPortfolio: "Portfolio",
+  },
+  esp: {
+    eyebrow: "Coucou Events",
+    slides: [
+      {
+        titleHtml: "ALQUILER<br />DE CARPAS",
+        titleText: "ALQUILER DE CARPAS",
+        subtitle:
+          "Carpas prémium y estructuras móviles para eventos de cualquier escala",
+        image:
+          "/images/hero/hero-main-1-tents.webp",
+      },
+      {
+        titleHtml: "CORPORATIVOS<br />DE CLASE MUNDIAL",
+        titleText: "CORPORATIVOS DE CLASE MUNDIAL",
+        subtitle:
+          "Team building, cenas de gala y eventos de negocios en 14 países",
+        image:
+          "/images/hero/hero-main-2-corporate.webp",
+      },
+      {
+        titleHtml: "CELEBRACIONES<br />PRIVADAS",
+        titleText: "CELEBRACIONES PRIVADAS",
+        subtitle: "Aniversarios, cumpleaños y fiestas exclusivas llave en mano",
+        image:
+          "/images/hero/hero-main-3-private.webp",
+      },
+    ],
+    btnOrder: "Reservar evento",
+    btnPortfolio: "Portafolio",
+  },
+  arm: {
+    eyebrow: "Coucou Events",
+    slides: [
+      {
+        titleHtml: "ՎՐԱՆՆԵՐԻ<br />ՎԱՐՁԱԿԱԼՈՒԹՅՈՒՆ",
+        titleText: "ՎՐԱՆՆԵՐԻ ՎԱՐՁԱԿԱԼՈՒԹՅՈՒՆ",
+        subtitle:
+          "Պրեմիում վրաններ և շարժական կառույցներ ցանկացած մասշտաբի միջոցառումների համար",
+        image:
+          "/images/hero/hero-main-1-tents.webp",
+      },
+      {
+        titleHtml: "ՀԱՄԱՇԽԱՐՀԱՅԻՆ<br />ԿՈՐՊՈՐԱՏԻՎՆԵՐ",
+        titleText: "ՀԱՄԱՇԽԱՐՀԱՅԻՆ ԿՈՐՊՈՐԱՏԻՎՆԵՐ",
+        subtitle:
+          "Թիմբիլդինգ, գալա-ընթրիքներ և գործնական միջոցառումներ 14 երկրներում",
+        image:
+          "/images/hero/hero-main-2-corporate.webp",
+      },
+      {
+        titleHtml: "ՄԱՍՆԱՎՈՐ<br />ՏՈՆԵՐ",
+        titleText: "ՄԱՍՆԱՎՈՐ ՏՈՆԵՐ",
+        subtitle:
+          "Հոբելյաններ, ծննդյան օրեր և բացառիկ երեկույթներ բանալին ձեռքին",
+        image:
+          "/images/hero/hero-main-3-private.webp",
+      },
+    ],
+    btnOrder: "Պատվիրել միջոցառում",
+    btnPortfolio: "Պորտֆոլիո",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  eyebrow: "Coucou Events",
+  slides: [
+    {
+      titleHtml: "АРЕНДА<br />ШАТРОВ",
+      titleText: "АРЕНДА ШАТРОВ",
+      subtitle:
+        "Премиальные шатры и мобильные конструкции для мероприятий любого масштаба",
+      image:
+        "/images/hero/hero-main-1-tents.webp",
+    },
+    {
+      titleHtml: "КОРПОРАТИВЫ<br />МИРОВОГО УРОВНЯ",
+      titleText: "КОРПОРАТИВЫ МИРОВОГО УРОВНЯ",
+      subtitle: "Тимбилдинг, гала-ужины и деловые мероприятия в 14 странах",
+      image:
+        "/images/hero/hero-main-2-corporate.webp",
+    },
+    {
+      titleHtml: "ЧАСТНЫЕ<br />ПРАЗДНИКИ",
+      titleText: "ЧАСТНЫЕ ПРАЗДНИКИ",
+      subtitle: "Юбилеи, дни рождения и эксклюзивные вечеринки под ключ",
+      image:
+        "/images/hero/hero-main-3-private.webp",
+    },
+  ],
+  btnOrder: "Заказать мероприятие",
+  btnPortfolio: "Портфолио",
+};
+
+const configuratorHref = `/${lang}/configurator`;
+const portfolioHref = `#portfolio`;
+---
+
+<section class="hero" lang={lang} aria-label="Hero">
+  <div id="hero-slides" class="hero__slides" aria-hidden="true">
+    {
+      t.slides.map((slide, i) => (
+        <div
+          class:list={["hero__slide", i === 0 && "is-active"]}
+          data-title-html={slide.titleHtml}
+          data-subtitle={slide.subtitle}
+          style={`background-image: url('${slide.image}')`}
+        />
+      ))
+    }
+  </div>
+
+  <div class="hero__overlay"></div>
+
+  <div class="hero__content">
+    <p class="hero__eyebrow">{t.eyebrow}</p>
+
+    <h1 id="hero-title" class="hero__title">
+      <Fragment set:html={t.slides[0].titleHtml} />
+    </h1>
+
+    <p id="hero-subtitle" class="hero__subtitle">
+      {t.slides[0].subtitle}
+    </p>
+
+    <div class="hero__actions">
+      <Button href={configuratorHref} size="lg" class="hero-btn-primary">
+        {t.btnOrder}
+      </Button>
+      <Button
+        href={portfolioHref}
+        variant="outline"
+        size="lg"
+        class="hero-btn-outline"
+      >
+        {t.btnPortfolio}
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: min(90vh, 900px);
+    min-height: 620px;
+    padding: clamp(4rem, 10vw, 7rem) 1.5rem clamp(3.5rem, 8vw, 5.5rem);
+    overflow: hidden;
+  }
+
+  .hero__slides,
+  .hero__slide {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero__slide {
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    transform: scale(1.04);
+  }
+
+  .hero__slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity 1.4s ease,
+      transform 7s ease-out;
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(4, 16, 13, 0.35) 0%,
+      rgba(4, 16, 13, 0.55) 45%,
+      rgba(4, 16, 13, 0.78) 100%
+    );
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 52rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .hero__eyebrow {
+    display: inline-flex;
+    margin: 0 0 1.25rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+  }
+
+  .hero__title {
+    margin: 0 0 1.25rem;
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #fff;
+    text-wrap: balance;
+  }
+
+  .hero__subtitle {
+    margin: 0 auto 2.25rem;
+    max-width: 36rem;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+  }
+
+  /* Brand CTA — teal, не красный */
+  .hero__actions :global(.hero-btn-primary),
+  .hero__actions :global(a.hero-btn-primary) {
+    background: #0d9488 !important;
+    color: #fff !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35);
+  }
+
+  .hero__actions :global(.hero-btn-primary:hover),
+  .hero__actions :global(a.hero-btn-primary:hover) {
+    background: #0f766e !important;
+  }
+
+  .hero__actions :global(.hero-btn-outline),
+  .hero__actions :global(a.hero-btn-outline) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(8px);
+  }
+
+  .hero__actions :global(.hero-btn-outline:hover),
+  .hero__actions :global(a.hero-btn-outline:hover) {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.55) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__slide {
+      transition: opacity 0.4s ease;
+      transform: none;
+    }
+    .hero__slide.is-active {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const slides = document.querySelectorAll(".hero__slide");
+  let current = 0;
+
+  function switchSlide() {
+    const titleEl = document.getElementById("hero-title");
+    const subtitleEl = document.getElementById("hero-subtitle");
+    if (!slides.length || !titleEl || !subtitleEl) return;
+
+    slides[current].classList.remove("is-active");
+    current = (current + 1) % slides.length;
+    slides[current].classList.add("is-active");
+
+    const slide = slides[current] as HTMLElement;
+    titleEl.innerHTML = slide.dataset.titleHtml || "";
+    subtitleEl.textContent = slide.dataset.subtitle || "";
+  }
+
+  // Пауза, если вкладка скрыта
+  let timer = window.setInterval(switchSlide, 6500);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      clearInterval(timer);
+    } else {
+      timer = window.setInterval(switchSlide, 6500);
+    }
+  });
+</script>

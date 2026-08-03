@@ -1,0 +1,475 @@
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  preselectedService?: string;
+  lang?: string;
+}
+
+const { preselectedService, lang: propLang } = Astro.props;
+const { lang: paramLang, locale } = Astro.params;
+const lang = propLang || paramLang || locale || "ru";
+
+const ENDPOINT = "/api/booking";
+
+const entries = await getCollection(
+  "services",
+  ({ id, data }) =>
+    (!lang || id.startsWith(`${lang}/`)) && data.published !== false,
+);
+
+const services = entries
+  .sort((a, b) => (a.data.order || 0) - (b.data.order || 0))
+  .map((entry) => {
+    const cleanId = entry.id.includes("/") ? entry.id.split("/")[1] : entry.id;
+    return { slug: cleanId, title: entry.data.title };
+  });
+
+const currentYear = new Date().getFullYear();
+const minDateString = `${currentYear}-01-01`;
+
+const t = {
+  ru: {
+    nameLabel: "Имя",
+    phoneLabel: "Телефон",
+    phoneHint: "Введите номер с кодом страны",
+    serviceLabel: "Услуга",
+    anyService: "Не важно / уточню позже",
+    dateLabel: "Дата мероприятия",
+    messageLabel: "Комментарий",
+    submitBtn: "Отправить заявку",
+    submitting: "Отправка...",
+    successMsg: "✓ Заявка успешно отправлена! Мы свяжемся с вами.",
+    successBtn: "Заявка отправлена",
+    alreadySent: "⚠️ Заявка уже отправлена. Ожидайте ответа!",
+    networkError: "⚠️ Ошибка сети. Проверьте подключение и попробуйте снова.",
+    countryChecking: "Ввод...",
+  },
+  eng: {
+    nameLabel: "Name",
+    phoneLabel: "Phone",
+    phoneHint: "Enter phone number with country code",
+    serviceLabel: "Service",
+    anyService: "Any / I'll specify later",
+    dateLabel: "Event Date",
+    messageLabel: "Comment",
+    submitBtn: "Submit Request",
+    submitting: "Sending...",
+    successMsg: "✓ Request sent successfully! We will contact you.",
+    successBtn: "Request Sent",
+    alreadySent: "⚠️ Request already sent. Please wait for a reply!",
+    networkError: "⚠️ Network error. Check connection and try again.",
+    countryChecking: "Typing...",
+  },
+  esp: {
+    nameLabel: "Nombre",
+    phoneLabel: "Teléfono",
+    phoneHint: "Ingrese el número con código de país",
+    serviceLabel: "Servicio",
+    anyService: "Cualquiera / Lo especificaré más tarde",
+    dateLabel: "Fecha del evento",
+    messageLabel: "Comentario",
+    submitBtn: "Enviar solicitud",
+    submitting: "Enviando...",
+    successMsg: "✓ ¡Solicitud enviada con éxito! Nos pondremos en contacto.",
+    successBtn: "Solicitud enviada",
+    alreadySent: "⚠️ La solicitud ya fue enviada. ¡Espere una respuesta!",
+    networkError: "⚠️ Error de red. Verifique la conexión e intente de nuevo.",
+    countryChecking: "Escribiendo...",
+  },
+  arm: {
+    nameLabel: "Անուն",
+    phoneLabel: "Հեռախոս",
+    phoneHint: "Մուտքագրեք համարը երկրի կոդով",
+    serviceLabel: "Ծառայություն",
+    anyService: "Կարևոր չէ / կճշտեմ ավելի ուշ",
+    dateLabel: "Միջոցառման ամսաթիվ",
+    messageLabel: "Մեկնաբանություն",
+    submitBtn: "Ուղարկել հայտ",
+    submitting: "Ուղարկվում է...",
+    successMsg: "✓ Հայտը հաջողությամբ ուղարկվեց: Մենք կապ կհաստատենք:",
+    successBtn: "Հայտն ուղարկված է",
+    alreadySent: "⚠️ Հայտը արդեն ուղարկված է: Սպասեք պատասխանի:",
+    networkError: "⚠️ Ցանցային սխալ: Ստուգեք կապը և կրկին փորձեք:",
+    countryChecking: "Մուտքագրում...",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  nameLabel: "Имя",
+  phoneLabel: "Телефон",
+  phoneHint: "Введите номер с кодом страны",
+  serviceLabel: "Услуга",
+  anyService: "Не важно / уточню позже",
+  dateLabel: "Дата мероприятия",
+  messageLabel: "Комментарий",
+  submitBtn: "Отправить заявку",
+  submitting: "Отправка...",
+  successMsg: "✓ Заявка успешно отправлена! Мы свяжемся с вами.",
+  successBtn: "Заявка отправлена",
+  alreadySent: "⚠️ Заявка уже отправлена. Ожидайте ответа!",
+  networkError: "⚠️ Ошибка сети. Проверьте подключение и попробуйте снова.",
+  countryChecking: "Ввод...",
+};
+---
+
+<form id="booking-form" class="booking-form" novalidate lang={lang}>
+  <!-- Honeypot -->
+  <div class="hp-field" aria-hidden="true">
+    <label for="booking-website">Website</label>
+    <input
+      type="text"
+      id="booking-website"
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="field">
+    <label for="booking-name">{t.nameLabel}</label>
+    <input
+      id="booking-name"
+      name="name"
+      type="text"
+      required
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="field">
+    <label for="booking-phone">{t.phoneLabel}</label>
+    <div class="phone-input-wrapper">
+      <input
+        id="booking-phone"
+        name="phone"
+        type="tel"
+        required
+        autocomplete="tel"
+        inputmode="tel"
+        placeholder="+..."
+      />
+      <span
+        id="whatsapp-status"
+        class="whatsapp-inline-badge"
+        style="display: none;"></span>
+    </div>
+    <span class="phone-hint" id="phone-hint">{t.phoneHint}</span>
+  </div>
+
+  <div class="field">
+    <label for="booking-service">{t.serviceLabel}</label>
+    <select id="booking-service" name="service">
+      <option value="">{t.anyService}</option>
+      {
+        services.map((service) => (
+          <option
+            value={service.slug}
+            selected={service.slug === preselectedService}
+          >
+            {service.title}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="booking-date">{t.dateLabel}</label>
+    <input id="booking-date" name="date" type="date" min={minDateString} />
+  </div>
+
+  <div class="field">
+    <label for="booking-message">{t.messageLabel}</label>
+    <textarea id="booking-message" name="message" rows="4"></textarea>
+  </div>
+
+  <button type="submit" class="submit-btn">
+    <span class="btn-label">{t.submitBtn}</span>
+  </button>
+
+  <p class="form-status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  .booking-form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 480px;
+  }
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  label {
+    color: var(--fg-soft);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  input,
+  select,
+  textarea {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--fg);
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  select option {
+    color: #111;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .phone-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .phone-input-wrapper input {
+    width: 100%;
+    padding-right: 115px;
+  }
+  .whatsapp-inline-badge {
+    position: absolute;
+    right: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+    background: var(--input-bg);
+  }
+  .whatsapp-inline-badge.checking {
+    color: #eab308;
+    background: rgba(234, 179, 8, 0.1);
+  }
+  .whatsapp-inline-badge.valid {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+  }
+  .whatsapp-inline-badge.invalid {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+  .phone-hint {
+    font-size: 0.75rem;
+    color: var(--fg-soft);
+  }
+  .submit-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      opacity 0.2s;
+  }
+  .submit-btn:hover {
+    background: #0f766e;
+  }
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .form-status {
+    min-height: 1.2em;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  .form-status[data-state="success"] {
+    color: var(--accent-text);
+  }
+  .form-status[data-state="error"] {
+    color: var(--error-text, #ef4444);
+  }
+</style>
+
+<script define:vars={{ ENDPOINT, minDateString, t }}>
+  const form = document.getElementById("booking-form");
+
+  if (form) {
+  const statusEl = form.querySelector(".form-status");
+  const submitBtn = form.querySelector(".submit-btn");
+  const phoneInput = document.getElementById("booking-phone");
+  const whatsappBadge = document.getElementById("whatsapp-status");
+  const dateInput = document.getElementById("booking-date");
+
+  let isSubmittedSuccessfully = false;
+
+  if (dateInput) {
+    dateInput.min = minDateString;
+  }
+
+  function getCountryLabel(digits) {
+    if (digits.startsWith("7")) return "RU/KZ";
+    if (digits.startsWith("374")) return "AM";
+    if (digits.startsWith("995")) return "GE";
+    if (digits.startsWith("375")) return "BY";
+    if (digits.startsWith("380")) return "UA";
+    if (digits.startsWith("34")) return "ES";
+    if (digits.startsWith("39")) return "IT";
+    if (digits.startsWith("33")) return "FR";
+    if (digits.startsWith("49")) return "DE";
+    return "INT";
+  }
+
+  if (phoneInput && whatsappBadge) {
+    phoneInput.addEventListener("focus", () => {
+      if (!phoneInput.value.startsWith("+")) {
+        phoneInput.value = "+" + phoneInput.value.replace(/\+/g, "");
+      }
+    });
+
+    phoneInput.addEventListener("input", () => {
+      let val = phoneInput.value;
+      if (!val.startsWith("+")) {
+        val = "+" + val.replace(/\+/g, "");
+      }
+      let digits = val.replace(/\D/g, "");
+
+      let maxDigits = 15;
+      if (
+        digits.startsWith("7") ||
+        digits.startsWith("374") ||
+        digits.startsWith("995") ||
+        digits.startsWith("375") ||
+        digits.startsWith("380")
+      ) {
+        maxDigits = 12;
+      }
+
+      if (digits.length > maxDigits) {
+        digits = digits.substring(0, maxDigits);
+      }
+
+      phoneInput.value = "+" + digits;
+
+      const country = getCountryLabel(digits);
+
+      if (digits.length >= 4) {
+        whatsappBadge.style.display = "block";
+
+        if (digits.length >= 10) {
+          whatsappBadge.className = "whatsapp-inline-badge checking";
+          whatsappBadge.textContent = `${country} WA ⏳`;
+
+          clearTimeout(window.waTimer);
+          window.waTimer = setTimeout(async () => {
+            try {
+              const res = await fetch(`/api/check-whatsapp?phone=${digits}`);
+              const data = await res.json();
+
+              if (data.exists) {
+                whatsappBadge.className = "whatsapp-inline-badge valid";
+                whatsappBadge.textContent = `${country} WA 🟢`;
+              } else {
+                whatsappBadge.className = "whatsapp-inline-badge invalid";
+                whatsappBadge.textContent = `${country} WA 🔴`;
+              }
+            } catch (e) {
+              whatsappBadge.className = "whatsapp-inline-badge invalid";
+              whatsappBadge.textContent = `${country} WA ⚪`;
+            }
+          }, 400);
+        } else {
+          whatsappBadge.className = "whatsapp-inline-badge checking";
+          whatsappBadge.textContent = `${country} ${t.countryChecking}`;
+        }
+      } else {
+        whatsappBadge.style.display = "none";
+      }
+    });
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const calcData = {
+    service: urlParams.get("service"),
+    guests: urlParams.get("guests"),
+    location: urlParams.get("location"),
+    date: urlParams.get("date"),
+    options: urlParams.get("options"),
+    estimate: urlParams.get("estimate"),
+  };
+
+  if (calcData.date && dateInput && !dateInput.value) {
+    dateInput.value = calcData.date;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (isSubmittedSuccessfully || submitBtn.disabled) {
+      statusEl.dataset.state = "error";
+      statusEl.textContent = t.alreadySent;
+      return;
+    }
+
+    const formData = new FormData(form);
+    const payload = {
+      ...Object.fromEntries(formData.entries()),
+      ...Object.fromEntries(
+        Object.entries(calcData).filter(([, v]) => v != null && v !== ""),
+      ),
+    };
+
+    submitBtn.disabled = true;
+    statusEl.dataset.state = "";
+    statusEl.textContent = t.submitting;
+
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let result = {};
+      try {
+        result = await response.json();
+      } catch (_) {}
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || t.networkError);
+      }
+
+      isSubmittedSuccessfully = true;
+
+      if (typeof window.trackConversion === "function") {
+        window.trackConversion("booking_submit", {
+          form: "booking",
+          service: payload.service || "",
+        });
+      }
+
+      const langPrefix =
+        window.location.pathname.match(/^\/(ru|eng|esp|arm)/)?.[0] || "/ru";
+      window.location.href = `${langPrefix}/thank-you?from=booking`;
+    } catch (err) {
+      statusEl.dataset.state = "error";
+      statusEl.textContent = err && err.message ? err.message : t.networkError;
+      submitBtn.disabled = false;
+    }
+  });
+
+  }
+</script>

@@ -1,0 +1,290 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { CITIES } from "@/config/site";
+import { getLangFromAstro } from "@/lib/i18n";
+export const prerender = true;
+// 1. Указываем поддерживаемые языки для статической генерации (SSG)
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "eng" } = Astro.params;
+const prefix = `/${lang}`;
+const currentPath = Astro.url.pathname;
+
+// 2. Словари переводов и SEO-метаданных для каждой локали
+const translations = {
+  ru: {
+    seoTitle: "О нас | Coucou",
+    seoDescription:
+      "Coucou — команда организации мероприятий под ключ, которая работает в 14 городах мира: от Барселоны и Бали до Тбилиси и Праги.",
+    eyebrow: "О компании",
+    title: "Мероприятия без границ",
+    lead: "Coucou — это команда профессионалов с 8-летним опытом в организации премиальных мероприятий по всему миру. Мы превращаем ваши идеи в реальность, беря на себя **все заботы**. Более 150 мероприятий в 14 странах — от интимных свадеб на Бали до масштабных корпоративов в Барселоне. Наш подход: максимальная персонализация, безупречное качество и полное погружение в атмосферу вашего праздника.",
+    stats: [
+      { value: "150+", label: "проведённых мероприятий" },
+      { value: "8", label: "лет на рынке" },
+      { value: `${CITIES.length}`, label: "городов мира" },
+      { value: "24/7", label: "поддержка на мероприятии" },
+    ],
+    values: [
+      {
+        title: "Надёжность",
+        desc: "Соблюдаем сроки и договорённости на каждом этапе — даже когда организация идёт удалённо, в другом часовом поясе.",
+      },
+      {
+        title: "Внимание к деталям",
+        desc: "Продумываем мелочи, которые превращают мероприятие в событие: от освещения шатра до рассадки гостей.",
+      },
+      {
+        title: "Гибкость",
+        desc: "Подбираем решения под ваш бюджет, площадку, формат и город — от Марракеша до Будапешта.",
+      },
+    ],
+    btnServices: "Смотреть услуги",
+    btnContact: "Связаться с нами",
+  },
+  eng: {
+    seoTitle: "About Us | Coucou",
+    seoDescription:
+      "Coucou is a turnkey event management team operating in 14 cities worldwide: from Barcelona and Bali to Tbilisi and Prague.",
+    eyebrow: "About Company",
+    title: "Events Without Borders",
+    lead: "Coucou is a team of professionals with 8 years of experience in organizing premium events worldwide. We turn your ideas into reality, taking care of **everything**. Over 150 events in 14 countries — from intimate weddings in Bali to large-scale corporate events in Barcelona. Our approach: maximum personalization, impeccable quality, and full immersion in the atmosphere of your celebration.",
+    stats: [
+      { value: "150+", label: "events held" },
+      { value: "8", label: "years on the market" },
+      { value: `${CITIES.length}`, label: "cities worldwide" },
+      { value: "24/7", label: "support at the event" },
+    ],
+    values: [
+      {
+        title: "Reliability",
+        desc: "We adhere to deadlines and agreements at every stage — even when organization is remote, across different time zones.",
+      },
+      {
+        title: "Attention to Detail",
+        desc: "We think through the small things that turn an event into an experience: from tent lighting to guest seating.",
+      },
+      {
+        title: "Flexibility",
+        desc: "We tailor solutions to your budget, venue, format, and city — from Marrakech to Budapest.",
+      },
+    ],
+    btnServices: "View Services",
+    btnContact: "Contact Us",
+  },
+  esp: {
+    seoTitle: "Sobre nosotros | Coucou",
+    seoDescription:
+      "Coucou es un equipo de gestión de eventos llave en mano que opera en 14 ciudades de todo el mundo: desde Barcelona y Bali hasta Tiflis y Praga.",
+    eyebrow: "Sobre la empresa",
+    title: "Eventos sin fronteras",
+    lead: "Coucou es un equipo de profesionales con 8 años de experiencia en la organización de eventos prémium en todo el mundo. Convertimos tus ideas en realidad ocupándonos de **todo**. Más de 150 eventos en 14 países, desde bodas íntimas en Bali hasta eventos corporativos a gran escala en Barcelona. Nuestro enfoque: máxima personalización, calidad impecable y total inmersión en la atmósfera de tu celebración.",
+    stats: [
+      { value: "150+", label: "eventos realizados" },
+      { value: "8", label: "años en el mercado" },
+      { value: `${CITIES.length}`, label: "ciudades del mundo" },
+      { value: "24/7", label: "asistencia en el evento" },
+    ],
+    values: [
+      {
+        title: "Fiabilidad",
+        desc: "Cumplimos con los plazos y acuerdos en cada etapa, incluso cuando la organización se realiza de forma remota.",
+      },
+      {
+        title: "Atención al detalle",
+        desc: "Cuidamos cada pequeño detalle que convierte un evento en una experiencia única: desde la iluminación hasta la disposición de los invitados.",
+      },
+      {
+        title: "Flexibilidad",
+        desc: "Adaptamos soluciones a tu presupuesto, lugar, formato y ciudad, desde Marrakech hasta Budapest.",
+      },
+    ],
+    btnServices: "Ver servicios",
+    btnContact: "Contáctanos",
+  },
+  arm: {
+    seoTitle: "Մեր մասին | Coucou",
+    seoDescription:
+      "Coucou-ն բանալու հիմունքներով միջոցառումների կազմակերպման թիմ է, որը գործում է աշխարհի 14 քաղաքներում՝ Բարսելոնայից ու Բալիից մինչև Թբիլիսի ու Պրահա:",
+    eyebrow: "Ընկերության մասին",
+    title: "Միջոցառումներ առանց սահմանների",
+    lead: "Coucou-ն 8 տարվա փորձ ունեցող պրոֆեսիոնալների թիմ է ամբողջ աշխարհում պրեմիում դասի միջոցառումների կազմակերպման գործում։ Մենք ձեր գաղափարները վերածում ենք իրականության՝ հոգ տանելով **բոլոր հարցերի** մասին։ Ավելի քան 150 միջոցառում 14 երկրում՝ մտերմիկ հարսանիքներից Բալիում մինչև մասշտաբային կորպորատիվներ Բարսելոնայում։ Մեր մոտեցումն է՝ առավելագույն անհատականացում, անբասիր որակ և լիարժեք սուզում ձեր տոնի մթնոլորտում:",
+    stats: [
+      { value: "150+", label: "անցկացված միջոցառում" },
+      { value: "8", label: "տարի շուկայում" },
+      { value: `${CITIES.length}`, label: "քաղաք աշխարհում" },
+      { value: "24/7", label: "աջակցություն միջոցառմանը" },
+    ],
+    values: [
+      {
+        title: "Հուսալիություն",
+        desc: "Պահպանում ենք ժամկետներն ու պայմանավորվածությունները յուրաքանչյուր փուլում՝ նույնիսկ երբ կազմակերպումն ընթանում է հեռակա կարգով:",
+      },
+      {
+        title: "Ուշադրություն մանրուքների նկատմամբ",
+        desc: "Մտածում ենք այն մանրուքների մասին, որոնք միջոցառումը դարձնում են իրադարձություն՝ վրանի լուսավորությունից մինչև հյուրերի տեղաբաշխում:",
+      },
+      {
+        title: "Ճկունություն",
+        desc: "Ընտրում ենք լուծումներ ձեր բն תקվյետին, հարթակին, ձևաչափին և քաղաքին համապատասխան՝ Մարրաքեշից մինչև Բուդապեշտ:",
+      },
+    ],
+    btnServices: "Դիտել ծառայությունները",
+    btnContact: "Կապնվել մեզ հետ",
+  },
+};
+
+const t = translations[lang as keyof typeof translations] || translations.ru;
+---
+
+<Layout title={t.seoTitle} description={t.seoDescription} lang={lang}>
+  <!-- SEO Альтернативные языковые ссылки для поисковых систем -->
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="ru" href="/ru/about" />
+    <link rel="alternate" hreflang="en" href="/eng/about" />
+    <link rel="alternate" hreflang="es" href="/esp/about" />
+    <link rel="alternate" hreflang="hy" href="/arm/about" />
+    <link rel="alternate" hreflang="x-default" href="/ru/about" />
+  </Fragment>
+
+  <section class="about-page">
+    <div class="container">
+      <div class="glass eyebrow inline-block mb-6">{t.eyebrow}</div>
+      <h1>{t.title}</h1>
+      <p
+        class="lead"
+        set:html={t.lead.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}
+      />
+
+      <div class="stats">
+        {
+          t.stats.map((stat) => (
+            <div class="stat">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="values">
+        {
+          t.values.map((val) => (
+            <div class="glass value-item">
+              <h3>{val.title}</h3>
+              <p>{val.desc}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="cta">
+        <a href={`${prefix}/services`} class="btn">{t.btnServices}</a>
+        <a href={`${prefix}/contacts`} class="btn btn-outline">{t.btnContact}</a
+        >
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .about-page {
+    padding: 6rem 0;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  h1 {
+    color: var(--fg);
+    margin-bottom: 1.5rem;
+  }
+  .lead {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: var(--fg-soft);
+    margin-bottom: 3.5rem;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+    text-align: center;
+  }
+  .stat-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-text);
+    font-family: "Playfair Display", serif;
+  }
+  .stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--fg-faint);
+    margin-top: 0.35rem;
+  }
+  .values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+  .value-item {
+    padding: 2rem;
+    border-radius: 20px;
+  }
+  .value-item h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1.2rem;
+    color: var(--fg);
+  }
+  .value-item p {
+    color: var(--fg-soft);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .cta {
+    display: flex;
+    gap: 1rem;
+  }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    padding: 0.9rem 2.2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background: #0f766e;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--surface-border);
+  }
+  .btn-outline:hover {
+    background: var(--input-bg);
+  }
+  @media (max-width: 768px) {
+    .stats,
+    .values {
+      grid-template-columns: 1fr 1fr;
+    }
+    .cta {
+      flex-direction: column;
+    }
+  }
+</style>

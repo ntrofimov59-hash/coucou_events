@@ -1,0 +1,964 @@
+---
+interface Props {
+  currentPath: string;
+  lang?: string;
+}
+
+const { currentPath, lang = "ru" } = Astro.props as Props;
+
+const cleanPath = currentPath.replace(/^\/(ru|eng|esp|arm)/, "") || "/";
+const prefix = `/${lang}`;
+
+const linksLeft = [
+  { href: `${prefix}/contacts`, labelKey: "contacts" },
+  { href: `${prefix}/about`, labelKey: "about" },
+];
+
+const linksRight = [
+  { href: `${prefix}/configurator`, labelKey: "price" },
+  { href: `${prefix}/services`, labelKey: "services" },
+  { href: `${prefix}/cities`, labelKey: "cities" },
+];
+
+const translations = {
+  ru: {
+    contacts: "Контакты",
+    about: "О нас",
+    price: "Прайс",
+    services: "Услуги",
+    cities: "Города",
+    solutions: "Наши решения",
+    discuss: "Обсудить событие",
+    subtitle:
+      "Оставьте контакты — мы рассчитаем предварительную концепцию и зафиксируем свободную дату под ваше мероприятие.",
+    name: "Ваше имя",
+    submit: "Отправить запрос",
+    success: "Заявка успешно принята!",
+    openMenu: "Открыть меню",
+    closeMenu: "Закрыть меню",
+    toMain: "На главную",
+    selectLang: "Выбрать язык",
+  },
+  eng: {
+    contacts: "Contacts",
+    about: "About",
+    price: "Price",
+    services: "Services",
+    cities: "Cities",
+    solutions: "Our Solutions",
+    discuss: "Discuss Event",
+    subtitle:
+      "Leave your contacts — we will calculate a preliminary concept and lock in your date.",
+    name: "Your name",
+    submit: "Submit Request",
+    success: "Request submitted successfully!",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    toMain: "To home",
+    selectLang: "Select language",
+  },
+  esp: {
+    contacts: "Contactos",
+    about: "Nosotros",
+    price: "Precio",
+    services: "Servicios",
+    cities: "Ciudades",
+    solutions: "Nuestras Soluciones",
+    discuss: "Discutir Evento",
+    subtitle:
+      "Déjanos tus datos: calcularemos un concepto preliminar y bloquearemos la fecha.",
+    name: "Tu nombre",
+    submit: "Enviar solicitud",
+    success: "¡Solicitud enviada con éxito!",
+    openMenu: "Abrir menú",
+    closeMenu: "Cerrar menú",
+    toMain: "A inicio",
+    selectLang: "Seleccionar idioma",
+  },
+  arm: {
+    contacts: "Կապ",
+    about: "Մեր մասին",
+    price: "Գնացուցակ",
+    services: "Ծառայություններ",
+    cities: "Քաղաքներ",
+    solutions: "Մեր լուծումները",
+    discuss: "Քննարկել միջոցառումը",
+    subtitle:
+      "Թողեք ձեր տվյալները՝ մենք կհաշվարկենք նախնական հայեցակարգը և կամրագրենք օրը:",
+    name: "Ձեր անունը",
+    submit: "Ուղարկել հարցում",
+    success: "Հարցումը հաջողությամբ ուղարկվեց!",
+    openMenu: "Բացել մենյու",
+    closeMenu: "Փակել մենյու",
+    toMain: "Գլխավոր",
+    selectLang: "Ընտրել լեզուն",
+  },
+};
+
+const t = translations[lang as keyof typeof translations] || translations.ru;
+
+const bentoTiles = [
+  {
+    href: `${prefix}/services`,
+    title: {
+      ru: "Премиум Шатры",
+      eng: "Premium Tents",
+      esp: "Carpas Premium",
+      arm: "Պրեմիում Վրաններ",
+    },
+    subtitle: {
+      ru: "Архитектурные тенты и оранжереи.",
+      eng: "Architectural tents & greenhouses.",
+      esp: "Carpas arquitectónicas.",
+      arm: "Ճարտարապետական վրաններ:",
+    },
+    img: "/images/services/service-tents-card.webp",
+    gridClass: "col-span-2",
+  },
+  {
+    href: `${prefix}/services`,
+    title: {
+      ru: "Кейтеринг",
+      eng: "Catering",
+      esp: "Catering",
+      arm: "Քեյթերինգ",
+    },
+    subtitle: {
+      ru: "Гастрономия.",
+      eng: "Gastronomy.",
+      esp: "Gastronomía.",
+      arm: "Գաստրոնոմիա:",
+    },
+    img: "/images/services/service-catering-card.webp",
+    gridClass: "col-span-1",
+  },
+  {
+    href: `${prefix}/cities`,
+    title: {
+      ru: "Города",
+      eng: "Cities",
+      esp: "Ciudades",
+      arm: "Քաղաքներ",
+    },
+    subtitle: {
+      ru: "14 городов мира.",
+      eng: "14 cities worldwide.",
+      esp: "14 ciudades del mundo.",
+      arm: "14 քաղաք աշխարհում:",
+    },
+    img: "/images/portfolio/portfolio-barcelona-card.webp",
+    gridClass: "col-span-1",
+  },
+];
+
+const isHome =
+  currentPath === prefix || currentPath === prefix + "/" || currentPath === "/";
+---
+
+<header
+  class={`site-header ${!isHome ? "dynamic-inner-header" : ""}`}
+  id="site-header"
+>
+  <div class="bar bar-container">
+    <div class="nav-group nav-group--left">
+      <button
+        id="burger-btn"
+        class="icon-btn burger-btn"
+        type="button"
+        aria-label={t.openMenu}
+        aria-expanded="false"
+        aria-controls="mega-menu"
+      >
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
+
+      <nav class="desktop-nav desktop-nav--left" aria-label="Left navigation">
+        {
+          linksLeft.map((link) => (
+            <a
+              class="nav-link"
+              href={link.href}
+              aria-current={currentPath === link.href ? "page" : undefined}
+            >
+              {t[link.labelKey as keyof typeof t]}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <a href={prefix} class="header-logo-link" aria-label={t.toMain}>
+      <img
+        src="/logo.svg"
+        alt="Coucou"
+        width="120"
+        height="40"
+        loading="eager"
+      />
+    </a>
+
+    <div class="nav-group nav-group--right">
+      <nav class="desktop-nav desktop-nav--right" aria-label="Right navigation">
+        {
+          linksRight.map((link) => (
+            <a
+              class={`nav-link nav-link--accent-hover ${link.href.includes("configurator") ? "mobile-price-btn" : ""}`}
+              href={link.href}
+              aria-current={currentPath === link.href ? "page" : undefined}
+            >
+              {t[link.labelKey as keyof typeof t]}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="mobile-scrolled-links" aria-label="Mobile navigation">
+        {
+          linksRight.map((link) => (
+            <a
+              class="nav-link nav-link--accent-hover"
+              href={link.href}
+              aria-current={currentPath === link.href ? "page" : undefined}
+            >
+              {t[link.labelKey as keyof typeof t]}
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="lang-switcher">
+        <button class="lang-current" type="button" aria-label={t.selectLang}>
+          {lang.toUpperCase()}
+        </button>
+        <div class="lang-dropdown">
+          <a
+            href={`/ru${cleanPath === "/" ? "" : cleanPath}`}
+            class={lang === "ru" ? "active" : ""}>RU</a
+          >
+          <a
+            href={`/eng${cleanPath === "/" ? "" : cleanPath}`}
+            class={lang === "eng" ? "active" : ""}>ENG</a
+          >
+          <a
+            href={`/esp${cleanPath === "/" ? "" : cleanPath}`}
+            class={lang === "esp" ? "active" : ""}>ESP</a
+          >
+          <a
+            href={`/arm${cleanPath === "/" ? "" : cleanPath}`}
+            class={lang === "arm" ? "active" : ""}>ARM</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mega-menu" id="mega-menu">
+    <button
+      class="mega-menu__backdrop"
+      id="mega-backdrop"
+      type="button"
+      aria-label={t.closeMenu}
+    >
+    </button>
+
+    <div class="mega-menu__panel">
+      <div class="panel-header">
+        <div class="panel-logo-wrap">
+          <a href={prefix} class="panel-logo-link" aria-label={t.toMain}>
+            <img src="/logo.svg" alt="Coucou" class="panel-logo-img" />
+          </a>
+        </div>
+        <button
+          id="panel-close-btn"
+          class="close-btn"
+          type="button"
+          aria-label={t.closeMenu}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="panel-content">
+        <div class="bento-section">
+          <h3 class="section-title">{t.solutions}</h3>
+          <div class="bento-grid">
+            {
+              bentoTiles.map((tile) => (
+                <a class={`bento-card ${tile.gridClass}`} href={tile.href}>
+                  <div class="bento-card__bg-wrap">
+                    <img
+                      src={tile.img}
+                      alt={
+                        tile.title[lang as keyof typeof tile.title] ||
+                        tile.title.ru
+                      }
+                      loading="lazy"
+                      class="bento-card__img"
+                    />
+                    <div class="bento-card__overlay" />
+                  </div>
+                  <div class="bento-card__content">
+                    <span class="bento-card__title">
+                      {tile.title[lang as keyof typeof tile.title] ||
+                        tile.title.ru}
+                    </span>
+                    <span class="bento-card__subtitle">
+                      {tile.subtitle[lang as keyof typeof tile.subtitle] ||
+                        tile.subtitle.ru}
+                    </span>
+                  </div>
+                </a>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="lead-section">
+          <div class="lead-text-box">
+            <h3 class="section-title">{t.discuss}</h3>
+            <p class="lead-description">{t.subtitle}</p>
+          </div>
+
+          <form
+            class="lead-form"
+            id="menu-lead-form"
+            data-success-msg={t.success}
+          >
+            <div class="form-inputs-row">
+              <input
+                type="text"
+                name="name"
+                placeholder={t.name}
+                required
+                class="form-input"
+                autocomplete="name"
+              />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="+7 (___) ___-__-__"
+                required
+                class="form-input"
+                autocomplete="tel"
+              />
+            </div>
+            <button type="submit" class="form-submit-btn">{t.submit}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 16px 20px 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) {
+    position: relative;
+    padding: 20px 0 0 0;
+    background: transparent;
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) .bar {
+    max-width: 100% !important;
+    height: 72px;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 32px;
+  }
+  .site-header.dynamic-inner-header.is-scrolled,
+  .site-header.is-scrolled {
+    position: fixed;
+    padding: 10px 20px 0;
+    background: transparent !important;
+  }
+  .site-header.dynamic-inner-header.is-scrolled .bar,
+  .site-header.is-scrolled .bar {
+    max-width: 1280px !important;
+    height: 64px;
+    border-radius: 999px !important;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.85)) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border, rgba(4, 16, 13, 0.1)) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    padding: 0 20px;
+  }
+  .site-header:not(.dynamic-inner-header):not(.is-scrolled) .bar {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+  }
+  .bar {
+    max-width: 1280px;
+    margin: 0 auto;
+    height: 64px;
+    padding: 0 20px;
+    border-radius: 999px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-group--left {
+    justify-self: start;
+  }
+  .nav-group--right {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mobile-scrolled-links {
+    display: none;
+    gap: 4px;
+  }
+  .lang-switcher {
+    position: relative;
+  }
+  .lang-current {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.7rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) .lang-current,
+  .site-header.is-scrolled .lang-current {
+    background: rgba(127, 127, 127, 0.1);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--fg, #04100d);
+  }
+  .lang-current:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #161619;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 105;
+  }
+  .lang-switcher:hover .lang-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .lang-dropdown a {
+    color: #a1a1aa;
+    text-decoration: none;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .lang-dropdown a:hover,
+  .lang-dropdown a.active {
+    background: rgba(13, 148, 136, 0.15);
+    color: #0d9488;
+  }
+  .header-logo-link {
+    justify-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    transition: background-color 0.2s ease;
+    line-height: 1;
+  }
+  .header-logo-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) .header-logo-link:hover,
+  .site-header.is-scrolled .header-logo-link:hover {
+    background: rgba(127, 127, 127, 0.12);
+  }
+  .header-logo-link img {
+    display: block;
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  .desktop-nav {
+    display: none;
+    gap: 6px;
+  }
+  @media (min-width: 900px) {
+    .desktop-nav {
+      display: flex;
+    }
+  }
+  @media (max-width: 899px) {
+    .site-header.is-scrolled,
+    .site-header.dynamic-inner-header.is-scrolled {
+      top: auto;
+      bottom: 16px;
+      padding: 0 16px;
+    }
+    .desktop-nav--right {
+      display: none !important;
+    }
+    .mobile-price-btn {
+      display: none !important;
+    }
+    .site-header.is-scrolled .lang-switcher,
+    .site-header.dynamic-inner-header.is-scrolled .lang-switcher {
+      display: none !important;
+    }
+    .site-header.is-scrolled .mobile-scrolled-links,
+    .site-header.dynamic-inner-header.is-scrolled .mobile-scrolled-links {
+      display: flex !important;
+    }
+  }
+  .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-weight: 450;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) .nav-link,
+  .site-header.is-scrolled .nav-link {
+    color: var(--fg-soft, #334155);
+  }
+  .nav-link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) .nav-link:hover,
+  .site-header.is-scrolled .nav-link:hover {
+    color: var(--fg);
+    background: rgba(127, 127, 127, 0.12);
+  }
+  .nav-link--accent-hover:hover {
+    background: rgba(13, 148, 136, 0.15) !important;
+    color: #0d9488 !important;
+  }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: #ffffff;
+    cursor: pointer;
+  }
+  .site-header.dynamic-inner-header:not(.is-scrolled) .icon-btn,
+  .site-header.is-scrolled .icon-btn {
+    color: var(--fg, #04100d);
+  }
+  .burger-btn {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .burger-line {
+    width: 20px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+  }
+  .burger-btn[aria-expanded="true"] .burger-line:first-child {
+    transform: translateY(3.5px) rotate(45deg);
+  }
+  .burger-btn[aria-expanded="true"] .burger-line:last-child {
+    transform: translateY(-3.5px) rotate(-45deg);
+  }
+  .mega-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .mega-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mega-menu__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    padding: 0;
+  }
+  /* На мобилке фон не кликабелен — только крестик */
+  @media (max-width: 899px) {
+    .mega-menu__backdrop {
+      pointer-events: none;
+      cursor: default;
+    }
+  }
+  .mega-menu__panel {
+    position: relative;
+    width: 100%;
+    min-height: auto; max-height: min(70vh, 640px);
+    max-height: 100%;
+    overflow-y: auto;
+    background: #ffffff;
+    color: #18181b;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 95;
+  }
+  .mega-menu.is-open .mega-menu__panel {
+    transform: translateY(0);
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    border-bottom: 1px solid #f4f4f5;
+  }
+  .panel-logo-wrap {
+    display: flex;
+    align-items: center;
+  }
+  .panel-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .panel-logo-img {
+    height: 28px;
+    width: auto;
+    display: block;
+  }
+  .close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: #52525b;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+  .close-btn:hover {
+    background: #f4f4f5;
+    color: #18181b;
+  }
+  .panel-content {
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    flex-grow: 1;
+  }
+  @media (min-width: 900px) {
+    .panel-content {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: stretch;
+    }
+  }
+  @media (max-width: 600px) {
+    .panel-header,
+    .panel-content {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+  .section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #71717a;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    height: 100%;
+  }
+  .bento-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 14px;
+    min-height: 88px;
+    max-height: 140px;
+    text-decoration: none;
+    border: 1px solid #e4e4e7;
+  }
+  .col-span-2 {
+    grid-column: span 2;
+    max-height: 160px;
+    min-height: 110px;
+  }
+  .col-span-1 {
+    grid-column: span 1;
+  }
+  .bento-card__bg-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .bento-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .bento-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.65) 0%,
+      transparent 70%
+    );
+  }
+  .bento-card__content {
+    position: relative;
+    z-index: 2;
+  }
+  .bento-card__title {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  .bento-card__subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+  }
+  .lead-section {
+    background: #f4f4f5;
+    padding: 24px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .lead-description {
+    font-size: 0.85rem;
+    color: #52525b;
+    line-height: 1.45;
+  }
+  .lead-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .form-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 600px) {
+    .form-inputs-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+    font-family: inherit;
+  }
+  .form-input:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+  }
+  .form-submit-btn {
+    width: 100%;
+    background: #0d9488;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    box-shadow: 0 6px 16px rgba(13, 148, 136, 0.25);
+  }
+  .form-submit-btn:hover {
+    background: #0f766e;
+  }
+  .form-submit-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+</style>
+
+<script is:inline>
+  const header = document.getElementById("site-header");
+  const burgerBtn = document.getElementById("burger-btn");
+  const megaMenu = document.getElementById("mega-menu");
+  const backdrop = document.getElementById("mega-backdrop");
+  const panelCloseBtn = document.getElementById("panel-close-btn");
+  const leadForm = document.getElementById("menu-lead-form");
+
+  function checkScroll() {
+    if (!header) return;
+    if (window.scrollY > 20) {
+      header.classList.add("is-scrolled");
+    } else {
+      header.classList.remove("is-scrolled");
+    }
+  }
+  window.addEventListener("scroll", checkScroll, { passive: true });
+  checkScroll();
+
+  function closeMenu() {
+    if (megaMenu) megaMenu.classList.remove("is-open");
+    if (burgerBtn) burgerBtn.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
+
+  function openMenu() {
+    if (megaMenu) megaMenu.classList.add("is-open");
+    if (burgerBtn) burgerBtn.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+
+  if (burgerBtn) {
+    burgerBtn.addEventListener("click", function () {
+      if (megaMenu && megaMenu.classList.contains("is-open")) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+  }
+
+  if (panelCloseBtn) {
+    panelCloseBtn.addEventListener("click", closeMenu);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", function () {
+      if (window.innerWidth >= 900) {
+        closeMenu();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  if (megaMenu) {
+    megaMenu.querySelectorAll(".bento-card").forEach(function (c) {
+      c.addEventListener("click", closeMenu);
+    });
+  }
+
+  if (leadForm) {
+    leadForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      var form = /** @type {HTMLFormElement} */ (leadForm);
+      var btn = form.querySelector('button[type="submit"]');
+      var formData = new FormData(form);
+      var payload = {
+        name: formData.get("name") || "",
+        phone: formData.get("phone") || "",
+        service: "",
+        message: "Lead from header mega-menu",
+      };
+
+      if (btn) {
+        /** @type {HTMLButtonElement} */ (btn).disabled = true;
+      }
+
+      try {
+        var res = await fetch("/api/booking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        var result = { success: false };
+        try {
+          result = await res.json();
+        } catch (_) {}
+
+        if (!res.ok || !result.success) {
+          throw new Error("fail");
+        }
+
+        if (typeof window.trackConversion === "function") {
+          window.trackConversion("booking_submit", { form: "header_menu" });
+        }
+
+        var match = window.location.pathname.match(/^\/(ru|eng|esp|arm)/);
+        var langPrefix = match ? match[0] : "/ru";
+        window.location.href = langPrefix + "/thank-you?from=booking";
+      } catch (_) {
+        alert("Ошибка отправки. Попробуйте ещё раз.");
+        if (btn) {
+          /** @type {HTMLButtonElement} */ (btn).disabled = false;
+        }
+      }
+    });
+  }
+</script>

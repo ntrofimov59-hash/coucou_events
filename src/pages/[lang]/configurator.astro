@@ -1,0 +1,1658 @@
+---
+import Layout from "@/layouts/Layout.astro";
+export const prerender = false;
+import {
+  CITIES_DATA,
+  SERVICES_PRICING,
+  CALC_OPTIONS,
+  priceFromUsd,
+} from "@/data/pricingData";
+
+const { lang = "ru" } = Astro.params;
+const prefix = `/${lang}`;
+
+const uiTranslations = {
+  ru: {
+    seoTitle: "Конфигуратор мероприятия | Coucou",
+    seoDescription:
+      "Соберите собственный пакет премиум-мероприятия: расчет стоимости в долларах и визуализация схемы площадки.",
+    eyebrow: "Инструмент планирования",
+    title: "Конфигуратор события",
+    subtitle:
+      "Настройте параметры вашей площадки. Масштаб схемы, планировка столов и итоговый бюджет в USD пересчитываются мгновенно.",
+    cityLabel: "0. Выберите город проведения",
+    tentLabel: "1. Габариты и тип шатра",
+    cateringLabel: "2. Кейтеринг и вместимость",
+    guestsLabel: "Количество гостей на площадке",
+    decorLabel: "3. Интерьерные решения и цвет",
+    entertainmentLabel: "4. Программа и звук",
+    photoLabel: "5. Съемка события",
+    transferLabel: "6. Логистическое сопровождение",
+    bioLabel: "7. Санитарная инфраструктура",
+    lightingLabel: "Праздничное контурное освещение",
+    lightingNote: "Интерьерные гирлянды по периметру купола",
+    blueprintTitle: "Архитектурный план площадки (схема)",
+    blueprintScale: "Масштаб: 1:100",
+    blueprintNote: "План расстановки мебели генерируется автоматически",
+    summaryTitle: "Спецификация пакета",
+    totalLabel: "Итоговая стоимость:",
+    ctaText: "Отправить спецификацию",
+    cityнь: "Город:",
+    tentFallback: "Конструкция шатра",
+    cateringPrefix: "Кейтеринг:",
+    decorFallback: "Декор интерьера",
+    entertainmentFallback: "Шоу-программа",
+    photoFallback: "Медиа-производство",
+    transferFallback: "Транспортная логистика",
+    bioFallback: "Санитарные модули",
+    lightingLabelShort: "Дизайнерское освещение",
+    guestsUnit: "чел.",
+    serviceName: "Конфигуратор события",
+    optionCatering: "Кейтеринг",
+    optionDecor: "Декор",
+    optionMusic: "Музыка",
+    optionPhoto: "Съемка",
+    optionTransfer: "Трансфер",
+    optionBio: "Санузлы",
+    optionLighting: "Контурное освещение",
+  },
+  eng: {
+    seoTitle: "Event Configurator | Coucou",
+    seoDescription:
+      "Build your own premium event package: cost calculation in USD and venue layout visualization.",
+    eyebrow: "Planning Tool",
+    title: "Event Configurator",
+    subtitle:
+      "Customize your venue parameters. The layout, table arrangement, and total budget in USD update instantly.",
+    cityLabel: "0. Select the city",
+    tentLabel: "1. Tent size and type",
+    cateringLabel: "2. Catering and capacity",
+    guestsLabel: "Number of guests",
+    decorLabel: "3. Interior solutions and colors",
+    entertainmentLabel: "4. Program and sound",
+    photoLabel: "5. Event photography",
+    transferLabel: "6. Logistics support",
+    bioLabel: "7. Sanitary facilities",
+    lightingLabel: "Festive contour lighting",
+    lightingNote: "Interior garlands around the dome perimeter",
+    blueprintTitle: "Venue architectural plan (layout)",
+    blueprintScale: "Scale: 1:100",
+    blueprintNote: "Furniture layout is generated automatically",
+    summaryTitle: "Package specification",
+    totalLabel: "Total cost:",
+    ctaText: "Submit specification",
+    cityнь: "City:",
+    tentFallback: "Tent structure",
+    cateringPrefix: "Catering:",
+    decorFallback: "Interior decor",
+    entertainmentFallback: "Entertainment",
+    photoFallback: "Media production",
+    transferFallback: "Logistics",
+    bioFallback: "Sanitary modules",
+    lightingLabelShort: "Designer lighting",
+    guestsUnit: "pers.",
+    serviceName: "Event Configurator",
+    optionCatering: "Catering",
+    optionDecor: "Decor",
+    optionMusic: "Music",
+    optionPhoto: "Photo",
+    optionTransfer: "Transfer",
+    optionBio: "Sanitary",
+    optionLighting: "Lighting",
+  },
+  esp: {
+    seoTitle: "Configurador de eventos | Coucou",
+    seoDescription:
+      "Cree su propio paquete de eventos premium: cálculo de costos en USD y visualización del plano del lugar.",
+    eyebrow: "Herramienta de planificación",
+    title: "Configurador de eventos",
+    subtitle:
+      "Ajuste los parámetros de su lugar. La escala del plano, la disposición de las mesas y el presupuesto total en USD se actualizan al instante.",
+    cityLabel: "0. Seleccione la ciudad",
+    tentLabel: "1. Tamaño y tipo de carpa",
+    cateringLabel: "2. Catering y capacidad",
+    guestsLabel: "Número de invitados",
+    decorLabel: "3. Soluciones de interior y color",
+    entertainmentLabel: "4. Programa y sonido",
+    photoLabel: "5. Fotografía del evento",
+    transferLabel: "6. Apoyo logístico",
+    bioLabel: "7. Instalaciones sanitarias",
+    lightingLabel: "Iluminación festiva perimetral",
+    lightingNote: "Guirnaldas interiores alrededor del perímetro de la cúpula",
+    blueprintTitle: "Plano arquitectónico del lugar (esquema)",
+    blueprintScale: "Escala: 1:100",
+    blueprintNote: "La distribución del mobiliario se genera automáticamente",
+    summaryTitle: "Especificación del paquete",
+    totalLabel: "Costo total:",
+    ctaText: "Enviar especificación",
+    cityнь: "Ciudad:",
+    tentFallback: "Estructura de la carpa",
+    cateringPrefix: "Catering:",
+    decorFallback: "Decoración de interiores",
+    entertainmentFallback: "Programa de entretenimiento",
+    photoFallback: "Producción de medios",
+    transferFallback: "Logística de transporte",
+    bioFallback: "Módulos sanitarios",
+    lightingLabelShort: "Iluminación diseñada",
+    guestsUnit: "pers.",
+    serviceName: "Configurador de eventos",
+    optionCatering: "Catering",
+    optionDecor: "Decoración",
+    optionMusic: "Música",
+    optionPhoto: "Fotografía",
+    optionTransfer: "Traslado",
+    optionBio: "Sanitarios",
+    optionLighting: "Iluminación",
+  },
+  arm: {
+    seoTitle: "Конфигуратор мероприятия | Coucou",
+    seoDescription:
+      "Соберите собственный пакет премиум-мероприятия: расчет стоимости в долларах и визуализация схемы площадки.",
+    eyebrow: "Инструмент планирования",
+    title: "Конфигуратор события",
+    subtitle:
+      "Настройте параметры вашей площадки. Масштаб схемы, планировка столов и итоговый бюджет в USD пересчитываются мгновенно.",
+    cityLabel: "0. Выберите город проведения",
+    tentLabel: "1. Габариты и тип шатра",
+    cateringLabel: "2. Кейтеринг и вместимость",
+    guestsLabel: "Количество гостей на площадке",
+    decorLabel: "3. Интерьерные решения и цвет",
+    entertainmentLabel: "4. Программа и звук",
+    photoLabel: "5. Съемка события",
+    transferLabel: "6. Логистическое сопровождение",
+    bioLabel: "7. Санитарная инфраструктура",
+    lightingLabel: "Праздничное контурное освещение",
+    lightingNote: "Интерьерные гирлянды по периметру купола",
+    blueprintTitle: "Архитектурный план площадки (схема)",
+    blueprintScale: "Масштаб: 1:100",
+    blueprintNote: "План расстановки мебели генерируется автоматически",
+    summaryTitle: "Спецификация пакета",
+    totalLabel: "Итоговая стоимость:",
+    ctaText: "Отправить спецификацию",
+    cityнь: "Город:",
+    tentFallback: "Конструкция шатра",
+    cateringPrefix: "Кейтеринг:",
+    decorFallback: "Декор интерьера",
+    entertainmentFallback: "Шоу-программа",
+    photoFallback: "Медиа-производство",
+    transferFallback: "Транспортная логистика",
+    bioFallback: "Санитарные модули",
+    lightingLabelShort: "Дизайнерское освещение",
+    guestsUnit: "чел.",
+    serviceName: "Конфигуратор события",
+    optionCatering: "Кейтеринг",
+    optionDecor: "Декор",
+    optionMusic: "Музыка",
+    optionPhoto: "Съемка",
+    optionTransfer: "Трансфер",
+    optionBio: "Санузлы",
+    optionLighting: "Контурное освещение",
+  },
+};
+
+const t =
+  uiTranslations[lang as keyof typeof uiTranslations] || uiTranslations.ru;
+
+const cityOptions = CITIES_DATA.map((city) => ({
+  id: `city-${city.id}`,
+  label: city.name[lang] || city.name.ru,
+  multiplier: city.multiplier,
+}));
+
+// Базовые цены из единого источника (SERVICES_PRICING) с учетом Еревана
+const marqueeBase = SERVICES_PRICING.marquees.baseUsd;
+const cateringBasePerGuest = SERVICES_PRICING.catering.baseUsd;
+const decorBase = SERVICES_PRICING.decor.baseUsd;
+const entBase = SERVICES_PRICING.entertainment.baseUsd;
+const photoBase = SERVICES_PRICING["photo-video"].baseUsd;
+const transferBase = SERVICES_PRICING.transfer.baseUsd;
+const bioBase = SERVICES_PRICING.biotoilets.baseUsd;
+
+const tentOptionsMap = {
+  ru: [
+    {
+      id: "tent-s",
+      label: "Малый шатёр",
+      note: "до 30 гостей, 10x10 м",
+      price: Math.round(marqueeBase * 0.8),
+      width: 120,
+      height: 120,
+    },
+    {
+      id: "tent-m",
+      label: "Средний шатёр",
+      note: "до 80 гостей, 10x20 м",
+      price: marqueeBase,
+      width: 180,
+      height: 120,
+    },
+    {
+      id: "tent-l",
+      label: "Большой шатёр",
+      note: "до 200 гостей, 20x40 м",
+      price: Math.round(marqueeBase * 2.2),
+      width: 240,
+      height: 140,
+    },
+  ],
+  eng: [
+    {
+      id: "tent-s",
+      label: "Small tent",
+      note: "up to 30 guests, 10x10 m",
+      price: Math.round(marqueeBase * 0.8),
+      width: 120,
+      height: 120,
+    },
+    {
+      id: "tent-m",
+      label: "Medium tent",
+      note: "up to 80 guests, 10x20 m",
+      price: marqueeBase,
+      width: 180,
+      height: 120,
+    },
+    {
+      id: "tent-l",
+      label: "Large tent",
+      note: "up to 200 guests, 20x40 m",
+      price: Math.round(marqueeBase * 2.2),
+      width: 240,
+      height: 140,
+    },
+  ],
+  esp: [
+    {
+      id: "tent-s",
+      label: "Carpa pequeña",
+      note: "hasta 30 invitados, 10x10 m",
+      price: Math.round(marqueeBase * 0.8),
+      width: 120,
+      height: 120,
+    },
+    {
+      id: "tent-m",
+      label: "Carpa mediana",
+      note: "hasta 80 invitados, 10x20 m",
+      price: marqueeBase,
+      width: 180,
+      height: 120,
+    },
+    {
+      id: "tent-l",
+      label: "Carpa grande",
+      note: "hasta 200 invitados, 20x40 m",
+      price: Math.round(marqueeBase * 2.2),
+      width: 240,
+      height: 140,
+    },
+  ],
+  arm: [
+    {
+      id: "tent-s",
+      label: "Малый шатёр",
+      note: "до 30 гостей, 10x10 м",
+      price: Math.round(marqueeBase * 0.8),
+      width: 120,
+      height: 120,
+    },
+    {
+      id: "tent-m",
+      label: "Средний шатёр",
+      note: "до 80 гостей, 10x20 м",
+      price: marqueeBase,
+      width: 180,
+      height: 120,
+    },
+    {
+      id: "tent-l",
+      label: "Большой шатёр",
+      note: "до 200 гостей, 20x40 м",
+      price: Math.round(marqueeBase * 2.2),
+      width: 240,
+      height: 140,
+    },
+  ],
+};
+
+const cateringOptionsMap = {
+  ru: [
+    {
+      id: "catering-none",
+      label: "Без кейтеринга",
+      note: "",
+      pricePerGuest: 0,
+    },
+    {
+      id: "catering-base",
+      label: "Базовый",
+      note: "легкий фуршет",
+      pricePerArgument: 0,
+      pricePerGuest: Math.round(cateringBasePerGuest * 0.5),
+    },
+    {
+      id: "catering-premium",
+      label: "Премиум",
+      note: "классический банкет",
+      pricePerGuest: cateringBasePerGuest,
+    },
+    {
+      id: "catering-lux",
+      label: "Люкс",
+      note: "авторское гастро-меню",
+      pricePerGuest: Math.round(cateringBasePerGuest * 1.7),
+    },
+  ],
+  eng: [
+    { id: "catering-none", label: "No catering", note: "", pricePerGuest: 0 },
+    {
+      id: "catering-base",
+      label: "Basic",
+      note: "light buffet",
+      pricePerGuest: Math.round(cateringBasePerGuest * 0.5),
+    },
+    {
+      id: "catering-premium",
+      label: "Premium",
+      note: "classic banquet",
+      pricePerGuest: cateringBasePerGuest,
+    },
+    {
+      id: "catering-lux",
+      label: "Lux",
+      note: "signature gastro menu",
+      pricePerGuest: Math.round(cateringBasePerGuest * 1.7),
+    },
+  ],
+  esp: [
+    { id: "catering-none", label: "Sin catering", note: "", pricePerGuest: 0 },
+    {
+      id: "catering-base",
+      label: "Básico",
+      note: "buffet ligero",
+      pricePerGuest: Math.round(cateringBasePerGuest * 0.5),
+    },
+    {
+      id: "catering-premium",
+      label: "Premium",
+      note: "banquete clásico",
+      pricePerGuest: cateringBasePerGuest,
+    },
+    {
+      id: "catering-lux",
+      label: "Lujo",
+      note: "menú gastro autor",
+      pricePerGuest: Math.round(cateringBasePerGuest * 1.7),
+    },
+  ],
+  arm: [
+    {
+      id: "catering-none",
+      label: "Без кейтеринга",
+      note: "",
+      pricePerGuest: 0,
+    },
+    {
+      id: "catering-base",
+      label: "Базовый",
+      note: "легкий фуршет",
+      pricePerGuest: Math.round(cateringBasePerGuest * 0.5),
+    },
+    {
+      id: "catering-premium",
+      label: "Премиум",
+      note: "классический банкет",
+      pricePerGuest: cateringBasePerGuest,
+    },
+    {
+      id: "catering-lux",
+      label: "Люкс",
+      note: "авторское гастро-меню",
+      pricePerGuest: Math.round(cateringBasePerGuest * 1.7),
+    },
+  ],
+};
+
+const decorOptionsMap = {
+  ru: [
+    {
+      id: "decor-none",
+      label: "Без декора",
+      note: "",
+      price: 0,
+      color: "#e4e4e7",
+    },
+    {
+      id: "decor-terracotta",
+      label: "Терракот",
+      note: "тёплая палитра",
+      price: Math.round(decorBase * 0.4),
+      color: "#ea580c",
+    },
+    {
+      id: "decor-sage",
+      label: "Шалфей",
+      note: "природная палитра",
+      price: Math.round(decorBase * 0.4),
+      color: "#16a34a",
+    },
+    {
+      id: "decor-gold",
+      label: "Золото",
+      note: "торжественный стиль",
+      price: Math.round(decorBase * 0.6),
+      color: "#ca8a04",
+    },
+  ],
+  eng: [
+    {
+      id: "decor-none",
+      label: "No decor",
+      note: "",
+      price: 0,
+      color: "#e4e4e7",
+    },
+    {
+      id: "decor-terracotta",
+      label: "Terracotta",
+      note: "warm palette",
+      price: Math.round(decorBase * 0.4),
+      color: "#ea580c",
+    },
+    {
+      id: "decor-sage",
+      label: "Sage",
+      note: "natural palette",
+      price: Math.round(decorBase * 0.4),
+      color: "#16a34a",
+    },
+    {
+      id: "decor-gold",
+      label: "Gold",
+      note: "ceremonial style",
+      price: Math.round(decorBase * 0.6),
+      color: "#ca8a04",
+    },
+  ],
+  esp: [
+    {
+      id: "decor-none",
+      label: "Sin decoración",
+      note: "",
+      price: 0,
+      color: "#e4e4e7",
+    },
+    {
+      id: "decor-terracotta",
+      label: "Terracota",
+      note: "paleta cálida",
+      price: Math.round(decorBase * 0.4),
+      color: "#ea580c",
+    },
+    {
+      id: "decor-sage",
+      label: "Salvia",
+      note: "paleta natural",
+      price: Math.round(decorBase * 0.4),
+      color: "#16a34a",
+    },
+    {
+      id: "decor-gold",
+      label: "Oro",
+      note: "estilo ceremonial",
+      price: Math.round(decorBase * 0.6),
+      color: "#ca8a04",
+    },
+  ],
+  arm: [
+    {
+      id: "decor-none",
+      label: "Без декора",
+      note: "",
+      price: 0,
+      color: "#e4e4e7",
+    },
+    {
+      id: "decor-terracotta",
+      label: "Терракот",
+      note: "тёплая палитра",
+      price: Math.round(decorBase * 0.4),
+      color: "#ea580c",
+    },
+    {
+      id: "decor-sage",
+      label: "Шалфей",
+      note: "природная палитра",
+      price: Math.round(decorBase * 0.4),
+      color: "#16a34a",
+    },
+    {
+      id: "decor-gold",
+      label: "Золото",
+      note: "торжественный стиль",
+      price: Math.round(decorBase * 0.6),
+      color: "#ca8a04",
+    },
+  ],
+};
+
+const entertainmentOptionsMap = {
+  ru: [
+    { id: "ent-none", label: "Без музыки", note: "", price: 0 },
+    {
+      id: "ent-dj",
+      label: "Премиум Диджей",
+      note: "",
+      price: Math.round(entBase * 0.4),
+    },
+    {
+      id: "ent-live",
+      label: "Живой бэнд / Кавер-группа",
+      note: "",
+      price: entBase,
+    },
+  ],
+  eng: [
+    { id: "ent-none", label: "No music", note: "", price: 0 },
+    {
+      id: "ent-dj",
+      label: "Premium DJ",
+      note: "",
+      price: Math.round(entBase * 0.4),
+    },
+    {
+      id: "ent-live",
+      label: "Live band / Cover band",
+      note: "",
+      price: entBase,
+    },
+  ],
+  esp: [
+    { id: "ent-none", label: "Sin música", note: "", price: 0 },
+    {
+      id: "ent-dj",
+      label: "DJ Premium",
+      note: "",
+      price: Math.round(entBase * 0.4),
+    },
+    {
+      id: "ent-live",
+      label: "Banda en vivo / Cover band",
+      note: "",
+      price: entBase,
+    },
+  ],
+  arm: [
+    { id: "ent-none", label: "Без музыки", note: "", price: 0 },
+    {
+      id: "ent-dj",
+      label: "Премиум Диджей",
+      note: "",
+      price: Math.round(entBase * 0.4),
+    },
+    {
+      id: "ent-live",
+      label: "Живой бэнд / Кавер-группа",
+      note: "",
+      price: entBase,
+    },
+  ],
+};
+
+const photoOptionsMap = {
+  ru: [
+    { id: "photo-none", label: "Не нужно", note: "", price: 0 },
+    {
+      id: "photo-only",
+      label: "Топ-фотограф",
+      note: "",
+      price: Math.round(photoBase * 0.5),
+    },
+    {
+      id: "photo-video",
+      label: "Команда: Фото + Видео",
+      note: "",
+      price: photoBase,
+    },
+  ],
+  eng: [
+    { id: "photo-none", label: "Not needed", note: "", price: 0 },
+    {
+      id: "photo-only",
+      label: "Top photographer",
+      note: "",
+      price: Math.round(photoBase * 0.5),
+    },
+    {
+      id: "photo-video",
+      label: "Team: Photo + Video",
+      note: "",
+      price: photoBase,
+    },
+  ],
+  esp: [
+    { id: "photo-none", label: "No necesario", note: "", price: 0 },
+    {
+      id: "photo-only",
+      label: "Fotógrafo top",
+      note: "",
+      price: Math.round(photoBase * 0.5),
+    },
+    {
+      id: "photo-video",
+      label: "Equipo: Foto + Video",
+      note: "",
+      price: photoBase,
+    },
+  ],
+  arm: [
+    { id: "photo-none", label: "Не нужно", note: "", price: 0 },
+    {
+      id: "photo-only",
+      label: "Топ-фотограф",
+      note: "",
+      price: Math.round(photoBase * 0.5),
+    },
+    {
+      id: "photo-video",
+      label: "Команда: Фото + Видео",
+      note: "",
+      price: photoBase,
+    },
+  ],
+};
+
+const transferOptionsMap = {
+  ru: [
+    { id: "transfer-none", label: "Не нужен", note: "", price: 0 },
+    {
+      id: "transfer-yes",
+      label: "Трансфер гостей (Микроавтобусы)",
+      note: "",
+      price: transferBase * 2,
+    },
+  ],
+  eng: [
+    { id: "transfer-none", label: "Not needed", note: "", price: 0 },
+    {
+      id: "transfer-yes",
+      label: "Guest transfer (Minibuses)",
+      note: "",
+      price: transferBase * 2,
+    },
+  ],
+  esp: [
+    { id: "transfer-none", label: "No necesario", note: "", price: 0 },
+    {
+      id: "transfer-yes",
+      label: "Traslado de invitados (Minibuses)",
+      note: "",
+      price: transferBase * 2,
+    },
+  ],
+  arm: [
+    { id: "transfer-none", label: "Не нужен", note: "", price: 0 },
+    {
+      id: "transfer-yes",
+      label: "Трансфер гостей (Микроавтобусы)",
+      note: "",
+      price: transferBase * 2,
+    },
+  ],
+};
+
+const biotoiletOptionsMap = {
+  ru: [
+    { id: "bio-none", label: "Не нужно", note: "", price: 0 },
+    {
+      id: "bio-standard",
+      label: "Стандарт-модули",
+      note: "",
+      price: bioBase * 2,
+    },
+    {
+      id: "bio-premium",
+      label: "Премиум-комплекс",
+      note: "VIP модули",
+      price: bioBase * 3,
+    },
+  ],
+  eng: [
+    { id: "bio-none", label: "Not needed", note: "", price: 0 },
+    {
+      id: "bio-standard",
+      label: "Standard modules",
+      note: "",
+      price: bioBase * 2,
+    },
+    {
+      id: "bio-premium",
+      label: "Premium complex",
+      note: "VIP modules",
+      price: bioBase * 3,
+    },
+  ],
+  esp: [
+    { id: "bio-none", label: "No necesario", note: "", price: 0 },
+    {
+      id: "bio-standard",
+      label: "Módulos estándar",
+      note: "",
+      price: bioBase * 2,
+    },
+    {
+      id: "bio-premium",
+      label: "Complejo premium",
+      note: "Módulos VIP",
+      price: bioBase * 3,
+    },
+  ],
+  arm: [
+    { id: "bio-none", label: "Не нужно", note: "", price: 0 },
+    {
+      id: "bio-standard",
+      label: "Стандарт-модули",
+      note: "",
+      price: bioBase * 2,
+    },
+    {
+      id: "bio-premium",
+      label: "Премиум-комплекс",
+      note: "VIP модули",
+      price: bioBase * 3,
+    },
+  ],
+};
+
+const tentOptions =
+  tentOptionsMap[lang as keyof typeof tentOptionsMap] || tentOptionsMap.ru;
+const cateringOptions =
+  cateringOptionsMap[lang as keyof typeof cateringOptionsMap] ||
+  cateringOptionsMap.ru;
+const decorOptions =
+  decorOptionsMap[lang as keyof typeof decorOptionsMap] || decorOptionsMap.ru;
+const entertainmentOptions =
+  entertainmentOptionsMap[lang as keyof typeof entertainmentOptionsMap] ||
+  entertainmentOptionsMap.ru;
+const photoOptions =
+  photoOptionsMap[lang as keyof typeof photoOptionsMap] || photoOptionsMap.ru;
+const transferOptions =
+  transferOptionsMap[lang as keyof typeof transferOptionsMap] ||
+  transferOptionsMap.ru;
+const biotoiletOptions =
+  biotoiletOptionsMap[lang as keyof typeof biotoiletOptionsMap] ||
+  biotoiletOptionsMap.ru;
+
+// Цена контурного освещения привязана к базовой цене CALC_OPTIONS или декору
+const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
+---
+
+<Layout title={t.seoTitle} description={t.seoDescription} lang={lang}>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="ru" href="/ru/configurator" />
+    <link rel="alternate" hreflang="en" href="/eng/configurator" />
+    <link rel="alternate" hreflang="es" href="/esp/configurator" />
+    <link rel="alternate" hreflang="hy" href="/arm/configurator" />
+    <link rel="alternate" hreflang="x-default" href="/ru/configurator" />
+  </Fragment>
+
+  <section
+    class="configurator-page bg-white text-zinc-900 min-h-screen font-sans py-16"
+  >
+    <div class="container max-w-6xl mx-auto px-6">
+      <div
+        class="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-semibold"
+      >
+        {t.eyebrow}
+      </div>
+      <h1
+        class="text-3xl md:text-4xl font-serif text-zinc-950 tracking-tight mb-3 font-extrabold"
+      >
+        {t.title}
+      </h1>
+      <p
+        class="subtitle text-zinc-500 font-light max-w-2xl mb-12 text-sm md:text-base"
+      >
+        {t.subtitle}
+      </p>
+
+      <div class="configurator-grid">
+        <div class="options space-y-8">
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.cityLabel}
+            </h2>
+            <div class="relative">
+              <select
+                id="city-select"
+                class="w-full bg-white border-2 border-zinc-400 rounded-xl px-4 py-3 text-zinc-950 font-bold text-base focus:outline-none focus:border-zinc-950 cursor-pointer appearance-none shadow-sm"
+              >
+                {
+                  cityOptions.map((opt, i) => (
+                    <option
+                      value={opt.id}
+                      data-multiplier={opt.multiplier}
+                      selected={i === 0}
+                    >
+                      {opt.label}
+                    </option>
+                  ))
+                }
+              </select>
+              <div
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-700"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.tentLabel}
+            </h2>
+            <div class="swatches">
+              {
+                tentOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price={opt.price}
+                    data-w={opt.width}
+                    data-h={opt.height}
+                  >
+                    <input
+                      type="radio"
+                      name="tent"
+                      value={opt.id}
+                      checked={i === 0}
+                    />
+                    <span class="swatch__label font-bold">{opt.label}</span>
+                    <span class="swatch__note">{opt.note}</span>
+                    <span class="swatch__price">
+                      +{(opt.price ?? 0).toLocaleString("en-US")} $
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.cateringLabel}
+            </h2>
+            <div
+              class="guests-field mb-5 p-4 bg-zinc-50 border-2 border-zinc-300 rounded-xl"
+            >
+              <label
+                for="guests"
+                class="text-xs text-zinc-900 block mb-2 font-extrabold uppercase tracking-wide"
+              >
+                {t.guestsLabel}
+              </label>
+              <input
+                type="number"
+                id="guests"
+                min="1"
+                value="40"
+                class="bg-white border-2 border-zinc-400 rounded-lg px-4 py-2.5 text-zinc-900 font-extrabold text-base focus:outline-none focus:border-zinc-950 w-36"
+              />
+            </div>
+            <div class="swatches">
+              {
+                cateringOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price-per-guest={opt.pricePerGuest}
+                  >
+                    <input
+                      type="radio"
+                      name="catering"
+                      value={opt.id}
+                      checked={i === 1}
+                    />
+                    <span class="swatch__label font-bold">{opt.label}</span>
+                    <span class="swatch__note">{opt.note}</span>
+                    <span class="swatch__price">
+                      {opt.pricePerGuest > 0
+                        ? `${(opt.pricePerGuest ?? 0).toLocaleString("en-US")} $ / ${t.guestsUnit}`
+                        : "—"}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.decorLabel}
+            </h2>
+            <div class="swatches">
+              {
+                decorOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price={opt.price}
+                    data-color={opt.color}
+                  >
+                    <input
+                      type="radio"
+                      name="decor"
+                      value={opt.id}
+                      checked={i === 0}
+                    />
+                    <span class="swatch__label flex items-center gap-2 font-bold">
+                      <span
+                        class="swatch__dot border border-zinc-300"
+                        style={`background: ${opt.color}`}
+                      />
+                      {opt.label}
+                    </span>
+                    <span class="swatch__note">{opt.note}</span>
+                    <span class="swatch__price">
+                      {opt.price > 0
+                        ? `+${(opt.price ?? 0).toLocaleString("en-US")} $`
+                        : "—"}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.entertainmentLabel}
+            </h2>
+            <div class="swatches">
+              {
+                entertainmentOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price={opt.price}
+                  >
+                    <input
+                      type="radio"
+                      name="entertainment"
+                      value={opt.id}
+                      checked={i === 0}
+                    />
+                    <span class="swatch__label font-bold">{opt.label}</span>
+                    <span class="swatch__price">
+                      {opt.price > 0
+                        ? `+${(opt.price ?? 0).toLocaleString("en-US")} $`
+                        : "—"}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.photoLabel}
+            </h2>
+            <div class="swatches">
+              {
+                photoOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price={opt.price}
+                  >
+                    <input
+                      type="radio"
+                      name="photo"
+                      value={opt.id}
+                      checked={i === 0}
+                    />
+                    <span class="swatch__label font-bold">{opt.label}</span>
+                    <span class="swatch__price">
+                      {opt.price > 0
+                        ? `+${(opt.price ?? 0).toLocaleString("en-US")} $`
+                        : "—"}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.transferLabel}
+            </h2>
+            <div class="swatches">
+              {
+                transferOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price={opt.price}
+                  >
+                    <input
+                      type="radio"
+                      name="transfer"
+                      value={opt.id}
+                      checked={i === 0}
+                    />
+                    <span class="swatch__label font-bold">{opt.label}</span>
+                    <span class="swatch__price">
+                      {opt.price > 0
+                        ? `+${(opt.price ?? 0).toLocaleString("en-US")} $`
+                        : "—"}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <h2
+              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
+            >
+              {t.bioLabel}
+            </h2>
+            <div class="swatches">
+              {
+                biotoiletOptions.map((opt, i) => (
+                  <label
+                    class="swatch border border-zinc-200"
+                    data-price={opt.price}
+                  >
+                    <input
+                      type="radio"
+                      name="bio"
+                      value={opt.id}
+                      checked={i === 0}
+                    />
+                    <span class="swatch__label font-bold">{opt.label}</span>
+                    <span class="swatch__note">{opt.note}</span>
+                    <span class="swatch__price">
+                      {opt.price > 0
+                        ? `+${(opt.price ?? 0).toLocaleString("en-US")} $`
+                        : "—"}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div
+            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+          >
+            <label
+              class="swatch border border-zinc-200 flex-row items-center justify-between cursor-pointer"
+              data-price={lightingPriceUsd}
+            >
+              <div class="flex flex-col">
+                <span class="swatch__label font-bold">{t.lightingLabel}</span>
+                <span class="swatch__note">{t.lightingNote}</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="swatch__price text-zinc-900 font-bold"
+                  >+{lightingPriceUsd} $</span
+                >
+                <input
+                  type="checkbox"
+                  id="lighting"
+                  class="w-4 h-4 accent-zinc-900"
+                />
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <aside class="summary-col">
+          <div
+            class="bg-white p-6 rounded-2xl border-2 border-zinc-300 shadow-sm overflow-hidden"
+          >
+            <p
+              class="text-xs text-zinc-700 uppercase tracking-wider mb-4 font-extrabold"
+            >
+              {t.blueprintTitle}
+            </p>
+            <div
+              class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-white border border-zinc-200 flex items-center justify-center"
+            >
+              <div
+                class="absolute inset-0 opacity-[0.03] pointer-events-none"
+                style="background-size: 16px 16px; background-image: linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px);"
+              >
+              </div>
+              <svg
+                id="blueprint-svg"
+                viewBox="0 0 300 220"
+                class="w-full h-full transition-all duration-300"
+              >
+                <rect
+                  x="20"
+                  y="20"
+                  width="260"
+                  height="180"
+                  fill="#fafafa"
+                  stroke="#e4e4e7"
+                  stroke-dasharray="4,4"
+                  rx="8"></rect>
+                <rect
+                  id="bp-tent"
+                  x="60"
+                  y="50"
+                  width="180"
+                  height="120"
+                  rx="6"
+                  fill="#ffffff"
+                  stroke="#18181b"
+                  stroke-width="2"
+                  class="transition-all duration-500"></rect>
+                <rect
+                  id="bp-lighting"
+                  x="56"
+                  y="46"
+                  width="188"
+                  height="128"
+                  rx="8"
+                  fill="none"
+                  stroke="#eab308"
+                  stroke-width="1.5"
+                  stroke-dasharray="6,4"
+                  class="transition-all duration-300 opacity-0"></rect>
+                <g id="bp-stage" class="transition-opacity duration-300">
+                  <rect
+                    x="68"
+                    y="58"
+                    width="35"
+                    height="20"
+                    fill="#f4f4f5"
+                    stroke="#a1a1aa"
+                    rx="2"></rect>
+                  <text
+                    x="85"
+                    y="71"
+                    font-size="8"
+                    fill="#71717a"
+                    text-anchor="middle"
+                    font-family="monospace">STAGE</text
+                  >
+                </g>
+                <g id="bp-tables"></g>
+              </svg>
+              <div
+                class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] text-zinc-700 font-mono bg-white/90 border border-zinc-200 px-2 py-1 rounded font-extrabold"
+              >
+                <span>{t.blueprintScale}</span>
+                <span id="bp-legend-text">Шатёр M</span>
+              </div>
+            </div>
+            <p
+              class="text-[11px] text-zinc-600 mt-2 text-center font-mono font-bold"
+            >
+              {t.blueprintNote}
+            </p>
+          </div>
+
+          <div
+            class="bg-white p-6 rounded-2xl border-2 border-zinc-300 shadow-sm"
+          >
+            <h2
+              class="text-sm uppercase tracking-wider font-extrabold text-zinc-900 mb-4"
+            >
+              {t.summaryTitle}
+            </h2>
+            <ul
+              class="summary-list text-xs space-y-3 mb-6 divide-y divide-zinc-200/60"
+              id="summary-list"
+            >
+            </ul>
+            <div
+              class="summary-total pt-4 border-t border-zinc-200 flex justify-between items-baseline mb-5"
+            >
+              <span class="text-zinc-700 text-xs font-bold">{t.totalLabel}</span
+              >
+              <span
+                id="summary-total"
+                class="text-2xl font-serif text-zinc-950 font-extrabold"
+                >0 $</span
+              >
+            </div>
+            <a
+              href={`${prefix}/booking`}
+              class="btn block text-center bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors duration-150"
+              id="summary-cta"
+            >
+              {t.ctaText}
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .configurator-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  @media (min-width: 960px) {
+    .configurator-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      align-items: start;
+    }
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+  }
+  .swatch {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 1.15rem;
+    border-radius: 12px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  }
+  .swatch:hover {
+    border-color: #18181b;
+    background: #fafafa;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  }
+  .swatch input[type="radio"] {
+    position: absolute;
+    top: 1.15rem;
+    right: 1.15rem;
+    accent-color: #18181b;
+  }
+  .swatch:has(input:checked) {
+    border-color: #18181b;
+    background: #ffffff;
+    box-shadow:
+      0 0 0 1px #18181b inset,
+      0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+  .swatch__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #18181b;
+    padding-right: 1.5rem;
+  }
+  .swatch__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .swatch__note {
+    font-size: 0.75rem;
+    color: #71717a;
+  }
+  .swatch__price {
+    font-size: 0.85rem;
+    color: #18181b;
+    font-weight: 700;
+    margin-top: 0.25rem;
+  }
+  .summary-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
+    z-index: 10;
+  }
+  @media (max-width: 959px) {
+    .summary-col {
+      position: static;
+    }
+  }
+</style>
+
+<script lang="ts" define:vars={{ translations: t, currentLang: lang }}>
+  const guestsInput = document.getElementById("guests");
+  const citySelect = document.getElementById("city-select");
+  const summaryList = document.getElementById("summary-list");
+  const summaryTotal = document.getElementById("summary-total");
+  const summaryCta = document.getElementById("summary-cta");
+  const lighting = document.getElementById("lighting");
+
+  const bpTent = document.getElementById("bp-tent");
+  const bpLighting = document.getElementById("bp-lighting");
+  const bpStage = document.getElementById("bp-stage");
+  const bpTables = document.getElementById("bp-tables");
+  const legendText = document.getElementById("bp-legend-text");
+
+  const t = translations;
+
+  function formatPriceUSD(n) {
+    return `$${Math.round(n || 0).toLocaleString("en-US")}`;
+  }
+
+  function checkedIn(name) {
+    return document.querySelector(`input[name="${name}"]:checked`);
+  }
+
+  function updateBlueprint() {
+    const tent = checkedIn("tent");
+    let currentW = 180;
+    let currentH = 120;
+
+    if (tent && bpTent && legendText) {
+      const wrap = tent.closest(".swatch");
+      if (wrap) {
+        currentW = Number(wrap.dataset.w) || 180;
+        currentH = Number(wrap.dataset.h) || 120;
+      }
+
+      const nextX = 150 - currentW / 2;
+      const nextY = 110 - currentH / 2;
+
+      bpTent.setAttribute("x", String(nextX));
+      bpTent.setAttribute("y", String(nextY));
+      bpTent.setAttribute("width", String(currentW));
+      bpTent.setAttribute("height", String(currentH));
+
+      if (bpLighting) {
+        bpLighting.setAttribute("x", String(nextX - 4));
+        bpLighting.setAttribute("y", String(nextY - 4));
+        bpLighting.setAttribute("width", String(currentW + 8));
+        bpLighting.setAttribute("height", String(currentH + 8));
+      }
+
+      const labelEl = wrap?.querySelector(".swatch__label");
+      legendText.textContent = labelEl?.textContent?.trim() || t.tentFallback;
+    }
+
+    const decor = checkedIn("decor");
+    if (decor && bpTent) {
+      const wrap = decor.closest(".swatch");
+      const hexColor = wrap?.dataset.color || "#18181b";
+      if (decor.value === "decor-none") {
+        bpTent.setAttribute("fill", "#ffffff");
+        bpTent.setAttribute("stroke", "#18181b");
+      } else {
+        bpTent.setAttribute("fill", `${hexColor}08`);
+        bpTent.setAttribute("stroke", hexColor);
+      }
+    }
+
+    if (bpLighting) {
+      bpLighting.style.opacity = lighting?.checked ? "1" : "0";
+    }
+
+    const ent = checkedIn("entertainment");
+    if (bpStage) {
+      bpStage.style.opacity = ent && ent.value !== "ent-none" ? "1" : "0";
+    }
+
+    const guests = Number(guestsInput?.value) || 0;
+    const catering = checkedIn("catering");
+    const hasTables = catering && catering.value !== "catering-none";
+
+    if (bpTables) {
+      bpTables.innerHTML = "";
+      if (hasTables && guests > 0) {
+        const tableCount = Math.min(12, Math.max(1, Math.ceil(guests / 8)));
+        const tentX = 150 - currentW / 2;
+        const tentY = 110 - currentH / 2;
+
+        for (let i = 0; i < tableCount; i++) {
+          const cols = currentW > 200 ? 4 : 3;
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+
+          const paddingX = currentW / (cols + 1);
+          const paddingY = currentH / (Math.ceil(tableCount / cols) + 1);
+
+          const posX = tentX + paddingX * (col + 1);
+          const posY = tentY + paddingY * (row + 1) + 8;
+
+          if (posX < tentX + currentW - 15 && posY < tentY + currentH - 15) {
+            const tableCircle = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "circle",
+            );
+            tableCircle.setAttribute("cx", String(posX));
+            tableCircle.setAttribute("cy", String(posY));
+            tableCircle.setAttribute("r", "6");
+            tableCircle.setAttribute("fill", "none");
+            tableCircle.setAttribute("stroke", "#71717a");
+            tableCircle.setAttribute("stroke-width", "1");
+            bpTables.appendChild(tableCircle);
+
+            for (let s = 0; s < 6; s++) {
+              const angle = (s * Math.PI) / 3;
+              const chairX = posX + 9 * Math.cos(angle);
+              const chairY = posY + 9 * Math.sin(angle);
+              const chair = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "circle",
+              );
+              chair.setAttribute("cx", String(chairX));
+              chair.setAttribute("cy", String(chairY));
+              chair.setAttribute("r", "1.5");
+              chair.setAttribute("fill", "#a1a1aa");
+              bpTables.appendChild(chair);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function recalculate() {
+    if (!summaryList || !summaryTotal) return;
+
+    let subtotal = 0;
+    const items = [];
+
+    // Получаем коэффициент выбранного города
+    let multiplier = 1.0;
+    let cityName = "";
+    if (citySelect) {
+      const selectedOption = citySelect.options[citySelect.selectedIndex];
+      multiplier = Number(selectedOption?.dataset.multiplier) || 1.0;
+      cityName = selectedOption?.text.trim() || "";
+
+      items.unshift({
+        label: `${t.cityнь} ${cityName}`,
+        isCity: true,
+      });
+    }
+
+    function addRadioPrice(name, fallbackLabel) {
+      const el = checkedIn(name);
+      if (!el) return;
+      const wrap = el.closest(".swatch");
+      const basePrice = Number(wrap?.dataset.price) || 0;
+      if (basePrice > 0) {
+        // Применяем рыночный коэффициент города прямо к отдельным компонентам
+        const price = Math.round(basePrice * multiplier);
+        const label =
+          wrap?.querySelector(".swatch__label")?.textContent?.trim() ||
+          fallbackLabel;
+        items.push({ label, price });
+        subtotal += price;
+      }
+    }
+
+    addRadioPrice("tent", t.tentFallback);
+
+    const catering = checkedIn("catering");
+    const guests = Number(guestsInput?.value) || 0;
+    if (catering) {
+      const wrap = catering.closest(".swatch");
+      const basePerGuest = Number(wrap?.dataset.pricePerGuest) || 0;
+      // Применяем коэффициент города и умножаем на количество гостей
+      const price = Math.round(basePerGuest * multiplier * guests);
+      if (price > 0) {
+        const label =
+          wrap?.querySelector(".swatch__label")?.textContent?.trim() || "";
+        items.push({
+          label: `${t.cateringPrefix} ${label} (${guests} ${t.guestsUnit})`,
+          price,
+        });
+        subtotal += price;
+      }
+    }
+
+    addRadioPrice("decor", t.decorFallback);
+    addRadioPrice("entertainment", t.entertainmentFallback);
+    addRadioPrice("photo", t.photoFallback);
+    addRadioPrice("transfer", t.transferFallback);
+    addRadioPrice("bio", t.bioFallback);
+
+    if (lighting?.checked) {
+      const wrap = lighting.closest(".swatch");
+      const basePrice = Number(wrap?.dataset.price) || 0;
+      const price = Math.round(basePrice * multiplier);
+      items.push({ label: t.lightingLabelShort, price });
+      subtotal += price;
+    }
+
+    // Итоговая сумма (базовые сметные элементы уже с учетом города, поэтому subtotal равен total)
+    const total = subtotal;
+
+    // Округление шагом до 50 USD согласно логике pricingData
+    const step = total < 100 ? 5 : 50;
+    const finalTotal = Math.ceil(total / step) * step;
+
+    summaryList.innerHTML = items
+      .map((i) => {
+        if (i.isCity) {
+          return `<li class="flex justify-between items-center pt-2 text-zinc-700 border-zinc-100 font-medium">
+            <span class="font-normal">${i.label}</span>
+            <span class="font-bold text-zinc-900">—</span>
+          </li>`;
+        }
+        return `<li class="flex justify-between items-center pt-2 text-zinc-700 border-zinc-100 font-medium">
+            <span class="font-normal">${i.label}</span>
+            <span class="font-bold text-zinc-900">${formatPriceUSD(i.price)}</span>
+          </li>`;
+      })
+      .join("");
+
+    summaryTotal.textContent = formatPriceUSD(finalTotal);
+
+    if (summaryCta) {
+      const selectedTent =
+        checkedIn("tent")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+      const selectedCatering =
+        checkedIn("catering")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+      const selectedDecor =
+        checkedIn("decor")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+      const selectedEnt =
+        checkedIn("entertainment")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+      const selectedPhoto =
+        checkedIn("photo")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+      const selectedTransfer =
+        checkedIn("transfer")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+      const selectedBio =
+        checkedIn("bio")
+          ?.closest(".swatch")
+          ?.querySelector(".swatch__label")
+          ?.textContent?.trim() || "";
+
+      const configParams = new URLSearchParams({
+        service: t.serviceName,
+        guests: guestsInput?.value || "0",
+        location: cityName,
+        estimate: formatPriceUSD(finalTotal),
+        options: [
+          selectedTent,
+          selectedCatering ? `${t.optionCatering}: ${selectedCatering}` : "",
+          selectedDecor ? `${t.optionDecor}: ${selectedDecor}` : "",
+          selectedEnt ? `${t.optionMusic}: ${selectedEnt}` : "",
+          selectedPhoto ? `${t.optionPhoto}: ${selectedPhoto}` : "",
+          selectedTransfer ? `${t.optionTransfer}: ${selectedTransfer}` : "",
+          selectedBio ? `${t.optionBio}: ${selectedBio}` : "",
+          lighting?.checked ? t.optionLighting : "",
+        ]
+          .filter(Boolean)
+          .join(", "),
+      });
+
+      const langPrefix =
+        window.location.pathname.match(/^\/(ru|eng|esp|arm)/)?.[0] || "/ru";
+      summaryCta.href = `${langPrefix}/booking?${configParams.toString()}`;
+    }
+
+    updateBlueprint();
+  }
+
+  document.querySelectorAll(".options input").forEach((input) => {
+    input.addEventListener("change", recalculate);
+  });
+  citySelect?.addEventListener("change", recalculate);
+  guestsInput?.addEventListener("input", recalculate);
+
+  recalculate();
+</script>

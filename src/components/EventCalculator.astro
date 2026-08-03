@@ -1,0 +1,815 @@
+---
+import { CITIES_DATA } from "@/data/pricingData";
+
+interface Props {
+  serviceName?: string;
+  serviceId?: string;
+  servicePrice?: string;
+  lang?: string;
+}
+
+const {
+  serviceName = "Мероприятие под ключ",
+  serviceId = "turnkey",
+  lang = "ru",
+} = Astro.props;
+
+const allCities = CITIES_DATA.map((city) => ({
+  id: city.id,
+  name: city.name[lang] || city.name.ru,
+  multiplier: city.multiplier,
+  flag: city.flag || "",
+}));
+
+// Словари переводов интерфейса калькулятора сметы
+const t = {
+  ru: {
+    title: "Конфигуратор сметы:",
+    guestsLabel: "Количество гостей:",
+    guestsSuffix: "чел.",
+    locationLabel: "Локация проведения:",
+    searchPlaceholder: "Поиск города...",
+    dateLabel: "Дата проведения:",
+    optionsLabel: "Инженерные и технические опции:",
+    optCatering: "Выездной ресторан / кейтеринг",
+    optTent: "Адаптивные защитные шатры",
+    optSound: "Световое и звуковое шоу",
+    optToilets: "Премиум био-модули (санузлы)",
+    previewSchema: "Интерактивная схема проекта",
+    tentText: "Главный шатер / Зал",
+    cateringText: "Кейтеринг",
+    soundText: "Звук & Свет 360°",
+    guestsTextPrefix: "Гости: ",
+    budgetLabel: "Расчетный бюджет:",
+    submitBtn: "Забронировать проект",
+    defaultLocationBadge: allCities[0].name.split(" ")[0],
+  },
+  eng: {
+    title: "Estimate Configurator:",
+    guestsLabel: "Number of guests:",
+    guestsSuffix: "guests",
+    locationLabel: "Event location:",
+    searchPlaceholder: "Search city...",
+    dateLabel: "Event date:",
+    optionsLabel: "Engineering and technical options:",
+    optCatering: "Catering / Outbound restaurant",
+    optTent: "Adaptive protective tents",
+    optSound: "Lighting and sound show",
+    optToilets: "Premium bio-modules (restrooms)",
+    previewSchema: "Interactive project layout",
+    tentText: "Main Tent / Hall",
+    cateringText: "Catering",
+    soundText: "Sound & Light 360°",
+    guestsTextPrefix: "Guests: ",
+    budgetLabel: "Estimated budget:",
+    submitBtn: "Book Project",
+    defaultLocationBadge: allCities[0].name.split(" ")[0],
+  },
+  esp: {
+    title: "Configurador de presupuesto:",
+    guestsLabel: "Número de invitados:",
+    guestsSuffix: "pers.",
+    locationLabel: "Ubicación del evento:",
+    searchPlaceholder: "Buscar ciudad...",
+    dateLabel: "Fecha del evento:",
+    optionsLabel: "Opciones técnicas e ingeniería:",
+    optCatering: "Catering / Restaurante exterior",
+    optTent: "Carpas protectoras adaptativas",
+    optSound: "Espectáculo de luces y sonido",
+    optToilets: "Módulos sanitarios prémium",
+    previewSchema: "Diseño interactivo del proyecto",
+    tentText: "Carpa Principal / Salón",
+    cateringText: "Catering",
+    soundText: "Sonido y Luz 360°",
+    guestsTextPrefix: "Invitados: ",
+    budgetLabel: "Presupuesto estimado:",
+    submitBtn: "Reservar proyecto",
+    defaultLocationBadge: allCities[0].name.split(" ")[0],
+  },
+  arm: {
+    title: "Сметная стоимость:",
+    guestsLabel: "Количество гостей:",
+    guestsSuffix: "чел.",
+    locationLabel: "Локация проведения:",
+    searchPlaceholder: "Поиск города...",
+    dateLabel: "Дата проведения:",
+    optionsLabel: "Инженерные и технические опции:",
+    optCatering: "Выездной ресторан / кейтеринг",
+    optTent: "Адаптивные защитные шатры",
+    optSound: "Световое и звуковое шоу",
+    optToilets: "Премиум био-модули",
+    previewSchema: "Интерактивная схема проекта",
+    tentText: "Главный шатер / Зал",
+    cateringText: "Кейтеринг",
+    soundText: "Звук & Свет 360°",
+    guestsTextPrefix: "Гости: ",
+    budgetLabel: "Расчетный бюджет:",
+    submitBtn: "Забронировать проект",
+    defaultLocationBadge: allCities[0].name.split(" ")[0],
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  title: "Конфигуратор сметы:",
+  guestsLabel: "Количество гостей:",
+  guestsSuffix: "чел.",
+  locationLabel: "Локация проведения:",
+  searchPlaceholder: "Поиск города...",
+  dateLabel: "Дата проведения:",
+  optionsLabel: "Инженерные и технические опции:",
+  optCatering: "Выездной ресторан / кейтеринг",
+  optTent: "Адаптивные защитные шатры",
+  optSound: "Световое и звуковое шоу",
+  optToilets: "Премиум био-модули (санузлы)",
+  previewSchema: "Интерактивная схема проекта",
+  tentText: "Главный шатер / Зал",
+  cateringText: "Кейтеринг",
+  soundText: "Звук & Свет 360°",
+  guestsTextPrefix: "Гости: ",
+  budgetLabel: "Расчетный бюджет:",
+  submitBtn: "Забронировать проект",
+  defaultLocationBadge: allCities[0].name.split(" ")[0],
+};
+---
+
+<div
+  class="event-calculator"
+  data-service-id={serviceId}
+  data-service-name={serviceName}
+  data-lang={lang}
+>
+  <div class="calc-grid">
+    <!-- Левая колонка: Настройки калькулятора -->
+    <div class="calc-controls">
+      <h3 class="calc-title">
+        {t.title}
+        <span id="active-service-title">{serviceName}</span>
+      </h3>
+
+      <!-- Шаг 1: Гости -->
+      <div class="calc-group">
+        <label>{t.guestsLabel}</label>
+        <div class="guests-picker-wrapper">
+          <button type="button" class="guest-btn" id="guest-minus">-</button>
+          <input
+            type="number"
+            id="calc-guests"
+            min="5"
+            max="500"
+            step="1"
+            value="50"
+            class="calc-input-number"
+          />
+          <button type="button" class="guest-btn" id="guest-plus">+</button>
+          <span class="guest-label-suffix">{t.guestsSuffix}</span>
+        </div>
+      </div>
+
+      <!-- Шаг 2: Локация -->
+      <div class="calc-group">
+        <label>{t.locationLabel}</label>
+        <div class="custom-select-container" id="city-dropdown-container">
+          <div class="select-selected" id="city-selected-display">
+            <span>{allCities[0].flag} {allCities[0].name}</span>
+            <span class="select-arrow"></span>
+          </div>
+          <div class="select-items select-hide" id="city-options-list">
+            <div class="city-search-box">
+              <input
+                type="text"
+                id="city-search-input"
+                placeholder={t.searchPlaceholder}
+              />
+            </div>
+            <div class="city-scroll-list">
+              {
+                allCities.map((city, idx) => (
+                  <div
+                    class={`city-option ${idx === 0 ? "selected" : ""}`}
+                    data-value={city.id}
+                    data-multiplier={city.multiplier}
+                  >
+                    <span>
+                      {city.flag} {city.name}
+                    </span>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+          <input type="hidden" id="calc-location" value={allCities[0].id} />
+        </div>
+      </div>
+
+      <!-- Шаг 3: Дата проведения -->
+      <div class="calc-group">
+        <label for="calc-date">{t.dateLabel}</label>
+        <input
+          type="date"
+          id="calc-date"
+          class="calc-input-date"
+          min={`${new Date().getFullYear()}-01-01`}
+        />
+      </div>
+
+      <!-- Шаг 4: Дополнительные опции -->
+      <div class="calc-group">
+        <label>{t.optionsLabel}</label>
+        <div class="calc-checkbox-group-vertical">
+          <label>
+            <input
+              type="checkbox"
+              name="calc-option"
+              value="catering"
+              data-id="catering"
+              checked
+            />
+            {t.optCatering}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="calc-option"
+              value="tent"
+              data-id="tent"
+            />
+            {t.optTent}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="calc-option"
+              value="sound"
+              data-id="sound"
+            />
+            {t.optSound}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="calc-option"
+              value="toilets"
+              data-id="toilets"
+            />
+            {t.optToilets}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая колонка: Схема-визуализация -->
+    <div class="calc-preview-panel">
+      <div class="preview-header">
+        <span>{t.previewSchema}</span>
+        <span class="preview-badge" id="preview-location-badge">
+          {t.defaultLocationBadge}
+        </span>
+      </div>
+
+      <div class="blueprint-container">
+        <svg viewBox="0 0 400 280" class="blueprint-svg">
+          <defs>
+            <pattern
+              id="grid"
+              width="20"
+              height="20"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 20 0 L 0 0 0 20"
+                fill="none"
+                stroke="rgba(255,255,255,0.05)"
+                stroke-width="1"></path>
+            </pattern>
+          </defs>
+          <rect width="400" height="280" fill="url(#grid)" rx="12"></rect>
+
+          <!-- Периметр площадки -->
+          <rect
+            x="30"
+            y="25"
+            width="340"
+            height="230"
+            rx="8"
+            fill="#18181b"
+            stroke="#3f3f46"
+            stroke-width="2"></rect>
+
+          <!-- Шатер / Зона -->
+          <g id="blueprint-tent" class="blueprint-element">
+            <rect
+              x="110"
+              y="50"
+              width="180"
+              height="110"
+              rx="6"
+              fill="rgba(16, 185, 129, 0.15)"
+              stroke="#10b981"
+              stroke-dasharray="4 4"
+              stroke-width="1.5"></rect>
+            <text
+              x="200"
+              y="110"
+              fill="#10b981"
+              font-size="11"
+              text-anchor="middle"
+              font-family="sans-serif">{t.tentText}</text
+            >
+          </g>
+
+          <!-- Кейтеринг / Зона кухни -->
+          <g id="blueprint-catering" class="blueprint-element">
+            <rect
+              x="50"
+              y="180"
+              width="90"
+              height="55"
+              rx="4"
+              fill="rgba(244, 63, 94, 0.15)"
+              stroke="#f43f5e"
+              stroke-width="1"></rect>
+            <text
+              x="95"
+              y="212"
+              fill="#f43f5e"
+              font-size="10"
+              text-anchor="middle"
+              font-family="sans-serif">{t.cateringText}</text
+            >
+          </g>
+
+          <!-- Звук и свет -->
+          <g
+            id="blueprint-sound"
+            class="blueprint-element"
+            style="display: none;"
+          >
+            <circle
+              cx="200"
+              cy="105"
+              r="75"
+              fill="none"
+              stroke="#a855f7"
+              stroke-width="1"
+              stroke-dasharray="2 2"
+              opacity="0.6"></circle>
+            <text
+              x="200"
+              y="42"
+              fill="#a855f7"
+              font-size="9"
+              text-anchor="middle"
+              font-family="sans-serif">{t.soundText}</text
+            >
+          </g>
+
+          <!-- Количество гостей (динамический текст) -->
+          <g id="blueprint-guests">
+            <text
+              x="200"
+              y="145"
+              fill="#a1a1aa"
+              font-size="9"
+              text-anchor="middle"
+              font-family="sans-serif"
+              id="blueprint-guest-text"
+            >
+              {t.guestsTextPrefix}50 {t.guestsSuffix}
+            </text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="calc-result">
+        <div class="calc-price-box">
+          <span>{t.budgetLabel}</span>
+          <strong id="calc-total">от $5,000</strong>
+        </div>
+        <button type="button" class="calc-submit-btn" id="open-calc-modal">
+          {t.submitBtn}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ lang, serviceId, serviceName }}>
+  (function () {
+    var CITY_MULT = {
+      yerevan: 1,
+      tbilisi: 0.92,
+      belgrade: 1,
+      nhatrang: 1.08,
+      danang: 1.08,
+      goa: 1.08,
+      antalya: 1.12,
+      srilanka: 1.15,
+      bali: 1.18,
+      phuket: 1.18,
+      budapest: 1.2,
+      casablanca: 1.28,
+      prague: 1.3,
+      marrakech: 1.32,
+      barcelona: 1.45,
+    };
+    var SVC_BASE = {
+      marquees: 450,
+      catering: 55,
+      ceremony: 3500,
+      turnkey: 5000,
+      decor: 800,
+      entertainment: 600,
+      "photo-video": 700,
+      transfer: 120,
+      biotoilets: 80,
+    };
+    var OPT = { catering: 800, tent: 600, sound: 500, toilets: 200 };
+
+    function estimateEventUsd(p) {
+      var city = CITY_MULT[p.cityId] || 1;
+      var sid = p.serviceId || "turnkey";
+      var base = SVC_BASE[sid] != null ? SVC_BASE[sid] : SVC_BASE.turnkey;
+      var total = base;
+      if (sid === "catering") {
+        total = base * Math.max(p.guests || 20, 20);
+      } else {
+        total += Math.max(p.guests || 30, 30) * 12;
+      }
+      (p.optionIds || []).forEach(function (id) {
+        if (OPT[id]) total += OPT[id];
+      });
+      total *= city;
+      return Math.ceil(total / 50) * 50;
+    }
+
+    function boot() {
+      var calculator = document.querySelector(".event-calculator");
+      if (!calculator) return;
+
+      var guestsInput = calculator.querySelector("#calc-guests");
+      var guestMinus = calculator.querySelector("#guest-minus");
+      var guestPlus = calculator.querySelector("#guest-plus");
+      var locationInput = calculator.querySelector("#calc-location");
+      var locationDisplay = calculator.querySelector("#city-selected-display");
+      var optionsList = calculator.querySelector("#city-options-list");
+      var searchInput = calculator.querySelector("#city-search-input");
+      var cityOptions = calculator.querySelectorAll(".city-option");
+      var locationBadge = calculator.querySelector("#preview-location-badge");
+      var optionCheckboxes = calculator.querySelectorAll(
+        'input[name="calc-option"]',
+      );
+      var totalEl = calculator.querySelector("#calc-total");
+      var guestText = calculator.querySelector("#blueprint-guest-text");
+      var soundGroup = calculator.querySelector("#blueprint-sound");
+      var bookBtn = document.getElementById("open-calc-modal");
+
+      function updateCalculator() {
+        var guests = parseInt(guestsInput && guestsInput.value, 10) || 50;
+        if (guestText) {
+          var parts = (guestText.textContent || "").split(":");
+          var prefix = parts[0] ? parts[0] + ": " : "Guests: ";
+          var suffix =
+            (guestText.textContent || "").trim().split(" ").pop() || "";
+          guestText.textContent = prefix + guests + " " + suffix;
+        }
+
+        var optionIds = [];
+        optionCheckboxes.forEach(function (box) {
+          if (box.checked) {
+            optionIds.push(box.getAttribute("data-id") || box.value);
+          }
+          if (box.value === "sound" && soundGroup) {
+            soundGroup.style.display = box.checked ? "block" : "none";
+          }
+        });
+
+        var cityId = (locationInput && locationInput.value) || "yerevan";
+        var total = estimateEventUsd({
+          serviceId: serviceId || "turnkey",
+          guests: guests,
+          cityId: cityId,
+          optionIds: optionIds,
+        });
+
+        if (totalEl) {
+          totalEl.textContent = "от $" + total.toLocaleString("en-US");
+        }
+      }
+
+      if (bookBtn) {
+        bookBtn.addEventListener("click", function () {
+          var opts = [];
+          optionCheckboxes.forEach(function (el) {
+            if (el.checked) opts.push(el.value);
+          });
+          var params = new URLSearchParams();
+          params.set("service", serviceId || "turnkey");
+          if (serviceName) params.set("serviceName", serviceName);
+          if (guestsInput && guestsInput.value)
+            params.set("guests", guestsInput.value);
+          if (locationInput && locationInput.value)
+            params.set("location", locationInput.value);
+          var dateInput = calculator.querySelector("#calc-date");
+          if (dateInput && dateInput.value) params.set("date", dateInput.value);
+          if (opts.length) params.set("options", opts.join(","));
+          if (totalEl)
+            params.set("estimate", (totalEl.textContent || "").trim());
+          window.location.href =
+            "/" + (lang || "ru") + "/booking?" + params.toString();
+        });
+      }
+
+      if (guestMinus) {
+        guestMinus.addEventListener("click", function () {
+          var val = parseInt(guestsInput.value, 10) || 50;
+          if (val > 5) {
+            guestsInput.value = String(val - 5);
+            updateCalculator();
+          }
+        });
+      }
+      if (guestPlus) {
+        guestPlus.addEventListener("click", function () {
+          var val = parseInt(guestsInput.value, 10) || 50;
+          if (val < 500) {
+            guestsInput.value = String(val + 5);
+            updateCalculator();
+          }
+        });
+      }
+
+      if (locationDisplay && optionsList) {
+        locationDisplay.addEventListener("click", function (e) {
+          e.stopPropagation();
+          optionsList.classList.toggle("select-hide");
+        });
+        document.addEventListener("click", function () {
+          optionsList.classList.add("select-hide");
+        });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener("input", function (e) {
+          var query = (e.target.value || "").toLowerCase();
+          cityOptions.forEach(function (opt) {
+            var text = (opt.textContent || "").toLowerCase();
+            opt.style.display = text.indexOf(query) !== -1 ? "block" : "none";
+          });
+        });
+      }
+
+      cityOptions.forEach(function (opt) {
+        opt.addEventListener("click", function () {
+          cityOptions.forEach(function (o) {
+            o.classList.remove("selected");
+          });
+          opt.classList.add("selected");
+          var val = opt.getAttribute("data-value");
+          if (locationInput) locationInput.value = val;
+          if (locationDisplay) {
+            var sp = locationDisplay.querySelector("span");
+            if (sp) sp.textContent = (opt.textContent || "").trim();
+          }
+          if (locationBadge) {
+            locationBadge.textContent = (opt.textContent || "")
+              .trim()
+              .split(" ")[0];
+          }
+          if (optionsList) optionsList.classList.add("select-hide");
+          updateCalculator();
+        });
+      });
+
+      if (guestsInput) {
+        guestsInput.addEventListener("input", updateCalculator);
+      }
+      optionCheckboxes.forEach(function (box) {
+        box.addEventListener("change", updateCalculator);
+      });
+
+      updateCalculator();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", boot);
+    } else {
+      boot();
+    }
+  })();
+</script>
+
+<style>
+  .event-calculator {
+    background: #09090b;
+    color: #f4f4f5;
+    padding: 2.5rem;
+    border-radius: 24px;
+    border: 1px solid #27272a;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+  @media (max-width: 768px) {
+    .calc-grid {
+      grid-template-columns: 1fr;
+    }
+    .event-calculator {
+      padding: 1.25rem;
+    }
+  }
+  .calc-title {
+    font-size: 1.35rem;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    font-family: serif;
+  }
+  .calc-group {
+    margin-bottom: 1.25rem;
+  }
+  .calc-group label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .guests-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .guest-btn {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+  .calc-input-number {
+    width: 90px;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.65rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1rem;
+  }
+  .calc-input-date {
+    width: 100%;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    color-scheme: dark;
+  }
+  .guest-label-suffix {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+  }
+  .custom-select-container {
+    position: relative;
+  }
+  .select-selected {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .select-items {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    margin-top: 4px;
+    z-index: 10;
+  }
+  .select-hide {
+    display: none;
+  }
+  .city-search-box {
+    padding: 0.5rem;
+    border-bottom: 1px solid #27272a;
+  }
+  .city-search-box input {
+    width: 100%;
+    background: #121215;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 6px;
+    outline: none;
+  }
+  .city-scroll-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .city-option {
+    padding: 0.65rem 0.75rem;
+    cursor: pointer;
+    color: #d4d4d8;
+  }
+  .city-option:hover {
+    background: #27272a;
+    color: #fff;
+  }
+  .city-option.selected {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+  .calc-checkbox-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .calc-checkbox-group-vertical label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f4f4f5;
+    cursor: pointer;
+    text-transform: none;
+    font-size: 0.95rem;
+  }
+  .calc-preview-panel {
+    background: #121215;
+    border: 1px solid #27272a;
+    padding: 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #71717a;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .preview-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+  .blueprint-container {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #27272a;
+    margin-bottom: 1.5rem;
+  }
+  .blueprint-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .calc-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #27272a;
+  }
+  .calc-price-box span {
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    display: block;
+    text-transform: uppercase;
+  }
+  .calc-price-box strong {
+    font-size: 1.4rem;
+    color: #10b981;
+  }
+  .calc-submit-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .calc-submit-btn:hover {
+    background: #059669;
+  }
+</style>

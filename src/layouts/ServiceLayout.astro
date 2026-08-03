@@ -1,0 +1,333 @@
+---
+const { frontmatter } = Astro.props;
+
+// Универсальная поддержка: берем первую картинку из массива images или из строки image
+let bgImage = "";
+if (
+  frontmatter.images &&
+  Array.isArray(frontmatter.images) &&
+  frontmatter.images.length > 0
+) {
+  bgImage = frontmatter.images[0];
+} else if (frontmatter.image) {
+  bgImage = frontmatter.image;
+}
+---
+
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{frontmatter.title} — Ивент-агентство</title>
+  </head>
+  <body>
+    <!-- Шапка (Hero) на всю ширину экрана с картинкой и затемнением без полосок -->
+    <section
+      class="service-hero"
+      style={bgImage ? `background-image: url('${bgImage}');` : ""}
+    >
+      <div class="hero-overlay"></div>
+      <div class="container hero-container">
+        <div class="hero-content">
+          <h1>{frontmatter.title}</h1>
+          <p class="service-lead">{frontmatter.description}</p>
+
+          <div class="hero-action-bar">
+            <div class="hero-price">
+              <span>Стоимость реализации:</span>
+              <strong
+                >{
+                  frontmatter.priceFrom || frontmatter.price || "по запросу"
+                }</strong
+              >
+            </div>
+            <a href="/ru/booking" class="primary-btn" id="service-layout-book">Забронировать дату</a>
+<script is:inline>
+  (function () {
+    var a = document.getElementById("service-layout-book");
+    if (!a) return;
+    var m = location.pathname.match(/^\/(ru|eng|esp|arm)/);
+    if (m) a.href = "/" + m[1] + "/booking";
+  })();
+</script>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Основная часть контента -->
+    <section class="service-content-section">
+      <div class="container content-container">
+        <!-- Текст статьи (MDX) -->
+        <div class="mdx-article">
+          <slot />
+        </div>
+
+        <!-- Блок "Что входит" -->
+        {
+          frontmatter.features && (
+            <div class="service-features-block">
+              <h3>Что входит в стоимость услуги</h3>
+              <div class="features-grid">
+                {frontmatter.features.map((feature: string) => (
+                  <div class="feature-item">
+                    <span class="check-icon">✓</span>
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+
+        <!-- Нижний блок с поисковыми ключами -->
+        {
+          frontmatter.searchKeywords && (
+            <div class="seo-keywords-section">
+              <h4>Частые запросы по услуге</h4>
+              <div class="keywords-wrap">
+                {frontmatter.searchKeywords.map((keyword: string) => (
+                  <span class="keyword-pill">{keyword}</span>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </section>
+  </body>
+</html>
+
+<style>
+  body {
+    background: #09090b;
+    color: #f4f4f5;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .content-container {
+    max-width: 900px;
+  }
+
+  /* Полноразмерный Hero-блок (растянут на всю ширину экрана) */
+  .service-hero {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding: 7rem 1.5rem 5rem 1.5rem;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Глубокий градиент без резких линий и полосок снизу */
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(9, 9, 11, 0.5) 0%,
+      rgba(9, 9, 11, 0.85) 60%,
+      rgba(9, 9, 11, 1) 100%
+    );
+    z-index: 1;
+  }
+
+  .hero-container {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .service-hero h1 {
+    font-size: 3.2rem;
+    font-family: serif;
+    color: #fff;
+    margin-bottom: 1.2rem;
+    line-height: 1.15;
+    font-weight: 400;
+  }
+
+  .service-lead {
+    font-size: 1.25rem;
+    color: #d4d4d8;
+    line-height: 1.6;
+    max-width: 750px;
+    margin: 0 auto 2.5rem auto;
+  }
+
+  /* Блок стоимости и кнопки строго по центру */
+  .hero-action-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 2.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 1.25rem 2.25rem;
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .hero-price span {
+    display: block;
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    margin-bottom: 0.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-price strong {
+    font-size: 1.4rem;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .primary-btn {
+    background: #10b981;
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .primary-btn:hover {
+    opacity: 0.9;
+  }
+
+  /* Текстовая часть */
+  .service-content-section {
+    padding: 3rem 0;
+  }
+
+  .mdx-article {
+    color: #d4d4d8;
+    line-height: 1.7;
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+    text-align: left;
+  }
+
+  .mdx-article h2,
+  .mdx-article h3 {
+    color: #fff;
+    font-family: serif;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .mdx-article p {
+    margin-bottom: 1rem;
+  }
+
+  /* Блок фич услуги */
+  .service-features-block {
+    background: #121215;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .service-features-block h3 {
+    font-size: 1.15rem;
+    font-family: serif;
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #e4e4e7;
+  }
+
+  .check-icon {
+    color: #10b981;
+    font-weight: bold;
+    font-size: 0.95rem;
+  }
+
+  /* SEO Ключи снизу */
+  .seo-keywords-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 1.5rem;
+  }
+
+  .seo-keywords-section h4 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #71717a;
+    margin-bottom: 0.6rem;
+  }
+
+  .keywords-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .keyword-pill {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+
+  /* Адаптивность для мобильных */
+  @media (max-width: 768px) {
+    .service-hero {
+      padding: 5rem 1rem 3rem 1rem;
+    }
+    .service-hero h1 {
+      font-size: 2.25rem;
+    }
+    .hero-action-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

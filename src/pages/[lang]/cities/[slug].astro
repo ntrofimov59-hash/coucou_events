@@ -1,0 +1,352 @@
+---
+export const prerender = true;
+
+import Layout from "@/layouts/Layout.astro";
+import { CITIES_PAGES } from "@/data/cities";
+import { CONTACT } from "@/config/site";
+
+export function getStaticPaths() {
+  const langs = ["ru", "eng", "esp", "arm"] as const;
+  return langs.flatMap((lang) =>
+    CITIES_PAGES.map((city) => ({
+      params: { lang, slug: city.slug },
+      props: { city },
+    })),
+  );
+}
+
+const { lang = "ru" } = Astro.params;
+const { city } = Astro.props;
+const L = lang as "ru" | "eng" | "esp" | "arm";
+const prefix = `/${lang}`;
+
+const name = city.name[L] || city.name.ru;
+const country = city.country[L] || city.country.ru;
+
+const ui = {
+  ru: {
+    breadcrumbHome: "Главная",
+    breadcrumbCities: "Города",
+    eventsLabel: "Форматы",
+    whyLabel: "Почему Coucou",
+    ctaTitle: "Готовы обсудить мероприятие?",
+    ctaLead: "Оставьте заявку — подготовим предложение под ваш город и формат.",
+    ctaBtn: "Оставить заявку",
+    configurator: "Открыть конфигуратор",
+    whatsapp: "WhatsApp",
+  },
+  eng: {
+    breadcrumbHome: "Home",
+    breadcrumbCities: "Cities",
+    eventsLabel: "Formats",
+    whyLabel: "Why Coucou",
+    ctaTitle: "Ready to plan your event?",
+    ctaLead:
+      "Submit a request — we’ll prepare a proposal for your city and format.",
+    ctaBtn: "Submit request",
+    configurator: "Open configurator",
+    whatsapp: "WhatsApp",
+  },
+  esp: {
+    breadcrumbHome: "Inicio",
+    breadcrumbCities: "Ciudades",
+    eventsLabel: "Formatos",
+    whyLabel: "Por qué Coucou",
+    ctaTitle: "¿Listo para planear tu evento?",
+    ctaLead: "Envía una solicitud; prepararemos una propuesta para tu ciudad.",
+    ctaBtn: "Enviar solicitud",
+    configurator: "Abrir configurador",
+    whatsapp: "WhatsApp",
+  },
+  arm: {
+    breadcrumbHome: "Գլխավոր",
+    breadcrumbCities: "Քաղաքներ",
+    eventsLabel: "Ձևաչափեր",
+    whyLabel: "Ինչու Coucou",
+    ctaTitle: "Պատրա՞ստ եք քննարկել միջոցառումը",
+    ctaLead: "Թողեք հայտ՝ կպատրաստենք առաջարկ ձեր քաղաքի և ձևաչափի համար:",
+    ctaBtn: "Թողնել հայտ",
+    configurator: "Բացել կոնֆիգուրատորը",
+    whatsapp: "WhatsApp",
+  },
+}[L] || {
+  breadcrumbHome: "Главная",
+  breadcrumbCities: "Города",
+  eventsLabel: "Форматы",
+  whyLabel: "Почему Coucou",
+  ctaTitle: "Готовы обсудить мероприятие?",
+  ctaLead: "Оставьте заявку.",
+  ctaBtn: "Оставить заявку",
+  configurator: "Открыть конфигуратор",
+  whatsapp: "WhatsApp",
+};
+
+const waHref =
+  CONTACT.whatsappHref ||
+  (CONTACT.whatsapp
+    ? `https://wa.me/${String(CONTACT.whatsapp).replace(/\D/g, "")}`
+    : "#");
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: city.seoTitle[L] || city.seoTitle.ru,
+  description: city.seoDescription[L] || city.seoDescription.ru,
+  provider: {
+    "@type": "ProfessionalService",
+    name: "Coucou",
+  },
+  areaServed: {
+    "@type": "City",
+    name: name,
+  },
+};
+---
+
+<Layout
+  title={city.seoTitle[L] || city.seoTitle.ru}
+  description={city.seoDescription[L] || city.seoDescription.ru}
+  lang={lang}
+  image={city.image}
+>
+  <Fragment slot="head">
+    {
+      (["ru", "eng", "esp", "arm"] as const).map((l) => (
+        <link
+          rel="alternate"
+          hreflang={l === "eng" ? "en" : l === "arm" ? "hy" : l}
+          href={`/${l}/cities/${city.slug}`}
+        />
+      ))
+    }
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={`/ru/cities/${city.slug}`}
+    />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <section class="city-page">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href={prefix}>{ui.breadcrumbHome}</a>
+        <span>/</span>
+        <a href={`${prefix}/cities`}>{ui.breadcrumbCities}</a>
+        <span>/</span>
+        <span>{name}</span>
+      </nav>
+
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">{country}</p>
+          <h1>{city.heading[L] || city.heading.ru}</h1>
+          <p class="lead">{city.lead[L] || city.lead.ru}</p>
+          <div class="hero-actions">
+            <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a
+            >
+            <a href={`${prefix}/configurator`} class="btn btn-outline"
+              >{ui.configurator}</a
+            >
+          </div>
+        </div>
+        {
+          city.image && (
+            <div class="hero-image">
+              <img src={city.image} alt={name} loading="eager" />
+            </div>
+          )
+        }
+      </div>
+
+      <div class="content-grid">
+        <div>
+          <h2>{ui.whyLabel}</h2>
+          <ul class="highlights">
+            {
+              (city.highlights[L] || city.highlights.ru).map((item) => (
+                <li>{item}</li>
+              ))
+            }
+          </ul>
+        </div>
+        <div>
+          <h2>{ui.eventsLabel}</h2>
+          <div class="tags">
+            {
+              (city.eventTypes[L] || city.eventTypes.ru).map((tag) => (
+                <span class="tag">{tag}</span>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-block">
+        <h2>{ui.ctaTitle}</h2>
+        <p>{ui.ctaLead}</p>
+        <div class="cta-actions">
+          <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a>
+          <a
+            href={waHref}
+            class="btn btn-whatsapp"
+            target="_blank"
+            rel="noopener noreferrer">{ui.whatsapp}</a
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .city-page {
+    padding: 3rem 0 5rem;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #71717a;
+    margin-bottom: 2rem;
+  }
+  .breadcrumb a {
+    color: #52525b;
+    text-decoration: none;
+  }
+  .breadcrumb a:hover {
+    color: #18181b;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+    margin-bottom: 3.5rem;
+  }
+  .eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #71717a;
+    margin: 0 0 0.75rem;
+  }
+  h1 {
+    font-family: serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.15;
+    color: #18181b;
+    margin: 0 0 1rem;
+  }
+  .lead {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #52525b;
+    margin: 0 0 1.75rem;
+  }
+  .hero-actions,
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .hero-image {
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    background: #f4f4f5;
+  }
+  .hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  .content-grid h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+    color: #18181b;
+  }
+  .highlights {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #3f3f46;
+    line-height: 1.8;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tag {
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    color: #27272a;
+  }
+  .cta-block {
+    background: #09090b;
+    color: #fafafa;
+    border-radius: 20px;
+    padding: 2rem 2.25rem;
+  }
+  .cta-block h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-family: serif;
+  }
+  .cta-block p {
+    color: #a1a1aa;
+    margin: 0 0 1.5rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.35rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: #18181b;
+    color: #fff;
+  }
+  .hero-actions .btn-primary,
+  .cta-block .btn-primary {
+    background: #10b981;
+  }
+  .btn-outline {
+    background: transparent;
+    color: #18181b;
+    border: 1px solid #d4d4d8;
+  }
+  .cta-block .btn-outline {
+    color: #fff;
+    border-color: #3f3f46;
+  }
+  .btn-whatsapp {
+    background: #25d366;
+    color: #fff;
+  }
+  @media (max-width: 768px) {
+    .hero-grid,
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

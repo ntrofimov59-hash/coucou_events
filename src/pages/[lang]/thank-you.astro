@@ -1,0 +1,259 @@
+---
+export const prerender = true;
+
+import Layout from "@/layouts/Layout.astro";
+import { CONTACT } from "@/config/site";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "ru" } = Astro.params;
+const prefix = `/${lang}`;
+
+const t = {
+  ru: {
+    seoTitle: "Заявка отправлена | Coucou",
+    seoDescription: "Спасибо за заявку. Мы свяжемся с вами в ближайшее время.",
+    title: "Спасибо!",
+    lead: "Ваша заявка успешно отправлена. Мы свяжемся с вами в течение рабочего дня — обычно в течение 15–30 минут.",
+    next: "Что дальше?",
+    steps: [
+      "Менеджер изучит ваш запрос",
+      "Свяжется с вами для уточнения деталей",
+      "Подготовит предварительное предложение",
+    ],
+    home: "На главную",
+    services: "Смотреть услуги",
+    whatsapp: "Написать в WhatsApp",
+  },
+  eng: {
+    seoTitle: "Request submitted | Coucou",
+    seoDescription: "Thank you for your request. We will contact you shortly.",
+    title: "Thank you!",
+    lead: "Your request has been submitted successfully. We will contact you within one business day — usually within 15–30 minutes.",
+    next: "What's next?",
+    steps: [
+      "A manager will review your request",
+      "Contact you to clarify the details",
+      "Prepare a preliminary proposal",
+    ],
+    home: "Back to home",
+    services: "View services",
+    whatsapp: "Chat on WhatsApp",
+  },
+  esp: {
+    seoTitle: "Solicitud enviada | Coucou",
+    seoDescription:
+      "Gracias por tu solicitud. Nos pondremos en contacto contigo pronto.",
+    title: "¡Gracias!",
+    lead: "Tu solicitud se ha enviado correctamente. Te contactaremos en un día hábil — normalmente en 15–30 minutos.",
+    next: "¿Qué sigue?",
+    steps: [
+      "Un gestor revisará tu solicitud",
+      "Te contactará para concretar los detalles",
+      "Preparará una propuesta preliminar",
+    ],
+    home: "Ir al inicio",
+    services: "Ver servicios",
+    whatsapp: "Escribir por WhatsApp",
+  },
+  arm: {
+    seoTitle: "Հայտն ուղարկված է | Coucou",
+    seoDescription: "Շնորհակալություն հայտի համար: Մենք շուտով կապ կհաստատենք:",
+    title: "Շնորհակալություն!",
+    lead: "Ձեր հայտը հաջողությամբ ուղարկվեց: Մենք կապ կհաստատենք աշխատանքային օրվա ընթացքում — սովորաբար 15–30 րոպեի ընթացքում:",
+    next: "Ի՞նչ է հաջորդը",
+    steps: [
+      "Մենեջերը կուսումնասիրի ձեր հայտը",
+      "Կկապվի ձեզ հետ մանրամասները ճշտելու համար",
+      "Կպատրաստի նախնական առաջարկ",
+    ],
+    home: "Գլխավոր էջ",
+    services: "Դիտել ծառայությունները",
+    whatsapp: "Գրել WhatsApp-ով",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  seoTitle: "Заявка отправлена | Coucou",
+  seoDescription: "Спасибо за заявку.",
+  title: "Спасибо!",
+  lead: "Ваша заявка успешно отправлена.",
+  next: "Что дальше?",
+  steps: [
+    "Менеджер изучит ваш запрос",
+    "Свяжется с вами для уточнения деталей",
+    "Подготовит предварительное предложение",
+  ],
+  home: "На главную",
+  services: "Смотреть услуги",
+  whatsapp: "Написать в WhatsApp",
+};
+
+const waHref =
+  CONTACT.whatsappHref ||
+  (CONTACT.whatsapp
+    ? `https://wa.me/${String(CONTACT.whatsapp).replace(/\D/g, "")}`
+    : "#");
+---
+
+<Layout
+  title={t.seoTitle}
+  description={t.seoDescription}
+  lang={lang}
+  noindex={true}
+>
+  <section class="thank-you-page">
+    <div class="container">
+      <div class="icon" aria-hidden="true">✓</div>
+      <h1>{t.title}</h1>
+      <p class="lead">{t.lead}</p>
+
+      <div class="next-block">
+        <h2>{t.next}</h2>
+        <ol>
+          {t.steps.map((step) => <li>{step}</li>)}
+        </ol>
+      </div>
+
+      <div class="actions">
+        <a href={prefix} class="btn btn-primary">{t.home}</a>
+        <a href={`${prefix}/services`} class="btn btn-outline">{t.services}</a>
+        <a
+          href={waHref}
+          class="btn btn-whatsapp"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.whatsapp}
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+  (function () {
+    try {
+      const key = "coucou_ty_tracked";
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+
+      if (typeof window.trackConversion === "function") {
+        const params = new URLSearchParams(window.location.search);
+        const source = params.get("from") || "booking";
+        window.trackConversion(
+          source === "contact" ? "contact_submit" : "booking_submit",
+          { page: "thank-you", from: source },
+        );
+      }
+    } catch (e) {}
+  })();
+</script>
+
+<style>
+  .thank-you-page {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+  }
+  .container {
+    max-width: 560px;
+    text-align: center;
+  }
+  .icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: rgba(18, 165, 148, 0.12);
+    color: #12a594;
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h1 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    color: var(--fg, #18181b);
+    margin: 0 0 1rem;
+    letter-spacing: -0.02em;
+  }
+  .lead {
+    color: var(--fg-soft, #71717a);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    margin: 0 0 2.5rem;
+  }
+  .next-block {
+    text-align: left;
+    background: var(--input-bg, #fafafa);
+    border: 1px solid var(--surface-border, #e4e4e7);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+  }
+  .next-block h2 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-faint, #a1a1aa);
+    margin: 0 0 1rem;
+    font-weight: 600;
+  }
+  .next-block ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--fg, #18181b);
+    line-height: 1.8;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.4rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition:
+      background 0.15s,
+      opacity 0.15s;
+  }
+  .btn-primary {
+    background: #12a594;
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: #0d9b8a;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--fg, #18181b);
+    border: 1px solid var(--surface-border, #d4d4d8);
+  }
+  .btn-outline:hover {
+    background: #f4f4f5;
+  }
+  .btn-whatsapp {
+    background: #25d366;
+    color: #fff;
+  }
+  .btn-whatsapp:hover {
+    background: #1ebe57;
+  }
+</style>

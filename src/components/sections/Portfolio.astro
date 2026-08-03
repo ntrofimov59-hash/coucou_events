@@ -1,0 +1,912 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = "ru" } = Astro.props;
+
+const t = {
+  ru: {
+    sectionTag: "Избранные кейсы",
+    heading: "Реализованные проекты",
+    subtitle:
+      "Нажмите на любую карточку, чтобы посмотреть детали проекта и отзыв клиента.",
+    modalGuests: "Масштаб:",
+    modalBudget: "Бюджет:",
+    modalAbout: "О проекте:",
+    modalReviewTitle: "Отзыв клиента:",
+    modalBtnText: "Забронировать похожий проект",
+    items: [
+      {
+        id: "bali-wedding",
+        title: "Частная вилла на Бали",
+        category: "Свадебное торжество",
+        location: "Бали, Индонезия",
+        guests: "120 гостей",
+        budget: "$150k+",
+        span: "col-span-2 row-span-2",
+        description:
+          "Трехдневное торжество на обрыве скалы с видом на океан. Полная техническая застройка, включая кастомный стеклянный танцпол над бассейном, свет 360° и авторский гастрономический ужин.",
+        review:
+          "«Команда превзошла все ожидания. Гости до сих пор вспоминают этот масштаб и безупречный сервис на тропическом острове!»",
+        client: "Артем и София",
+        image:
+          "/images/portfolio/portfolio-bali-card.webp",
+      },
+      {
+        id: "tbilisi-dinner",
+        title: "Закрытый гастро-ужин",
+        category: "Частный вечер",
+        location: "Тбилиси, Грузия",
+        guests: "35 гостей",
+        budget: "$45k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Атмосферный вечер на панорамной террасе старого города с живой акустической музыкой, авторской подачей вин и световой инсталляцией.",
+        review:
+          "«Невероятная камерная атмосфера и абсолютное спокойствие для нас во время самого события.»",
+        client: "Даниил М.",
+        image:
+          "/images/portfolio/portfolio-tbilisi-card.webp",
+      },
+      {
+        id: "barcelona-corp",
+        title: "Бизнес-конференция",
+        category: "Корпоратив",
+        location: "Барселона, Испания",
+        guests: "300 гостей",
+        budget: "$220k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Масштабный бизнес-ивент в исторической усадьбе. Интерактивные зоны, синхронный перевод, брендирование пространства и вечернее шоу.",
+        review:
+          "«Четкая логистика, безупречный тайминг и высочайший уровень организации для топ-менеджмента.»",
+        client: "Компания TechCorp",
+        image:
+          "/images/portfolio/portfolio-barcelona-card.webp",
+      },
+      {
+        id: "phuket-party",
+        title: "Событие у океана",
+        category: "Юбилей",
+        location: "Пхукет, Таиланд",
+        guests: "80 гостей",
+        budget: "$95k",
+        span: "col-span-2 row-span-1",
+        description:
+          "Празднование юбилея на уединенном пляже с тропическими декорациями, пиротехническим шоу и выступлением хедлайнеров.",
+        review:
+          "«Все было продумано до мелочей. Праздник прошел на одном дыхании!»",
+        client: "Михаил В.",
+        image:
+          "/images/portfolio/portfolio-phuket-card.webp",
+      },
+    ],
+  },
+  eng: {
+    sectionTag: "Featured Cases",
+    heading: "Completed Projects",
+    subtitle: "Click on any card to view project details and client review.",
+    modalGuests: "Scale:",
+    modalBudget: "Budget:",
+    modalAbout: "About the project:",
+    modalReviewTitle: "Client Review:",
+    modalBtnText: "Book a similar project",
+    items: [
+      {
+        id: "bali-wedding",
+        title: "Private Villa in Bali",
+        category: "Wedding Celebration",
+        location: "Bali, Indonesia",
+        guests: "120 guests",
+        budget: "$150k+",
+        span: "col-span-2 row-span-2",
+        description:
+          "A three-day cliffside celebration overlooking the ocean. Complete technical setup including a custom glass dance floor over the pool, 360° lighting, and an author's gourmet dinner.",
+        review:
+          "«The team exceeded all expectations. Guests are still talking about the scale and flawless service on the tropical island!»",
+        client: "Artem & Sofia",
+        image:
+          "/images/portfolio/portfolio-bali-card.webp",
+      },
+      {
+        id: "tbilisi-dinner",
+        title: "Private Gastro Dinner",
+        category: "Private Evening",
+        location: "Tbilisi, Georgia",
+        guests: "35 guests",
+        budget: "$45k",
+        span: "col-span-1 row-span-1",
+        description:
+          "An atmospheric evening on a panoramic old town terrace featuring live acoustic music, curated wine pairings, and a light installation.",
+        review:
+          "«An incredible intimate atmosphere and absolute peace of mind for us during the event itself.»",
+        client: "Daniil M.",
+        image:
+          "/images/portfolio/portfolio-tbilisi-card.webp",
+      },
+      {
+        id: "barcelona-corp",
+        title: "Business Conference",
+        category: "Corporate",
+        location: "Barcelona, Spain",
+        guests: "300 guests",
+        budget: "$220k",
+        span: "col-span-1 row-span-1",
+        description:
+          "A large-scale business event in a historic estate. Interactive zones, simultaneous translation, space branding, and an evening show.",
+        review:
+          "«Clear logistics, flawless timing, and the highest level of organization for top management.»",
+        client: "TechCorp Company",
+        image:
+          "/images/portfolio/portfolio-barcelona-card.webp",
+      },
+      {
+        id: "phuket-party",
+        title: "Oceanfront Event",
+        category: "Anniversary",
+        location: "Phuket, Thailand",
+        guests: "80 guests",
+        budget: "$95k",
+        span: "col-span-2 row-span-1",
+        description:
+          "Anniversary celebration on a secluded beach with tropical decor, a pyrotechnic show, and headliner performances.",
+        review:
+          "«Everything was thought out to the smallest detail. The holiday went by in one breath!»",
+        client: "Mikhail V.",
+        image:
+          "/images/portfolio/portfolio-phuket-card.webp",
+      },
+    ],
+  },
+  esp: {
+    sectionTag: "Casos destacados",
+    heading: "Proyectos Realizados",
+    subtitle:
+      "Haz clic en cualquier tarjeta para ver los detalles del proyecto y la reseña del cliente.",
+    modalGuests: "Escala:",
+    modalBudget: "Presupuesto:",
+    modalAbout: "Sobre el proyecto:",
+    modalReviewTitle: "Reseña del cliente:",
+    modalBtnText: "Reservar un proyecto similar",
+    items: [
+      {
+        id: "bali-wedding",
+        title: "Villa Privada en Bali",
+        category: "Boda",
+        location: "Bali, Indonesia",
+        guests: "120 invitados",
+        budget: "$150k+",
+        span: "col-span-2 row-span-2",
+        description:
+          "Celebración de tres días en un acantilado con vista al océano. Montaje técnico completo que incluye pista de baile de cristal personalizada sobre la piscina, iluminación 360° y cena gourmet.",
+        review:
+          "«El equipo superó todas las expectativas. ¡Los invitados aún recuerdan la magnitud y el servicio impecable en la isla tropical!»",
+        client: "Artem y Sofía",
+        image:
+          "/images/portfolio/portfolio-bali-card.webp",
+      },
+      {
+        id: "tbilisi-dinner",
+        title: "Cena Gastronómica Privada",
+        category: "Velada privada",
+        location: "Tiflis, Georgia",
+        guests: "35 invitados",
+        budget: "$45k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Una velada atmosférica en una terraza panorámica del casco antiguo con música acústica en vivo, cata de vinos y una instalación lumínica.",
+        review:
+          "«Un ambiente íntimo increíble y absoluta tranquilidad para nosotros durante todo el evento.»",
+        client: "Daniil M.",
+        image:
+          "/images/portfolio/portfolio-tbilisi-card.webp",
+      },
+      {
+        id: "barcelona-corp",
+        title: "Conferencia de Negocios",
+        category: "Corporativo",
+        location: "Barcelona, España",
+        guests: "300 invitados",
+        budget: "$220k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Evento empresarial a gran escala en una finca histórica. Zonas interactivas, traducción simultánea, branding del espacio y espectáculo nocturno.",
+        review:
+          "«Logística clara, tiempos impecables y el más alto nivel de organización para la alta dirección.»",
+        client: "Empresa TechCorp",
+        image:
+          "/images/portfolio/portfolio-barcelona-card.webp",
+      },
+      {
+        id: "phuket-party",
+        title: "Evento junto al Océano",
+        category: "Aniversario",
+        location: "Phuket, Tailandia",
+        guests: "80 invitados",
+        budget: "$95k",
+        span: "col-span-2 row-span-1",
+        description:
+          "Celebración de aniversario en una playa privada con decoración tropical, espectáculo pirotécnico y artistas invitados.",
+        review:
+          "«Todo fue pensado hasta el más mínimo detalle. ¡La fiesta pasó en un suspiro!»",
+        client: "Mikhail V.",
+        image:
+          "/images/portfolio/portfolio-phuket-card.webp",
+      },
+    ],
+  },
+  arm: {
+    sectionTag: "Ընտրված գործեր",
+    heading: "Իրականացված նախագծեր",
+    subtitle:
+      "Սեղմեք ցանկացած քարտի վրա՝ նախագծի մանրամասները և հաճախորդի կարծիքը տեսնելու համար:",
+    modalGuests: "Մասշտաբ՝",
+    modalBudget: "Բյուջե՝",
+    modalAbout: "Նախագծի մասին՝",
+    modalReviewTitle: "Հաճախորդի կարծիքը՝",
+    modalBtnText: "Ամրագրել նմանատիպ նախագիծ",
+    items: [
+      {
+        id: "bali-wedding",
+        title: "Մասնավոր վիլլա Բալիում",
+        category: "Հարսանեկան արարողություն",
+        location: "Բալի, Ինդոնեզիա",
+        guests: "120 հյուր",
+        budget: "$150k+",
+        span: "col-span-2 row-span-2",
+        description:
+          "Եռօրյա տոնակատարություն ժայռի եզրին՝ օվկիանոսի տեսարանով: Ամբողջական տեխնիկական կառուցվածք, ներառյալ հարմարեցված ապակյա պարահրապարակ լողավազանի վրա, 360° լույս և հեղինակային գաստրոնոմիկ ընթրիք:",
+        review:
+          "«Թիմը գերազանցեց բոլոր սպասելիքները: Հյուրերը մինչ այժմ հիշում են այս մասշտաբն ու անթերի սպասարկումը արևադարձային կղզում!»",
+        client: "Արտյոմ և Սոֆիա",
+        image:
+          "/images/portfolio/portfolio-bali-card.webp",
+      },
+      {
+        id: "tbilisi-dinner",
+        title: "Փակ գաստրո-ընթրիք",
+        category: "Մասնավոր երեկո",
+        location: "Թբիլիսի, Վրաստան",
+        guests: "35 հյուր",
+        budget: "$45k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Մթնոլորտային երեկո հին քաղաքի համայնապատկերային տեռասում՝ կենդանի ակուստիկ երաժշտությամբ, հեղինակային գինիներով և լուսային ինստալյացիայով:",
+        review:
+          "«Անհավանական ջերմ մթնոլորտ և բացարձակ հանգստություն մեզ համար հենց միջոցառման ընթացքում։»",
+        client: "Դանիիլ Մ.",
+        image:
+          "/images/portfolio/portfolio-tbilisi-card.webp",
+      },
+      {
+        id: "barcelona-corp",
+        title: "Բիզնես կոնֆերանս",
+        category: "Կորպորատիվ",
+        location: "Բարսելոնա, Իսպանիա",
+        guests: "300 հյուր",
+        budget: "$220k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Լայնածավալ բիզնես իրադարձություն պատմական կալվածքում: Ինտերակտիվ գոտիներ, համաժամանակյա թարգմանություն, տարածքի բրենդավորում և երեկոյան շոու:",
+        review:
+          "«Հստակ լոգիստիկա, անթերի ժամանակացույց և կազմակերպման ամենաբարձր մակարդակ թոփ-մենեջմենթի համար:»",
+        client: "TechCorp ընկերություն",
+        image:
+          "/images/portfolio/portfolio-barcelona-card.webp",
+      },
+      {
+        id: "phuket-party",
+        title: "Միջոցառում օվկիանոսի ափին",
+        category: "Հոբելյան",
+        location: "Պհուկետ, Թաիլանդ",
+        guests: "80 հյուր",
+        budget: "$95k",
+        span: "col-span-2 row-span-1",
+        description:
+          "Հոբելյանի նշում առանձնացված լողափում՝ արևադարձային ձևավորումներով, պիրոտեխնիկական շոույով և հեդլայներների մասնակցությամբ:",
+        review:
+          "«Ամեն ինչ մտածված էր մինչև մանրամասները: Տոնն անցավ մեկ շնչով!»",
+        client: "Միխայիլ Վ.",
+        image:
+          "/images/portfolio/portfolio-phuket-card.webp",
+      },
+    ],
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  sectionTag: "Избранные кейсы",
+  heading: "Реализованные проекты",
+  subtitle:
+    "Нажмите на любую карточку, чтобы посмотреть детали проекта и отзыв клиента.",
+  modalGuests: "Масштаб:",
+  modalBudget: "Бюджет:",
+  modalAbout: "О проекте:",
+  modalReviewTitle: "Отзыв клиента:",
+  modalBtnText: "Забронировать похожий проект",
+  items: [],
+};
+
+const bookingHref = `/${lang}/booking`;
+---
+
+<section id="portfolio" class="bento-section" lang={lang}>
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">{t.sectionTag}</span>
+      <h2 class="font-serif">{t.heading}</h2>
+      <p class="subtitle font-light">{t.subtitle}</p>
+    </div>
+
+    <div class="bento-grid">
+      {
+        t.items.map((item) => (
+          <div
+            class={`bento-card ${item.span}`}
+            role="button"
+            tabindex="0"
+            data-title={item.title}
+            data-category={item.category}
+            data-location={item.location}
+            data-guests={item.guests}
+            data-budget={item.budget}
+            data-description={item.description}
+            data-review={item.review}
+            data-client={item.client}
+            data-image={item.image}
+            style={`background-image: url(${item.image});`}
+          >
+            <div class="card-overlay" />
+            <div class="card-content">
+              <div class="card-top">
+                <span class="card-category">{item.category}</span>
+                <span class="card-location">📍 {item.location}</span>
+              </div>
+              <div class="card-middle">
+                <h3>{item.title}</h3>
+              </div>
+              <div class="card-bottom">
+                <div class="card-meta">
+                  <span>👥 {item.guests}</span>
+                  <span>💎 {item.budget}</span>
+                </div>
+                <div class="card-arrow">
+                  <span>→</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<div class="portfolio-modal-overlay" id="portfolio-modal" aria-hidden="true">
+  <div class="portfolio-modal-content" role="dialog" aria-modal="true">
+    <button
+      class="modal-close"
+      id="close-portfolio-modal"
+      type="button"
+      aria-label="Close"
+    >
+      &times;
+    </button>
+
+    <div class="modal-image-wrapper">
+      <img id="modal-image" src="" alt="" />
+      <span class="modal-tag" id="modal-category">Категория</span>
+    </div>
+
+    <div class="modal-body">
+      <h2 id="modal-title" class="font-serif">Название проекта</h2>
+      <p class="modal-location" id="modal-location">Локация</p>
+
+      <div class="modal-info-grid">
+        <div>
+          <span>{t.modalGuests}</span>
+          <strong id="modal-guests">-</strong>
+        </div>
+        <div>
+          <span>{t.modalBudget}</span>
+          <strong id="modal-budget">-</strong>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h4>{t.modalAbout}</h4>
+        <p id="modal-description">Описание...</p>
+      </div>
+
+      <div class="modal-review-box">
+        <h4>{t.modalReviewTitle}</h4>
+        <p id="modal-review">«Отзыв»</p>
+        <span class="modal-client" id="modal-client">Имя клиента</span>
+      </div>
+
+      <div class="modal-footer">
+        <a href={bookingHref} class="modal-book-btn">{t.modalBtnText}</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  function initPortfolioModal() {
+    const cards = document.querySelectorAll(".bento-card");
+    const modal = document.getElementById("portfolio-modal");
+    const closeBtn = document.getElementById("close-portfolio-modal");
+    if (!modal || !closeBtn) return;
+
+    const mTitle = document.getElementById("modal-title");
+    const mCategory = document.getElementById("modal-category");
+    const mLocation = document.getElementById("modal-location");
+    const mGuests = document.getElementById("modal-guests");
+    const mBudget = document.getElementById("modal-budget");
+    const mDescription = document.getElementById("modal-description");
+    const mReview = document.getElementById("modal-review");
+    const mClient = document.getElementById("modal-client");
+    const mImage = document.getElementById("modal-image");
+
+    function openFromCard(card) {
+      mTitle.textContent = card.dataset.title || "";
+      mCategory.textContent = card.dataset.category || "";
+      mLocation.textContent = "📍 " + (card.dataset.location || "");
+      mGuests.textContent = card.dataset.guests || "";
+      mBudget.textContent = card.dataset.budget || "";
+      mDescription.textContent = card.dataset.description || "";
+      mReview.textContent = card.dataset.review || "";
+      mClient.textContent = card.dataset.client || "";
+      mImage.src = card.dataset.image || "";
+      mImage.alt = card.dataset.title || "";
+
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => openFromCard(card));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openFromCard(card);
+        }
+      });
+    });
+
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initPortfolioModal);
+  document.addEventListener("astro:page-load", initPortfolioModal);
+  initPortfolioModal();
+</script>
+
+<style>
+  .bento-section {
+    padding: 6rem 0;
+    background: #f7faf9; /* светлый, в тон сайту */
+    color: var(--fg, #04100d);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .section-tag {
+    display: inline-block;
+    background: rgba(13, 148, 136, 0.1);
+    color: #0d9488;
+    padding: 0.35rem 1rem;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(13, 148, 136, 0.2);
+  }
+
+  .section-header h2 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    color: var(--fg, #04100d);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    color: var(--fg-soft, rgba(4, 16, 13, 0.72));
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 260px;
+    gap: 1.5rem;
+  }
+
+  .bento-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(4, 16, 13, 0.08);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 28px rgba(10, 40, 34, 0.06);
+  }
+
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(10, 10, 12, 0.82) 100%
+    );
+    z-index: 1;
+    transition: background 0.3s ease;
+  }
+
+  .bento-card:hover .card-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.08) 0%,
+      rgba(10, 10, 12, 0.72) 100%
+    );
+  }
+
+  .bento-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(13, 148, 136, 0.45);
+    box-shadow: 0 20px 40px -15px rgba(13, 148, 136, 0.2);
+  }
+
+  .bento-card:focus-visible {
+    outline: 2px solid #0d9488;
+    outline-offset: 3px;
+  }
+
+  .col-span-2 {
+    grid-column: span 2;
+  }
+  .row-span-2 {
+    grid-row: span 2;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .card-category {
+    font-size: 0.75rem;
+    color: #0d9488;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+  }
+
+  .card-location {
+    font-size: 0.85rem;
+    color: #f4f4f5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .card-middle h3 {
+    font-size: 1.65rem;
+    color: #fff;
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-top: 0.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+  }
+
+  .bento-card:not(.col-span-2) .card-middle h3 {
+    font-size: 1.25rem;
+  }
+
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding-top: 1rem;
+    margin-top: auto;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: #f4f4f5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Стрелка — цвет Hero (teal) */
+  .card-arrow {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(13, 148, 136, 0.2);
+    border: 1px solid rgba(13, 148, 136, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  .bento-card:hover .card-arrow {
+    background: #0d9488;
+    border-color: #0d9488;
+    transform: translateX(3px);
+  }
+
+  /* Modal */
+  .portfolio-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .portfolio-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .portfolio-modal-content {
+    background: #161619;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    max-width: 540px;
+    width: 100%;
+    position: relative;
+    color: #f4f4f5;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+    transform: translateY(15px);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    max-height: min(90vh, 720px);
+    overflow-y: auto;
+  }
+
+  .portfolio-modal-overlay.active .portfolio-modal-content {
+    transform: translateY(0);
+  }
+
+  .modal-image-wrapper {
+    position: relative;
+    height: 200px;
+    width: 100%;
+  }
+
+  .modal-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .modal-image-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(22, 22, 25, 0) 50%,
+      rgba(22, 22, 25, 1) 100%
+    );
+  }
+
+  .modal-image-wrapper .modal-tag {
+    position: absolute;
+    bottom: 1rem;
+    left: 1.5rem;
+    z-index: 2;
+    background: rgba(13, 148, 136, 0.18);
+    border: 1px solid rgba(13, 148, 136, 0.4);
+    color: #5eead4;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 10;
+    transition: background 0.2s;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-body {
+    padding: 0 1.75rem 1.75rem;
+  }
+
+  .portfolio-modal-content h2 {
+    font-size: 1.65rem;
+    color: #fff;
+    margin-bottom: 0.2rem;
+    font-weight: 400;
+  }
+
+  .modal-location {
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-info-grid {
+    display: flex;
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  /* Подписи «Масштаб / Бюджет» — белые */
+  .modal-info-grid span {
+    color: #ffffff;
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.75rem;
+    opacity: 0.9;
+  }
+
+  .modal-info-grid strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .modal-section {
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-section h4,
+  .modal-review-box h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #a1a1aa;
+    margin-bottom: 0.35rem;
+  }
+
+  .modal-section p {
+    color: #d4d4d8;
+    line-height: 1.5;
+    font-size: 0.9rem;
+  }
+
+  .modal-review-box {
+    background: rgba(13, 148, 136, 0.08);
+    border-left: 3px solid #0d9488;
+    padding: 1rem;
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-review-box p {
+    font-style: italic;
+    color: #e4e4e7;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .modal-client {
+    font-size: 0.8rem;
+    color: #5eead4;
+    font-weight: 500;
+  }
+
+  /* Кнопка CTA — как primary в Hero */
+  .modal-book-btn {
+    display: block;
+    width: 100%;
+    background: #0d9488;
+    color: #fff;
+    text-align: center;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(13, 148, 136, 0.3);
+    transition:
+      background 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .modal-book-btn:hover {
+    background: #0f766e;
+    box-shadow: 0 10px 28px rgba(13, 148, 136, 0.35);
+  }
+
+  @media (max-width: 900px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+      grid-auto-rows: 220px;
+    }
+    .col-span-2,
+    .row-span-2 {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
+  }
+</style>

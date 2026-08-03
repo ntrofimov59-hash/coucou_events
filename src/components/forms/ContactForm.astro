@@ -1,0 +1,259 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang: propLang } = Astro.props;
+const { lang: paramLang, locale } = Astro.params;
+const lang = propLang || paramLang || locale || "ru";
+
+const ENDPOINT = "/api/contact";
+
+const t = {
+  ru: {
+    nameLabel: "Имя",
+    contactLabel: "Телефон или e-mail",
+    messageLabel: "Сообщение",
+    submitBtn: "Отправить",
+    submitting: "Отправка...",
+    successMsg: "Спасибо! Мы свяжемся с вами в ближайшее время.",
+    errorMsg:
+      "Не удалось отправить форму. Попробуйте ещё раз или напишите нам напрямую.",
+  },
+  eng: {
+    nameLabel: "Name",
+    contactLabel: "Phone or e-mail",
+    messageLabel: "Message",
+    submitBtn: "Submit",
+    submitting: "Sending...",
+    successMsg: "Thank you! We will contact you shortly.",
+    errorMsg:
+      "Failed to send the form. Please try again or contact us directly.",
+  },
+  esp: {
+    nameLabel: "Nombre",
+    contactLabel: "Teléfono o correo electrónico",
+    messageLabel: "Mensaje",
+    submitBtn: "Enviar",
+    submitting: "Enviando...",
+    successMsg: "¡Gracias! Nos pondremos en contacto pronto.",
+    errorMsg:
+      "No se pudo enviar el formulario. Inténtalo de nuevo o escríbenos directamente.",
+  },
+  arm: {
+    nameLabel: "Անուն",
+    contactLabel: "Հեռախոս կամ էլ. հասցե",
+    messageLabel: "Հաղորդագրություն",
+    submitBtn: "Ուղարկել",
+    submitting: "Ուղարկվում է...",
+    successMsg: "Շնորհակալություն: Մենք շուտով կապ կհաստատենք ձեզ հետ:",
+    errorMsg:
+      "Հնարավոր չեղավ ուղարկել հայտը: Կրկին փորձեք կամ գրեք մեզ ուղղակիորեն:",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  nameLabel: "Имя",
+  contactLabel: "Телефон или e-mail",
+  messageLabel: "Сообщение",
+  submitBtn: "Отправить",
+  submitting: "Отправка...",
+  successMsg: "Спасибо! Мы свяжемся с вами в ближайшее время.",
+  errorMsg:
+    "Не удалось отправить форму. Попробуйте ещё раз или напишите нам напрямую.",
+};
+---
+
+<form id="contact-form" class="contact-form" novalidate lang={lang}>
+  <div class="hp-field" aria-hidden="true">
+    <label for="contact-website">Website</label>
+    <input
+      type="text"
+      id="contact-website"
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="field">
+    <label for="contact-name">{t.nameLabel}</label>
+    <input
+      id="contact-name"
+      name="name"
+      type="text"
+      required
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="field">
+    <label for="contact-contact">{t.contactLabel}</label>
+    <input
+      id="contact-contact"
+      name="contact"
+      type="text"
+      required
+      autocomplete="tel"
+      placeholder="+... или email"
+    />
+    <span class="field-hint"></span>
+  </div>
+
+  <div class="field">
+    <label for="contact-message">{t.messageLabel}</label>
+    <textarea id="contact-message" name="message" rows="4" required></textarea>
+  </div>
+
+  <button type="submit" class="submit-btn">
+    <span class="btn-label">{t.submitBtn}</span>
+  </button>
+
+  <p class="form-status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  .contact-form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  label {
+    color: var(--fg-soft);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--fg-muted, #888);
+  }
+  input,
+  textarea {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--fg);
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  input:focus,
+  textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .submit-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover {
+    background: #0f766e;
+  }
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .form-status {
+    min-height: 1.2em;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  .form-status[data-state="success"] {
+    color: var(--accent-text, #10b981);
+  }
+  .form-status[data-state="error"] {
+    color: var(--error-text, #ef4444);
+  }
+</style>
+
+<script define:vars={{ ENDPOINT, t }}>
+  const form = document.getElementById("contact-form");
+
+  if (form) {
+    const statusEl = form.querySelector(".form-status");
+    const submitBtn = form.querySelector(".submit-btn");
+    const contactInput = document.getElementById("contact-contact");
+
+    if (contactInput) {
+      contactInput.addEventListener("input", () => {
+        let val = contactInput.value;
+        if (/[a-zA-Z@]/.test(val)) {
+          /* email — не трогаем */
+        } else {
+          let cleanVal = val.replace(/\+/g, "");
+          if (cleanVal.length > 0 && /^\d/.test(cleanVal)) {
+            contactInput.value = "+" + cleanVal;
+          }
+        }
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (submitBtn && !submitBtn.disabled) {
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+
+        submitBtn.disabled = true;
+        if (statusEl) {
+          statusEl.dataset.state = "";
+          statusEl.textContent = t.submitting;
+        }
+
+        try {
+          const response = await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          let result = {};
+          try {
+            result = await response.json();
+          } catch (parseErr) {}
+
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || t.errorMsg);
+          }
+
+          if (typeof window.trackConversion === "function") {
+            window.trackConversion("contact_submit", { form: "contact" });
+          }
+
+          const match = window.location.pathname.match(/^\/(ru|eng|esp|arm)/);
+          const langPrefix = match ? match[0] : "/ru";
+          window.location.href = langPrefix + "/thank-you?from=contact";
+        } catch (err) {
+          if (statusEl) {
+            statusEl.dataset.state = "error";
+            statusEl.textContent =
+              err && err.message ? err.message : t.errorMsg;
+          }
+          submitBtn.disabled = false;
+        }
+      }
+    });
+  }
+</script>

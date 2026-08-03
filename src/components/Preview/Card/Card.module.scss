@@ -1,0 +1,64 @@
+@use "@colors" as *;
+@use "@sizes" as *;
+
+.root {
+  display: flex;
+  gap: 20px;
+
+  overflow: hidden;
+
+  padding: 16px;
+
+  background: $color-bg-elevated;
+  border: 1px solid $color-border-default;
+  border-radius: 12px;
+
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: $color-accent-border;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+  }
+}
+
+.picture {
+  flex-shrink: 0;
+
+  width: 180px;
+  height: 120px;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  background: $color-bg-surface;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+
+  color: $color-text-primary;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0;
+
+  color: $color-text-secondary;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}

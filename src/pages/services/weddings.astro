@@ -1,0 +1,125 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import EventCalculator from "@/components/EventCalculator.astro";
+import { SITE_NAME, SITE_URL } from "@/config/site";
+import { getLangFromAstro } from "@/lib/i18n";
+
+const lang = getLangFromAstro(Astro);
+const title = "Свадьбы мечты под ключ | Coucou";
+const description =
+  "Романтические церемонии, координация, декор и банкеты в самых красивых локациях мира.";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Свадьбы мечты под ключ",
+  description: description,
+  provider: { "@type": "Organization", name: SITE_NAME },
+  areaServed: "Worldwide",
+  url: `${SITE_URL}/services/weddings`,
+};
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <article class="service-detail">
+    <div class="container">
+      <h1>Свадьбы мечты под ключ</h1>
+      <div class="service-detail__content">
+        <div class="service-detail__gallery">
+          <img
+            src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"
+            alt="Свадьбы мечты под ключ"
+            loading="lazy"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800"
+            alt="Декор свадьбы"
+            loading="lazy"
+          />
+        </div>
+        <div class="glass service-detail__info">
+          <p class="description">{description}</p>
+          <p class="price">Стоимость: По запросу</p>
+          <ul class="features">
+            <li>✓ Полная координация дня свадьбы</li>
+            <li>✓ Эксклюзивный авторский декор</li>
+            <li>✓ Подбор лучших локаций мира</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Калькулятор сметы для свадьбы -->
+      <div id="calculator" class="mt-20">
+        <EventCalculator
+          serviceName="Свадьбы мечты под ключ"
+          serviceId="weddings"
+        />
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .service-detail {
+    padding: 6rem 0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  h1 {
+    color: var(--fg);
+    margin-bottom: 2rem;
+    font-size: 3rem;
+  }
+  .service-detail__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem;
+  }
+  .service-detail__gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-content: start;
+  }
+  .service-detail__gallery img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 16px;
+  }
+  .service-detail__info {
+    padding: 2.5rem;
+    border-radius: 20px;
+    height: fit-content;
+  }
+  .service-detail__info .description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--fg-soft);
+  }
+  .price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-text);
+    margin: 1.5rem 0;
+  }
+  .features {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+  .features li {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: var(--fg-soft);
+  }
+  @media (max-width: 768px) {
+    .service-detail__content {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

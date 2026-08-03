@@ -1,0 +1,169 @@
+---
+export const prerender = true;
+
+import Layout from "@/layouts/Layout.astro";
+import { CITIES_PAGES } from "@/data/cities";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "ru" } = Astro.params;
+const L = lang as "ru" | "eng" | "esp" | "arm";
+const prefix = `/${lang}`;
+
+const totalCities = CITIES_PAGES.length;
+
+const t = {
+  ru: {
+    title: "Города присутствия | Coucou",
+    desc: `Организуем мероприятия в ${totalCities} городах мира: Ереван, Бали, Барселона, Пхукет и другие.`,
+    h1: "Города, где мы работаем",
+    lead: "Выберите город — расскажем, как организуем свадьбу, корпоратив или частный праздник на месте.",
+  },
+  eng: {
+    title: "Cities we serve | Coucou",
+    desc: `We organize events in ${totalCities} cities worldwide: Yerevan, Bali, Barcelona, Phuket and more.`,
+    h1: "Cities where we work",
+    lead: "Choose a city — we’ll show how we run weddings, corporate and private events on site.",
+  },
+  esp: {
+    title: "Ciudades | Coucou",
+    desc: `Organizamos eventos en ${totalCities} ciudades del mundo: Ereván, Bali, Barcelona, Phuket y más.`,
+    h1: "Ciudades donde trabajamos",
+    lead: "Elige una ciudad y te contamos cómo organizamos bodas y eventos in situ.",
+  },
+  arm: {
+    title: "Քաղաքներ | Coucou",
+    desc: `Կազմակերպում ենք միջոցառումներ աշխարհի ${totalCities} քաղաքներում:`,
+    h1: "Քաղաքներ, որտեղ աշխատում ենք",
+    lead: "Ընտրեք քաղաք՝ կպատմենք, թե ինչպես ենք կազմակերպում միջոցառումները տեղում:",
+  },
+}[L];
+---
+
+<Layout title={t.title} description={t.desc} lang={lang}>
+  <section class="cities-index">
+    <div class="container">
+      <h1>{t.h1}</h1>
+      <p class="lead">{t.lead}</p>
+      <div class="grid">
+        {
+          CITIES_PAGES.map((city) => (
+            <a href={`${prefix}/cities/${city.slug}`} class="card">
+              {city.image && (
+                <div class="card-img">
+                  <img
+                    src={city.image}
+                    alt={city.name[L] || city.name.ru}
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div class="card-body">
+                <h2>{city.name[L] || city.name.ru}</h2>
+                <p>{city.country[L] || city.country.ru}</p>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .cities-index {
+    padding: 4rem 0 5rem;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  h1 {
+    font-family: serif;
+    font-size: 2.5rem;
+    margin: 0 0 0.75rem;
+    color: #18181b;
+  }
+  .lead {
+    color: #71717a;
+    margin: 0 0 2.5rem;
+    max-width: 40rem;
+  }
+
+  /* Десктопная сетка по умолчанию */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card {
+    border: 1px solid #e4e4e7;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    background: #fff;
+    transition:
+      box-shadow 0.2s,
+      transform 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+  .card-img {
+    width: 100%;
+    aspect-ratio: 16/10;
+    background: #f4f4f5;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .card-body {
+    padding: 1rem 1.15rem 1.25rem;
+  }
+  .card-body h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+    color: #18181b;
+  }
+  .card-body p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #71717a;
+  }
+
+  /* Мобильная карусель */
+  @media (max-width: 768px) {
+    .grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      scrollbar-width: none;
+    }
+    .grid::-webkit-scrollbar {
+      display: none;
+    }
+    .card {
+      flex: 0 0 260px;
+      scroll-snap-align: start;
+    }
+  }
+</style>

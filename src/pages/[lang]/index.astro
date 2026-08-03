@@ -1,0 +1,77 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Hero from "@/components/sections/Hero.astro";
+import Services from "@/components/sections/Services.astro";
+import Portfolio from "@/components/sections/Portfolio.astro";
+import Testimonials from "@/components/sections/Testimonials.astro";
+import Contact from "@/components/sections/Contact.astro";
+import { getLangFromAstro } from "@/lib/i18n";
+
+// Убедитесь, что настроен getStaticPaths для языков, если у вас статическая генерация (prerender)
+export const prerender = true;
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "ru" } = Astro.params;
+
+// Переводы для мета-тегов главной страницы с явной типизацией для TypeScript
+const seoMeta = {
+  ru: {
+    title:
+      "Coucou — организация мероприятий под ключ | Свадьбы, корпоративы, шатры",
+    description:
+      "Ивент-агентство Coucou: организация свадеб и корпоративов, аренда шатров, кейтеринг, декор и трансфер. Ереван и 15 городов мира. Заявка онлайн.",
+  },
+  eng: {
+    title: "Coucou — Turnkey Event Planning | Weddings, Corporates, Tents",
+    description:
+      "Event agency Coucou: weddings, corporate events, tent rental, catering, decor and transfers. Yerevan and 15 cities worldwide. Request a quote online.",
+  },
+  esp: {
+    title:
+      "Coucou — Organización de eventos llave en mano | Bodas y corporativos",
+    description:
+      "Agencia Coucou: bodas, corporativos, alquiler de carpas, catering y decoración. Ereván y 15 ciudades. Solicitud online.",
+  },
+  arm: {
+    title: "Coucou — միջոցառումների կազմակերպում | Հարսանիքներ, կորպորատիվներ",
+    description:
+      "Coucou իրադարձությունների գործակալություն՝ հարսանիքներ, կորպորատիվներ, վրաններ, քեյթերինգ։ Երևան և 15 քաղաք։ Հայտ առցանց։",
+  },
+} as const;
+
+// Безопасно получаем мета-теги для текущего языка с фоллбэком на русский
+type LangKey = keyof typeof seoMeta;
+const currentLang: LangKey = (
+  seoMeta[lang as LangKey] ? lang : "ru"
+) as LangKey;
+const meta = seoMeta[currentLang];
+---
+
+<Layout
+  title={meta.title}
+  description={meta.description}
+  lang={lang}
+  currentPath={`/${lang}`}
+>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="ru" href="/ru" />
+    <link rel="alternate" hreflang="en" href="/eng" />
+    <link rel="alternate" hreflang="es" href="/esp" />
+    <link rel="alternate" hreflang="hy" href="/arm" />
+    <link rel="alternate" hreflang="x-default" href="/ru" />
+  </Fragment>
+
+  <!-- Передаем lang во все компоненты секций -->
+  <Hero lang={lang} />
+  <Services lang={lang} />
+  <Portfolio lang={lang} />
+  <Testimonials lang={lang} />
+  <Contact lang={lang} />
+</Layout>

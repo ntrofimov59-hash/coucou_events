@@ -1,0 +1,82 @@
+---
+import { getCollection } from "astro:content";
+import { PreviewList } from "@/components/Preview";
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = "ru" } = Astro.props;
+
+// Фильтрация контента под текущий язык из коллекции (при условии, что превью используют структуру id с префиксом языка, например "ru/item-1")
+const entries = await getCollection(
+  "previews",
+  ({ id }) => !lang || id.startsWith(`${lang}/`),
+);
+
+const sorted = entries.sort(
+  (a, b) => (a.data.order || 0) - (b.data.order || 0),
+);
+const previews = sorted.map((entry) => entry.data);
+
+// Словари переводов и SEO-ключей для секции галереи / портфолио
+const t = {
+  ru: {
+    heading: "Галерея",
+    emptyText: "Фотографии наших мероприятий скоро появятся здесь.",
+    seoKeywords:
+      "фото мероприятий, галерея свадеб, портфолио ивент агентства, оформление праздников фото",
+  },
+  eng: {
+    heading: "Gallery",
+    emptyText: "Photos of our events will appear here soon.",
+    seoKeywords:
+      "event photos, wedding gallery, event agency portfolio, celebration decoration photos",
+  },
+  esp: {
+    heading: "Galería",
+    emptyText: "Las fotos de nuestros eventos aparecerán aquí pronto.",
+    seoKeywords:
+      "fotos de eventos, galería de bodas, portafolio de agencia de eventos, decoración de fiestas",
+  },
+  arm: {
+    heading: "Պատկերասրահ",
+    emptyText: "Մեր միջոցառումների լուսանկարները շուտով կհայտնվեն այստեղ:",
+    seoKeywords:
+      "միջոցառումների լուսանկարներ, հարսանեկան պատկերասրահ, գործակալության պորտֆոլիո",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  heading: "Галерея",
+  emptyText: "Фотографии наших мероприятий скоро появятся здесь.",
+  seoKeywords: "фото мероприятий, галерея свадеб, портфолио ивент агентства",
+};
+---
+
+<!-- SEO метаданные и поисковые ключи для секции галереи -->
+<meta name="keywords" content={t.seoKeywords} />
+
+<section id="gallery" class="py-24" lang={lang}>
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-center mb-12 u-fg font-serif text-4xl md:text-5xl">
+      {t.heading}
+    </h2>
+
+    {
+      previews.length > 0 ? (
+        <div class="gallery-list">
+          <PreviewList previews={previews} />
+        </div>
+      ) : (
+        <p class="text-center u-fg-soft text-lg font-light">{t.emptyText}</p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .gallery-list {
+    background: rgba(127, 127, 127, 0.06);
+    border-radius: 16px;
+    padding: 16px;
+  }
+</style>

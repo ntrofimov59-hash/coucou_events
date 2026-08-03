@@ -1,0 +1,123 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = true;
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+const { lang = "ru" } = Astro.params;
+const prefix = `/${lang}`;
+
+const t = {
+  ru: {
+    title: "Условия использования | Coucou",
+    desc: "Правила пользования сайтом и подачи заявок Coucou.",
+    h1: "Условия использования",
+    updated: "Редакция: июль 2026",
+    body: `
+<p>Используя сайт Coucou, вы соглашаетесь с условиями ниже.</p>
+<h2>1. О сервисе</h2>
+<p>Сайт представляет услуги по организации мероприятий (шатры, кейтеринг, декор, фото, трансфер и др.). Юридическое лицо может быть оформлено позже; до этого заявки обрабатывает команда Coucou по адресу <strong>ул. Вагарша Вагаршяна 24, Ереван 0012</strong> и указанным контактам.</p>
+<h2>2. Заявки</h2>
+<p>Отправка формы не означает автоматический договор. Мы связываемся для уточнения деталей, сроков и стоимости. Окончательные условия фиксируются отдельно (переписка, счёт, договор — по мере появления юрлица).</p>
+<h2>3. Контент сайта</h2>
+<p>Тексты, фото и описания носят информационный характер. Фактический состав услуги согласуется индивидуально.</p>
+<h2>4. Ответственность</h2>
+<p>Мы стараемся поддерживать сайт в рабочем состоянии, но не гарантируем отсутствие технических сбоев. За содержание внешних ссылок не отвечаем.</p>
+<h2>5. Контакты</h2>
+<p>Вопросы: раздел «Контакты» на сайте, телефон и мессенджеры в шапке/футере.</p>
+`,
+  },
+  eng: {
+    title: "Terms of Use | Coucou",
+    desc: "Rules for using the Coucou website and submitting requests.",
+    h1: "Terms of Use",
+    updated: "Last updated: July 2026",
+    body: `
+<p>By using the Coucou website you agree to these terms.</p>
+<h2>1. Service</h2>
+<p>The site presents event services (tents, catering, decor, photo, transfer, etc.). A legal entity may be registered later; until then requests are handled by the Coucou team at <strong>24 Vagharsh Vagharshyan St, Yerevan 0012</strong> and the contacts listed on the site.</p>
+<h2>2. Requests</h2>
+<p>Submitting a form is not an automatic contract. We contact you to confirm details, timing and price. Final terms are agreed separately.</p>
+<h2>3. Content</h2>
+<p>Texts and images are informational. The actual scope of work is agreed case by case.</p>
+<h2>4. Liability</h2>
+<p>We aim to keep the site available but do not guarantee uninterrupted operation. We are not responsible for third-party links.</p>
+<h2>5. Contact</h2>
+<p>Use the Contacts page, phone or messengers in the header/footer.</p>
+`,
+  },
+  esp: {
+    title: "Condiciones de uso | Coucou",
+    desc: "Normas de uso del sitio y de las solicitudes Coucou.",
+    h1: "Condiciones de uso",
+    updated: "Actualizado: julio 2026",
+    body: `
+<p>Al usar el sitio Coucou acepta estas condiciones.</p>
+<h2>1. Servicio</h2>
+<p>El sitio presenta servicios de eventos. Dirección de contacto: <strong>Calle Vagharsh Vagharshyan 24, Ereván 0012</strong>.</p>
+<h2>2. Solicitudes</h2>
+<p>Enviar un formulario no crea un contrato automático. Confirmamos detalles y precio por separado.</p>
+<h2>3. Contenido</h2>
+<p>Textos e imágenes son orientativos. El alcance real se acuerda caso por caso.</p>
+<h2>4. Responsabilidad</h2>
+<p>No garantizamos disponibilidad continua del sitio ni enlaces de terceros.</p>
+<h2>5. Contacto</h2>
+<p>Página Contactos, teléfono o mensajeros del sitio.</p>
+`,
+  },
+  arm: {
+    title: "Օգտագործման պայմաններ | Coucou",
+    desc: "Coucou կայքի և հայտերի օգտագործման կանոններ։",
+    h1: "Օգտագործման պայմաններ",
+    updated: "Թարմացված՝ հուլիս 2026",
+    body: `
+<p>Օգտագործելով Coucou կայքը՝ համաձայնում եք այս պայմաններին։</p>
+<h2>1. Ծառայություն</h2>
+<p>Կայքը ներկայացնում է միջոցառումների ծառայություններ։ Հասցե՝ <strong>Վաղարշ Վաղարշյան 24, Երևան 0012</strong>։</p>
+<h2>2. Հայտեր</h2>
+<p>Ձևի ուղարկումը ավտոմատ պայմանագիր չէ։ Մանրամասները և գինը համաձայնեցվում են առանձին։</p>
+<h2>3. Բովանդակություն</h2>
+<p>Տեքստերն ու նկարները տեղեկատվական են։</p>
+<h2>4. Պատասխանատվություն</h2>
+<p>Չենք երաշխավորում կայքի անընդհատ աշխատանքը։</p>
+<h2>5. Կապ</h2>
+<p>Կապ բաժին, հեռախոս կամ մեսենջերներ։</p>
+`,
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  title: "Terms | Coucou",
+  desc: "Terms of use",
+  h1: "Terms",
+  updated: "",
+  body: "",
+};
+---
+
+<Layout title={t.title} description={t.desc} lang={lang}>
+  <article class="legal-page">
+    <div class="container">
+      <h1>{t.h1}</h1>
+      <p class="updated">{t.updated}</p>
+      <div class="legal-body" set:html={t.body} />
+      <p class="back"><a href={prefix}>← Coucou</a></p>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .legal-page { padding: 5rem 0 4rem; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+  h1 { margin-bottom: 0.5rem; }
+  .updated { color: var(--fg-faint); font-size: 0.9rem; margin-bottom: 2rem; }
+  .legal-body :global(h2) { font-size: 1.15rem; margin: 1.75rem 0 0.75rem; font-family: inherit; }
+  .legal-body :global(p), .legal-body :global(li) { color: var(--fg-soft); line-height: 1.65; }
+  .legal-body :global(ul) { padding-left: 1.25rem; }
+  .back { margin-top: 2.5rem; }
+  .back a { color: #0d9488; }
+</style>

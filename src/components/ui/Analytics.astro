@@ -1,0 +1,99 @@
+---
+import { ANALYTICS } from "@/config/site";
+
+const { ga4Id, metrikaId } = ANALYTICS;
+const hasGa = Boolean(ga4Id && String(ga4Id).trim());
+const hasMetrika = Boolean(metrikaId && String(metrikaId).trim());
+---
+
+{/* Google Analytics 4 */}
+{
+  hasGa && (
+    <>
+      <script
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+      />
+      <script is:inline define:vars={{ ga4Id }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag("js", new Date());
+        gtag("config", ga4Id, {
+          send_page_view: true,
+          anonymize_ip: true,
+        });
+      </script>
+    </>
+  )
+}
+
+{/* Яндекс.Метрика */}
+{
+  hasMetrika && (
+    <>
+      <script is:inline define:vars={{ metrikaId }}>
+        (function (m, e, t, r, i, k, a) {
+          m[i] =
+            m[i] ||
+            function () {
+              (m[i].a = m[i].a || []).push(arguments);
+            };
+          m[i].l = 1 * new Date();
+          for (var j = 0; j < document.scripts.length; j++) {
+            if (document.scripts[j].src === r) return;
+          }
+          (k = e.createElement(t)),
+            (a = e.getElementsByTagName(t)[0]);
+          k.async = 1;
+          k.src = r;
+          a.parentNode.insertBefore(k, a);
+        })(
+          window,
+          document,
+          "script",
+          "https://mc.yandex.ru/metrika/tag.js",
+          "ym",
+        );
+
+        window.__METRIKA_ID__ = metrikaId;
+
+        ym(metrikaId, "init", {
+          clickmap: true,
+          trackLinks: true,
+          accurateTrackBounce: true,
+          webvisor: true,
+        });
+      </script>
+
+      <noscript>
+        <div>
+          <img
+            src={`https://mc.yandex.ru/watch/${metrikaId}`}
+            style="position:absolute; left:-9999px;"
+            alt=""
+          />
+        </div>
+      </noscript>
+    </>
+  )
+}
+
+{/* Универсальная функция конверсий — всегда доступна формам */}
+<script is:inline>
+  window.trackConversion = function (eventName, params) {
+    params = params || {};
+    try {
+      if (typeof window.gtag === "function") {
+        window.gtag("event", eventName, params);
+      }
+    } catch (e) {}
+    try {
+      if (typeof window.ym === "function" && window.__METRIKA_ID__) {
+        window.ym(window.__METRIKA_ID__, "reachGoal", eventName, params);
+      }
+    } catch (e) {}
+  };
+</script>

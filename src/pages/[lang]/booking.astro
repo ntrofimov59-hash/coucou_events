@@ -1,0 +1,175 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import BookingForm from "@/components/forms/BookingForm.astro";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "ru" } = Astro.params;
+
+const uiTranslations = {
+  ru: {
+    seoTitle: "Бронирование | Coucou",
+    seoDescription:
+      "Оставьте заявку на организацию мероприятия — свадьбы, корпоратива или частного праздника.",
+    eyebrow: "Заявка",
+    title: "Бронирование",
+    subtitle:
+      "Оставьте заявку — мы свяжемся с вами, чтобы уточнить детали и подтвердить бронирование.",
+  },
+  eng: {
+    seoTitle: "Booking | Coucou",
+    seoDescription:
+      "Submit a request to organize a wedding, corporate or private event.",
+    eyebrow: "Request",
+    title: "Booking",
+    subtitle:
+      "Submit your request — we will contact you to clarify details and confirm booking.",
+  },
+  esp: {
+    seoTitle: "Reserva | Coucou",
+    seoDescription: "Envía una solicitud para organizar tu evento.",
+    eyebrow: "Solicitud",
+    title: "Reserva",
+    subtitle:
+      "Envía tu solicitud; nos pondremos en contacto para confirmar los detalles.",
+  },
+  arm: {
+    seoTitle: "Ամրագրում | Coucou",
+    seoDescription: "Թողեք հայտ միջոցառման կազմակերպման համար։",
+    eyebrow: "Հայտ",
+    title: "Ամրագրում",
+    subtitle:
+      "Թողեք հայտ. մենք կկապվենք ձեզ հետ մանրամասները ճշտելու համար։",
+  },
+};
+
+const t =
+  uiTranslations[lang as keyof typeof uiTranslations] || uiTranslations.ru;
+---
+
+<Layout title={t.seoTitle} description={t.seoDescription} lang={lang}>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="ru" href="/ru/booking" />
+    <link rel="alternate" hreflang="en" href="/eng/booking" />
+    <link rel="alternate" hreflang="es" href="/esp/booking" />
+    <link rel="alternate" hreflang="hy" href="/arm/booking" />
+    <link rel="alternate" hreflang="x-default" href="/ru/booking" />
+  </Fragment>
+
+  <section class="booking-page">
+    <div class="container">
+      <div class="glass eyebrow">{t.eyebrow}</div>
+      <h1>{t.title}</h1>
+      <p class="subtitle">{t.subtitle}</p>
+      <div class="glass form-card">
+        <BookingForm lang={lang} />
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var service = params.get("service");
+    var guests = params.get("guests");
+    var locationVal = params.get("location");
+    var dateVal = params.get("date");
+    var options = params.get("options");
+    var estimate = params.get("estimate");
+    var serviceName = params.get("serviceName");
+
+    function ensureHidden(form, name, value) {
+      if (!value) return;
+      var existing = form.querySelector('input[name="' + name + '"]');
+      if (existing) {
+        existing.value = value;
+        return;
+      }
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    function applyParams() {
+      var form = document.getElementById("booking-form");
+      if (!form) return;
+
+      if (service) {
+        var select = document.getElementById("booking-service");
+        if (select) {
+          select.value = service;
+          // if option missing, keep hidden service field
+          if (select.value !== service) {
+            ensureHidden(form, "service", service);
+          }
+        } else {
+          ensureHidden(form, "service", service);
+        }
+      }
+
+      if (serviceName) ensureHidden(form, "serviceName", serviceName);
+      if (guests) ensureHidden(form, "guests", guests);
+      if (locationVal) ensureHidden(form, "location", locationVal);
+      if (dateVal) {
+        var dateInput = document.getElementById("booking-date");
+        if (dateInput) dateInput.value = dateVal;
+        else ensureHidden(form, "date", dateVal);
+      }
+      if (options) ensureHidden(form, "options", options);
+      if (estimate) ensureHidden(form, "estimate", estimate);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", applyParams);
+    } else {
+      applyParams();
+    }
+  })();
+</script>
+
+<style>
+  .booking-page {
+    padding: clamp(4rem, 10vw, 6rem) 0;
+  }
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #0d9488;
+  }
+  h1 {
+    color: var(--fg, #04100d);
+    margin-bottom: 0.5rem;
+  }
+  .subtitle {
+    color: var(--fg-soft, rgba(4, 16, 13, 0.72));
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+  }
+  .form-card {
+    padding: 2.5rem;
+    border-radius: 20px;
+  }
+</style>

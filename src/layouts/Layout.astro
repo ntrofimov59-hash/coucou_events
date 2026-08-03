@@ -1,0 +1,380 @@
+---
+import Header from "@/components/Header/Header.astro";
+import { Footer } from "@/components/Footer";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_DESCRIPTION,
+  CITIES,
+  CONTACT,
+  DEFAULT_LANG,
+  HREFLANG_MAP,
+  type SiteLang,
+} from "@/config/site";
+import FloatingActions from "@/components/ui/FloatingActions.astro";
+import Analytics from "@/components/ui/Analytics.astro";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+  lang?: string;
+  currentPath?: string;
+}
+
+const {
+  title = SITE_NAME,
+  description = SITE_DESCRIPTION,
+  image = "/og-image.jpg",
+  noindex = false,
+} = Astro.props as Props;
+
+const segments = Astro.url.pathname.split("/").filter(Boolean);
+const supportedLangs: SiteLang[] = ["ru", "eng", "esp", "arm"];
+
+const rawLang =
+  (Astro.props.lang as string | undefined) ||
+  (supportedLangs.includes(segments[0] as SiteLang)
+    ? segments[0]
+    : DEFAULT_LANG);
+
+const currentLang: SiteLang = supportedLangs.includes(rawLang as SiteLang)
+  ? (rawLang as SiteLang)
+  : DEFAULT_LANG;
+
+// Стандартный BCP 47 код для <html lang="...">
+const htmlLang = HREFLANG_MAP[currentLang] || "ru";
+
+const canonicalURL = new URL(Astro.url.pathname, SITE_URL).toString();
+const ogImageURL = new URL(image, SITE_URL).toString();
+
+const ogLocales: Record<string, string> = {
+  ru: "ru_RU",
+  eng: "en_US",
+  esp: "es_ES",
+  arm: "hy_AM",
+};
+const ogLocale = ogLocales[currentLang] || "ru_RU";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  url: SITE_URL,
+  image: ogImageURL,
+  telephone: CONTACT.phone,
+  email: CONTACT.email,
+  serviceType: "Event Planning",
+  areaServed: CITIES.map((city) => ({
+    "@type": "City",
+    name:
+      typeof city === "string"
+        ? city
+        : (city as { name?: string }).name || String(city),
+  })),
+};
+
+const formTexts = {
+  ru: {
+    sending: "Отправка...",
+    success: "Успешно отправлено! ✓",
+    error: "Ошибка. Повторить?",
+  },
+  eng: {
+    sending: "Sending...",
+    success: "Successfully sent! ✓",
+    error: "Error. Retry?",
+  },
+  esp: {
+    sending: "Enviando...",
+    success: "¡Enviado con éxito! ✓",
+    error: "Error. ¿Reintentar?",
+  },
+  arm: {
+    sending: "Ուղարկվում է...",
+    success: "Հաջողությամբ ուղարկվեց! ✓",
+    error: "Սխալ։ Կրկն՞ել?",
+  },
+};
+const tForm = formTexts[currentLang] || formTexts.ru;
+---
+
+<!doctype html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    {
+      noindex ? (
+        <meta name="robots" content="noindex, follow" />
+      ) : (
+        <meta name="robots" content="index, follow" />
+      )
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:locale" content={ogLocale} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <meta name="author" content="Coucou Events" />
+
+    <!-- Schema.org без фейкового aggregateRating -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <Analytics />
+
+    <slot name="head" />
+
+    <script src="/scripts/scroll-animations.js" is:inline></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.14/bundle/libphonenumber-max.js"
+      is:inline></script>
+  </head>
+
+  <body>
+    <Header currentPath={Astro.url.pathname} lang={currentLang} />
+    <main>
+      <slot />
+    </main>
+    <FloatingActions lang={currentLang} />
+    <Footer currentPath={Astro.url.pathname} lang={currentLang} />
+
+    <script is:inline define:vars={{ tForm, currentLang }}>
+      function initPhoneField(input) {
+        if (input.dataset.phoneEnhanced) return;
+        input.dataset.phoneEnhanced = "true";
+
+        const wrapper =
+          input.closest(".form-inputs-row") || input.parentElement;
+        let badge = null;
+
+        if (wrapper) {
+          wrapper.style.position = "relative";
+          badge = document.createElement("div");
+          badge.className = "phone-info-badge";
+          badge.style.cssText =
+            "font-size: 0.75rem; color: #71717a; margin-top: 4px; min-height: 18px; transition: all 0.2s ease;";
+          wrapper.appendChild(badge);
+        }
+
+        input.addEventListener("input", () => {
+          let rawValue = input.value;
+          const selectionStart = input.selectionStart;
+          let isPlus = rawValue.startsWith("+");
+          let digits = rawValue.replace(/\D/g, "");
+
+          if (!digits) {
+            input.value = isPlus ? "+" : "";
+            if (badge) badge.textContent = "";
+            return;
+          }
+
+          let formattedValue = "";
+
+          if (!isPlus && digits[0] === "8" && digits.length > 1) {
+            digits = "7" + digits.substring(1);
+            isPlus = true;
+          }
+
+          if (!isPlus && (digits[0] === "7" || digits[0] === "9")) {
+            if (digits[0] === "9") digits = "7" + digits;
+            formattedValue = "+7 ";
+
+            if (digits.length > 1)
+              formattedValue += "(" + digits.substring(1, 4);
+            if (digits.length >= 5)
+              formattedValue += ") " + digits.substring(4, 7);
+            if (digits.length >= 8)
+              formattedValue += "-" + digits.substring(7, 9);
+            if (digits.length >= 10)
+              formattedValue += "-" + digits.substring(9, 11);
+          } else {
+            formattedValue = isPlus || rawValue.includes("+") ? "+" : "";
+            for (let i = 0; i < digits.length; i++) {
+              if (i === 1 || i === 4 || i === 7 || i === 11)
+                formattedValue += " ";
+              formattedValue += digits[i];
+            }
+            formattedValue = formattedValue.substring(0, 20);
+          }
+
+          input.value = formattedValue;
+
+          if (selectionStart && selectionStart < rawValue.length) {
+            input.setSelectionRange(selectionStart, selectionStart);
+          }
+
+          if (badge && typeof libphonenumber !== "undefined") {
+            try {
+              const phoneNumber = libphonenumber.parsePhoneNumberFromString(
+                input.value,
+              );
+
+              if (phoneNumber && phoneNumber.country) {
+                const country = phoneNumber.country;
+                const type = phoneNumber.getType();
+
+                const displayNames = new Intl.DisplayNames([currentLang], {
+                  type: "region",
+                });
+                const countryName = displayNames.of(country) || country;
+
+                const typeText =
+                  type === "MOBILE"
+                    ? currentLang === "ru"
+                      ? "Мобильный"
+                      : "Mobile"
+                    : type === "FIXED_LINE"
+                      ? currentLang === "ru"
+                        ? "Городской"
+                        : "Landline"
+                      : "";
+                const typeDisplay = typeText ? ` (${typeText})` : "";
+
+                badge.style.color = phoneNumber.isValid()
+                  ? "#10b981"
+                  : "#3b82f6";
+                badge.textContent = `✓ ${countryName}${typeDisplay}`;
+              } else {
+                badge.style.color = "#a1a1aa";
+                badge.textContent =
+                  digits.length > 1
+                    ? currentLang === "ru"
+                      ? "Определяем страну..."
+                      : "Detecting country..."
+                    : "";
+              }
+            } catch (err) {
+              badge.textContent = "";
+            }
+          }
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace") {
+            let digits = input.value.replace(/\D/g, "");
+            if (digits.length <= 1 && input.value.length <= 3) {
+              input.value = "";
+              if (badge) badge.textContent = "";
+            }
+          }
+        });
+      }
+
+      function initFormSubmit(form) {
+        if (form.dataset.submitInitialized) return;
+        // Не перехватывать формы с собственным обработчиком
+        if (
+          form.id === "booking-form" ||
+          form.id === "contact-form" ||
+          form.classList.contains("no-loader")
+        ) {
+          return;
+        }
+        form.dataset.submitInitialized = "true";
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const submitBtn = form.querySelector(
+            'button[type="submit"], input[type="submit"]',
+          );
+          if (!submitBtn) return;
+
+          const originalBtnText = submitBtn.innerHTML;
+
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = "0.7";
+          submitBtn.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="animation: global-spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25"></circle>
+                <path d="M4 12a8 8 0 018-8V4"></path>
+              </svg>
+              ${tForm.sending}
+            </span>
+          `;
+
+          if (!document.getElementById("global-btn-spin-styles")) {
+            const style = document.createElement("style");
+            style.id = "global-btn-spin-styles";
+            style.innerHTML =
+              "@keyframes global-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }";
+            document.head.appendChild(style);
+          }
+
+          try {
+            const formData = new FormData(form);
+            const dataObj = {};
+            formData.forEach((value, key) => {
+              dataObj[key] = value;
+            });
+
+            const response = await fetch("/api/booking", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(dataObj),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+              throw new Error(result.error || "Server error");
+            }
+
+            if (typeof window.trackConversion === "function") {
+              window.trackConversion("booking_submit", { form: "layout" });
+            }
+
+            const langPrefix =
+              window.location.pathname.match(/^\/(ru|eng|esp|arm)/)?.[0] ||
+              "/ru";
+            window.location.href = `${langPrefix}/thank-you?from=booking`;
+          } catch (error) {
+            console.error("Ошибка:", error);
+            submitBtn.innerHTML = tForm.error;
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "";
+          }
+        });
+      }
+
+      function scanPageElements() {
+        document.querySelectorAll('input[type="tel"]').forEach(initPhoneField);
+        document.querySelectorAll("form").forEach(initFormSubmit);
+      }
+
+      document.addEventListener("DOMContentLoaded", scanPageElements);
+      scanPageElements();
+
+      const observer = new MutationObserver(scanPageElements);
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>

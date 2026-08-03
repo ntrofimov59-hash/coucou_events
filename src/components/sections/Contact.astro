@@ -1,0 +1,459 @@
+---
+interface Props {
+  lang?: string;
+}
+
+const { lang = "ru" } = Astro.props;
+
+const t = {
+  ru: {
+    title: "Какое мероприятие вы хотели бы видеть?",
+    subtitle:
+      "Расскажите о празднике: гости, дата, пожелания — подберём решение под ваш бюджет и свяжемся в ближайшее время.",
+    hintsTitle: "Что полезно указать:",
+    hint1: "Формат (свадьба, кейтеринг, тимбилдинг)",
+    hint2: "Локация (природа, лофт, загородный отель)",
+    hint3: "Доп. услуги (звук, свет, ведущий)",
+    nameLabel: "Имя",
+    namePlaceholder: "Иван Иванов",
+    phoneLabel: "Телефон",
+    emailLabel: "Email",
+    messageLabel: "Сообщение",
+    messagePlaceholder: "Опишите пожелания к мероприятию...",
+    submitBtn: "Отправить запрос",
+    submitting: "Отправка...",
+    error: "Не удалось отправить. Попробуйте ещё раз.",
+  },
+  eng: {
+    title: "What kind of event would you like to create?",
+    subtitle:
+      "Tell us about your celebration: guests, date, requests — we’ll tailor a solution to your budget and get back to you soon.",
+    hintsTitle: "Helpful to include:",
+    hint1: "Format (wedding, catering, team building)",
+    hint2: "Location (nature, loft, country hotel)",
+    hint3: "Extra services (sound, lighting, host)",
+    nameLabel: "Name",
+    namePlaceholder: "John Doe",
+    phoneLabel: "Phone",
+    emailLabel: "Email",
+    messageLabel: "Message",
+    messagePlaceholder: "Describe your event preferences...",
+    submitBtn: "Send Request",
+    submitting: "Sending...",
+    error: "Could not send. Please try again.",
+  },
+  esp: {
+    title: "¿Qué tipo de evento te gustaría crear?",
+    subtitle:
+      "Cuéntanos sobre tu celebración: invitados, fecha, peticiones — adaptaremos la solución a tu presupuesto.",
+    hintsTitle: "Útil incluir:",
+    hint1: "Formato (boda, catering, team building)",
+    hint2: "Ubicación (naturaleza, loft, hotel)",
+    hint3: "Servicios extra (sonido, luz, presentador)",
+    nameLabel: "Nombre",
+    namePlaceholder: "Juan Pérez",
+    phoneLabel: "Teléfono",
+    emailLabel: "Correo",
+    messageLabel: "Mensaje",
+    messagePlaceholder: "Describe tus preferencias...",
+    submitBtn: "Enviar solicitud",
+    submitting: "Enviando...",
+    error: "No se pudo enviar. Inténtalo de nuevo.",
+  },
+  arm: {
+    title: "Ինչպիսի՞ միջոցառում կցանկանայիք տեսնել:",
+    subtitle:
+      "Պատմեք տոնի մասին՝ հյուրեր, ամսաթիվ, ցանկություններ — կընտրենք լուծում ձեր բյուջեի համար:",
+    hintsTitle: "Օգտակար է նշել.",
+    hint1: "Ձևաչափ (հարսանիք, քեյթերինգ, թիմբիլդինգ)",
+    hint2: "Վայր (բնություն, լոֆթ, հյուրանոց)",
+    hint3: "Լրացուցիչ ծառայություններ (ձայն, լույս)",
+    nameLabel: "Անուն",
+    namePlaceholder: "Արման Հակոբյան",
+    phoneLabel: "Հեռախոս",
+    emailLabel: "Էլ. հասցե",
+    messageLabel: "Հաղորդագրություն",
+    messagePlaceholder: "Նկարագրեք ցանկությունները...",
+    submitBtn: "Ուղարկել հարցում",
+    submitting: "Ուղարկվում է...",
+    error: "Չհաջողվեց ուղարկել։ Կրկին փորձեք։",
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  title: "Какое мероприятие вы хотели бы видеть?",
+  subtitle:
+    "Расскажите о празднике: гости, дата, пожелания — подберём решение под ваш бюджет.",
+  hintsTitle: "Что полезно указать:",
+  hint1: "Формат (свадьба, кейтеринг, тимбилдинг)",
+  hint2: "Локация (природа, лофт, загородный отель)",
+  hint3: "Доп. услуги (звук, свет, ведущий)",
+  nameLabel: "Имя",
+  namePlaceholder: "Иван Иванов",
+  phoneLabel: "Телефон",
+  emailLabel: "Email",
+  messageLabel: "Сообщение",
+  messagePlaceholder: "Опишите пожелания к мероприятию...",
+  submitBtn: "Отправить запрос",
+  submitting: "Отправка...",
+  error: "Не удалось отправить. Попробуйте ещё раз.",
+};
+
+const ENDPOINT = "/api/contact";
+---
+
+<section id="contacts" class="contacts-section" lang={lang}>
+  <div class="contacts-container">
+    <div class="contacts-info">
+      <div class="contacts-info__top">
+        <h2 class="contacts-title">{t.title}</h2>
+        <p class="contacts-subtitle">{t.subtitle}</p>
+      </div>
+
+      <div class="contacts-hints">
+        <span class="contacts-hints__title">{t.hintsTitle}</span>
+        <ul class="contacts-hints__list">
+          <li>{t.hint1}</li>
+          <li>{t.hint2}</li>
+          <li>{t.hint3}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="contacts-form-wrapper">
+      <form id="main-contact-form" class="main-form" novalidate>
+        <!-- Honeypot -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="contact-website">Website</label>
+          <input
+            type="text"
+            id="contact-website"
+            name="website"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="form-name" class="form-label">{t.nameLabel}</label>
+          <input
+            type="text"
+            id="form-name"
+            name="name"
+            required
+            autocomplete="name"
+            placeholder={t.namePlaceholder}
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-phone" class="form-label">{t.phoneLabel}</label>
+            <input
+              type="tel"
+              id="form-phone"
+              name="phone"
+              required
+              autocomplete="tel"
+              inputmode="tel"
+              placeholder="+..."
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label for="form-email" class="form-label">{t.emailLabel}</label>
+            <input
+              type="email"
+              id="form-email"
+              name="email"
+              autocomplete="email"
+              placeholder="example@mail.com"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="form-message" class="form-label">{t.messageLabel}</label>
+          <textarea
+            id="form-message"
+            name="message"
+            rows="4"
+            required
+            placeholder={t.messagePlaceholder}
+            class="form-input form-textarea"></textarea>
+        </div>
+
+        <button type="submit" class="form-submit-btn" id="form-submit-btn">
+          {t.submitBtn}
+        </button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ ENDPOINT, t, lang }}>
+  (function () {
+    const form = document.getElementById("main-contact-form");
+    if (!form) return;
+
+    const statusEl = form.querySelector(".form-status");
+    const submitBtn = document.getElementById("form-submit-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!submitBtn || submitBtn.disabled) return;
+
+      const fd = new FormData(form);
+      const name = String(fd.get("name") || "").trim();
+      const phone = String(fd.get("phone") || "").trim();
+      const email = String(fd.get("email") || "").trim();
+      const message = String(fd.get("message") || "").trim();
+      const website = String(fd.get("website") || "").trim();
+
+      const contact = phone || email;
+      let fullMessage = message;
+      if (email && phone) {
+        fullMessage = `Email: ${email}\n\n${message}`;
+      }
+
+      const payload = {
+        name,
+        contact,
+        message: fullMessage,
+        website,
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = t.submitting;
+      if (statusEl) {
+        statusEl.textContent = "";
+        statusEl.dataset.state = "";
+      }
+
+      try {
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        let result = {};
+        try {
+          result = await response.json();
+        } catch (_) {}
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || t.error);
+        }
+
+        if (typeof window.trackConversion === "function") {
+          window.trackConversion("contact_submit", {
+            form: "contacts_section",
+          });
+        }
+
+        const langPrefix =
+          window.location.pathname.match(/^\/(ru|eng|esp|arm)/)?.[0] ||
+          `/${lang || "ru"}`;
+        window.location.href = `${langPrefix}/thank-you?from=contact`;
+      } catch (err) {
+        if (statusEl) {
+          statusEl.dataset.state = "error";
+          statusEl.textContent = err && err.message ? err.message : t.error;
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = t.submitBtn;
+      }
+    });
+  })();
+</script>
+
+<style>
+  .contacts-section {
+    padding: clamp(3.5rem, 8vw, 5.5rem) 1.25rem;
+    background: #f7faf9;
+    color: var(--fg, #04100d);
+  }
+
+  .contacts-container {
+    max-width: 72rem;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(4, 16, 13, 0.08);
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    padding: clamp(1.75rem, 4vw, 3.5rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    box-shadow: 0 12px 40px rgba(10, 40, 34, 0.06);
+  }
+
+  @media (min-width: 900px) {
+    .contacts-container {
+      grid-template-columns: 1fr 1fr;
+      gap: 3.5rem;
+      align-items: stretch;
+    }
+  }
+
+  .contacts-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .contacts-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+    color: var(--fg, #04100d);
+  }
+
+  .contacts-subtitle {
+    margin: 0;
+    color: var(--fg-soft, rgba(4, 16, 13, 0.72));
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+
+  .contacts-hints {
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(4, 16, 13, 0.08);
+  }
+
+  .contacts-hints__title {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-faint, rgba(4, 16, 13, 0.52));
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .contacts-hints__list {
+    padding-left: 1.15rem;
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--fg-soft, rgba(4, 16, 13, 0.72));
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    line-height: 1.5;
+  }
+
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .main-form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.15rem;
+  }
+
+  @media (min-width: 600px) {
+    .form-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-faint, rgba(4, 16, 13, 0.52));
+    font-weight: 600;
+  }
+
+  .form-input {
+    background: #fff;
+    border: 1px solid rgba(4, 16, 13, 0.12);
+    color: var(--fg, #04100d);
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .form-input::placeholder {
+    color: rgba(4, 16, 13, 0.4);
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 6.5rem;
+  }
+
+  .form-submit-btn {
+    background: #0d9488;
+    color: #fff;
+    border: none;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      transform 0.1s ease,
+      box-shadow 0.2s ease;
+    box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+  }
+
+  .form-submit-btn:hover {
+    background: #0f766e;
+  }
+
+  .form-submit-btn:active {
+    transform: scale(0.98);
+  }
+
+  .form-submit-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .form-status {
+    min-height: 1.25em;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .form-status[data-state="error"] {
+    color: #c0392b;
+  }
+</style>

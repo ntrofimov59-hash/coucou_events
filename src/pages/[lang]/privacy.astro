@@ -1,0 +1,173 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+export const prerender = true;
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+const { lang = "ru" } = Astro.params;
+const prefix = `/${lang}`;
+
+const t = {
+  ru: {
+    title: "Политика конфиденциальности | Coucou",
+    desc: "Как Coucou обрабатывает персональные данные заявок и обращений.",
+    h1: "Политика конфиденциальности",
+    updated: "Редакция: июль 2026",
+    body: `
+<p>Настоящая политика описывает, как сайт Coucou (далее — «мы») обрабатывает данные пользователей при заявках и обращениях.</p>
+<h2>1. Оператор</h2>
+<p>На момент публикации юридическое лицо не зарегистрировано. Фактический контактный адрес: <strong>ул. Вагарша Вагаршяна 24, Ереван 0012, Армения</strong>. По вопросам данных пишите на email, указанный в разделе «Контакты», или в Telegram / WhatsApp на сайте.</p>
+<h2>2. Какие данные мы получаем</h2>
+<ul>
+<li>имя;</li>
+<li>телефон и/или email;</li>
+<li>текст сообщения, параметры заявки (услуга, дата, город, число гостей, комментарий).</li>
+</ul>
+<p>Данные поступают только если вы сами отправляете форму на сайте.</p>
+<h2>3. Зачем обрабатываем</h2>
+<ul>
+<li>чтобы ответить на заявку и уточнить детали мероприятия;</li>
+<li>чтобы связаться по телефону, WhatsApp, Telegram или email;</li>
+<li>чтобы улучшить сервис (агрегированная статистика без продажи данных третьим лицам в маркетинговых целях).</li>
+</ul>
+<h2>4. Куда передаются данные</h2>
+<p>Заявки могут направляться в мессенджер администратора (Telegram) и/или на рабочую почту. Хостинг и аналитика (если подключены Google Analytics / Яндекс.Метрика) обрабатывают технические данные визита согласно их политикам.</p>
+<h2>5. Срок хранения</h2>
+<p>Данные заявки хранятся столько, сколько нужно для ответа и организации услуги, либо до вашего запроса на удаление — если нет иных обязательств.</p>
+<h2>6. Ваши права</h2>
+<p>Вы можете запросить уточнение, исправление или удаление данных, написав нам на контактный email / в мессенджер. Мы ответим в разумный срок.</p>
+<h2>7. Изменения</h2>
+<p>Мы можем обновить текст политики; актуальная версия всегда на этой странице.</p>
+`,
+  },
+  eng: {
+    title: "Privacy Policy | Coucou",
+    desc: "How Coucou processes personal data from enquiries and booking forms.",
+    h1: "Privacy Policy",
+    updated: "Last updated: July 2026",
+    body: `
+<p>This policy explains how the Coucou website (“we”) processes user data submitted via forms.</p>
+<h2>1. Controller</h2>
+<p>No legal entity is registered yet. Contact address: <strong>24 Vagharsh Vagharshyan St, Yerevan 0012, Armenia</strong>. For data requests use the email or messengers listed on the Contacts page.</p>
+<h2>2. Data we collect</h2>
+<ul>
+<li>name;</li>
+<li>phone and/or email;</li>
+<li>message text and booking details (service, date, city, guests, comments).</li>
+</ul>
+<p>We only receive data you submit yourself.</p>
+<h2>3. Purpose</h2>
+<ul>
+<li>to reply to your request and plan the event;</li>
+<li>to contact you by phone, WhatsApp, Telegram or email;</li>
+<li>to improve our service (aggregated stats; we do not sell your data).</li>
+</ul>
+<h2>4. Sharing</h2>
+<p>Requests may be forwarded to an admin Telegram chat and/or work email. Hosting and analytics providers (if enabled) process visit data under their own policies.</p>
+<h2>5. Retention</h2>
+<p>We keep enquiry data as long as needed to respond and deliver the service, or until you ask for deletion where applicable.</p>
+<h2>6. Your rights</h2>
+<p>You may request access, correction or deletion via our contact channels. We will respond within a reasonable time.</p>
+<h2>7. Changes</h2>
+<p>We may update this policy; the current version is always on this page.</p>
+`,
+  },
+  esp: {
+    title: "Política de privacidad | Coucou",
+    desc: "Cómo Coucou trata los datos personales de solicitudes y formularios.",
+    h1: "Política de privacidad",
+    updated: "Actualizado: julio 2026",
+    body: `
+<p>Esta política describe cómo el sitio Coucou («nosotros») trata los datos enviados en formularios.</p>
+<h2>1. Responsable</h2>
+<p>Aún no hay persona jurídica registrada. Dirección de contacto: <strong>Calle Vagharsh Vagharshyan 24, Ereván 0012, Armenia</strong>. Para solicitudes de datos use el email o mensajeros de la página Contactos.</p>
+<h2>2. Datos</h2>
+<ul>
+<li>nombre;</li>
+<li>teléfono y/o email;</li>
+<li>mensaje y detalles de la solicitud (servicio, fecha, ciudad, invitados).</li>
+</ul>
+<h2>3. Finalidad</h2>
+<ul>
+<li>responder y organizar el evento;</li>
+<li>contactarle por teléfono, WhatsApp, Telegram o email;</li>
+<li>mejorar el servicio (estadísticas agregadas; no vendemos datos).</li>
+</ul>
+<h2>4. Destinatarios</h2>
+<p>Las solicitudes pueden enviarse a Telegram del administrador y/o al email de trabajo. Hosting y analítica (si están activos) tratan datos técnicos según sus políticas.</p>
+<h2>5. Conservación</h2>
+<p>Conservamos los datos el tiempo necesario para responder y prestar el servicio, o hasta su solicitud de eliminación cuando proceda.</p>
+<h2>6. Derechos</h2>
+<p>Puede pedir acceso, corrección o eliminación por nuestros canales de contacto.</p>
+<h2>7. Cambios</h2>
+<p>Podemos actualizar esta política; la versión vigente está en esta página.</p>
+`,
+  },
+  arm: {
+    title: "Գաղտնիության քաղաքականություն | Coucou",
+    desc: "Ինչպես է Coucou-ն մշակում հայտերի անձնական տվյալները։",
+    h1: "Գաղտնիության քաղաքականություն",
+    updated: "Թարմացված՝ հուլիս 2026",
+    body: `
+<p>Այս քաղաքականությունը նկարագրում է, թե ինչպես է Coucou կայքը մշակում ձեր ուղարկած տվյալները։</p>
+<h2>1. Օպերատոր</h2>
+<p>Իրավաբանական անձ դեռ գրանցված չէ։ Հասցե՝ <strong>Վաղարշ Վաղարշյան 24, Երևան 0012, Հայաստան</strong>։ Հարցերի համար՝ կայքի Կապ բաժնի email կամ մեսենջերներ։</p>
+<h2>2. Տվյալներ</h2>
+<ul>
+<li>անուն;</li>
+<li>հեռախոս և/կամ email;</li>
+<li>հաղորդագրություն և հայտի մանրամասներ։</li>
+</ul>
+<h2>3. Նպատակ</h2>
+<ul>
+<li>պատասխանել հայտին և կազմակերպել միջոցառումը;</li>
+<li>կապ հաստատել հեռախոսով, WhatsApp, Telegram կամ email-ով;</li>
+<li>բարելավել ծառայությունը (առանց տվյալների վաճառքի)։</li>
+</ul>
+<h2>4. Փոխանցում</h2>
+<p>Հայտերը կարող են ուղարկվել ադմինի Telegram և/կամ աշխատանքային փոստ։ Հոսթինգն ու վերլուծությունը (եթե միացված են) մշակում են տեխնիկական տվյալներ իրենց քաղաքականությամբ։</p>
+<h2>5. Պահպանում</h2>
+<p>Պահում ենք այնքան, որքան անհրաժեշտ է պատասխանի և ծառայության համար, կամ մինչև ջնջման խնդրանքը։</p>
+<h2>6. Իրավունքներ</h2>
+<p>Կարող եք խնդրել ուղղում կամ ջնջում մեր կոնտակտներով։</p>
+<h2>7. Փոփոխություններ</h2>
+<p>Քաղաքականությունը կարող է թարմացվել. ակտուալ տարբերակը այս էջում է։</p>
+`,
+  },
+}[lang as "ru" | "eng" | "esp" | "arm"] || {
+  title: "Privacy | Coucou",
+  desc: "Privacy policy",
+  h1: "Privacy",
+  updated: "",
+  body: "",
+};
+---
+
+<Layout title={t.title} description={t.desc} lang={lang}>
+  <article class="legal-page">
+    <div class="container">
+      <h1>{t.h1}</h1>
+      <p class="updated">{t.updated}</p>
+      <div class="legal-body" set:html={t.body} />
+      <p class="back"><a href={prefix}>← Coucou</a></p>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .legal-page { padding: 5rem 0 4rem; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+  h1 { margin-bottom: 0.5rem; }
+  .updated { color: var(--fg-faint); font-size: 0.9rem; margin-bottom: 2rem; }
+  .legal-body :global(h2) { font-size: 1.15rem; margin: 1.75rem 0 0.75rem; font-family: inherit; }
+  .legal-body :global(p), .legal-body :global(li) { color: var(--fg-soft); line-height: 1.65; }
+  .legal-body :global(ul) { padding-left: 1.25rem; }
+  .back { margin-top: 2.5rem; }
+  .back a { color: #0d9488; }
+</style>

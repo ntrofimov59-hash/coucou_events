@@ -1,0 +1,59 @@
+@use "@colors" as *;
+@use "@sizes" as *;
+
+.root {
+  min-height: 72px;
+  padding: 0 32px;
+
+  background: $color-bg-elevated;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid $color-border-default;
+
+  .container {
+    max-width: $with-max-content;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+
+    .copy {
+      color: $color-text-secondary;
+      font-size: 0.875rem;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+
+      margin: 0;
+      padding: 0;
+
+      list-style: none;
+    }
+
+    .item {
+      list-style: none;
+    }
+
+    .link {
+      color: $color-text-secondary;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $color-text-primary;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $color-accent-border;
+        outline-offset: 4px;
+      }
+    }
+  }
+}

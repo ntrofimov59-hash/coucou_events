@@ -1,0 +1,32 @@
+---
+export const prerender = false;
+
+import { DEFAULT_LANG, SUPPORTED_LANGS, type SiteLang } from "@/config/site";
+
+// Определяем язык по Accept-Language, иначе — дефолт (ru)
+const accept = Astro.request.headers.get("accept-language") || "";
+const preferred = accept
+  .split(",")
+  .map((part) => part.split(";")[0].trim().toLowerCase())
+  .find((code) => {
+    if (code.startsWith("ru")) return true;
+    if (code.startsWith("en")) return true;
+    if (code.startsWith("es")) return true;
+    if (code.startsWith("hy") || code.startsWith("arm")) return true;
+    return false;
+  });
+
+let lang: SiteLang = DEFAULT_LANG;
+
+if (preferred?.startsWith("en")) lang = "eng";
+else if (preferred?.startsWith("es")) lang = "esp";
+else if (preferred?.startsWith("hy") || preferred?.startsWith("arm"))
+  lang = "arm";
+else if (preferred?.startsWith("ru")) lang = "ru";
+
+if (!SUPPORTED_LANGS.includes(lang)) {
+  lang = DEFAULT_LANG;
+}
+
+return Astro.redirect(`/${lang}`, 302);
+---

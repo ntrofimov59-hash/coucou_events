@@ -1,0 +1,12 @@
+---
+// Универсальная карточка в едином "glass" стиле сайта.
+// Используйте вместо повторения `class="glass p-8 rounded-2xl"` в разных секциях.
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props as Props;
+---
+
+<div class={`glass p-8 rounded-2xl ${className}`}>
+  <slot />
+</div>

@@ -1,0 +1,841 @@
+---
+export const prerender = true;
+
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
+
+const { lang = "ru" } = Astro.params;
+const prefix = `/${lang}`;
+
+const uiTranslations = {
+  ru: {
+    seoTitle: "Услуги — Организация мероприятий под ключ | Coucou",
+    seoDescription:
+      "Полный спектр премиум-услуг: аренда шатров, выездной кейтеринг, декор и организация мероприятий под ключ.",
+    eyebrow: "Наши услуги",
+    heading: "Всё для вашего идеального праздника",
+    defaultPrice: "По запросу",
+    ctaButton: "Рассчитать смету",
+    calcTitle: "Конфигуратор сметы:",
+    guestsLabel: "Количество гостей:",
+    guestsSuffix: "чел.",
+    locationLabel: "Локация проведения:",
+    searchPlaceholder: "Поиск города...",
+    dateLabel: "Дата проведения:",
+    optionsLabel: "Инженерные и технические опции:",
+    optCatering: "Выездной ресторан / кейтеринг",
+    optTent: "Адаптивные защитные шатры",
+    optSound: "Световое и звуковое шоу",
+    optToilets: "Премиум био-модули (санузлы)",
+    previewSchema: "Интерактивная схема проекта",
+    tentText: "Главный шатер / Зал",
+    cateringText: "Кейтеринг",
+    soundText: "Звук & Свет 360°",
+    guestsTextPrefix: "Гости: ",
+    budgetLabel: "Расчетный бюджет:",
+    submitBtn: "Забронировать проект",
+    defaultLocationBadge: "Бали / Пляж",
+  },
+  eng: {
+    seoTitle: "Services — Turnkey Event Management | Coucou",
+    seoDescription:
+      "Full range of premium services: tent rentals, catering, decor, and turnkey event management.",
+    eyebrow: "Our Services",
+    heading: "Everything for Your Perfect Celebration",
+    defaultPrice: "Upon request",
+    ctaButton: "Calculate estimate",
+    calcTitle: "Estimate Configurator:",
+    guestsLabel: "Number of guests:",
+    guestsSuffix: "guests",
+    locationLabel: "Event location:",
+    searchPlaceholder: "Search city...",
+    dateLabel: "Event date:",
+    optionsLabel: "Engineering and technical options:",
+    optCatering: "Catering / Outbound restaurant",
+    optTent: "Adaptive protective tents",
+    optSound: "Lighting and sound show",
+    optToilets: "Premium bio-modules (restrooms)",
+    previewSchema: "Interactive project layout",
+    tentText: "Main Tent / Hall",
+    cateringText: "Catering",
+    soundText: "Sound & Light 360°",
+    guestsTextPrefix: "Guests: ",
+    budgetLabel: "Estimated budget:",
+    submitBtn: "Book Project",
+    defaultLocationBadge: "Bali / Beach",
+  },
+  esp: {
+    seoTitle: "Servicios — Gestión de eventos llave en mano | Coucou",
+    seoDescription:
+      "Gama completa de servicios prémium: alquiler de carpas, catering, decoración y gestión de eventos llave en mano.",
+    eyebrow: "Nuestros servicios",
+    heading: "Todo para tu celebración perfecta",
+    defaultPrice: "Bajo demanda",
+    ctaButton: "Calcular presupuesto",
+    calcTitle: "Configurador de presupuesto:",
+    guestsLabel: "Número de invitados:",
+    guestsSuffix: "pers.",
+    locationLabel: "Ubicación del evento:",
+    searchPlaceholder: "Buscar ciudad...",
+    dateLabel: "Fecha del evento:",
+    optionsLabel: "Opciones técnicas e ingeniería:",
+    optCatering: "Catering / Restaurante exterior",
+    optTent: "Carpas protectoras adaptativas",
+    optSound: "Espectáculo de luces y sonido",
+    optToilets: "Módulos sanitarios prémium",
+    previewSchema: "Diseño interactivo del proyecto",
+    tentText: "Carpa Principal / Salón",
+    cateringText: "Catering",
+    soundText: "Sonido y Luz 360°",
+    guestsTextPrefix: "Invitados: ",
+    budgetLabel: "Presupuesto estimado:",
+    submitBtn: "Reservar proyecto",
+    defaultLocationBadge: "Bali / Playa",
+  },
+  arm: {
+    seoTitle: "Ծառայություններ — Միջոցառումների կազմակերպում | Coucou",
+    seoDescription:
+      "Պրեմիում դասի ծառայությունների ամբողջական շրջանակ՝ վրանների վարձույթ, արտագնա քեյթերինգ, դեկոր և միջոցառումների կազմակերպում:",
+    eyebrow: "Մեր ծառայությունները",
+    heading: "Ամեն ինչ ձեր կատարյալ տոնի համար",
+    defaultPrice: "Հարցումով",
+    ctaButton: "Հաշվարկել նախահաշիվը",
+    calcTitle: "Նախահաշվի կոնֆիգուրատոր:",
+    guestsLabel: "Հյուրերի քանակը:",
+    guestsSuffix: "անձ",
+    locationLabel: "Անցկացման վայրը:",
+    searchPlaceholder: "Որոնել քաղաք...",
+    dateLabel: "Անցկացման ամսաթիվը:",
+    optionsLabel: "Ինժեներական և տեխնիկական ընտրանքներ:",
+    optCatering: "Արտագնա ռեստորան / քեյթերինգ",
+    optTent: "Ադապտիվ պաշտպանիչ վրաններ",
+    optSound: "Լուսային և ձայնային շոու",
+    optToilets: "Պրեմիում բիո-մոդուլներ (զուգարաններ)",
+    previewSchema: "Նախագծի ինտերակտիվ սխեմա",
+    tentText: "Գլխավոր վրան / Սրահ",
+    cateringText: "Քեյթերինգ",
+    soundText: "Ձայն & Լույս 360°",
+    guestsTextPrefix: "Հյուրեր: ",
+    budgetLabel: "Հաշվարկային բյուջե:",
+    submitBtn: "Ամրագրել նախագիծը",
+    defaultLocationBadge: "Բալի / Լողափ",
+  },
+};
+
+const t =
+  uiTranslations[lang as keyof typeof uiTranslations] || uiTranslations.ru;
+
+const citiesList = [
+  { id: "bali", name: "Bali", price: 400 },
+  { id: "barcelona", name: "Barcelona", price: 600 },
+  { id: "yerevan", name: "Yerevan", price: 0 },
+  { id: "tbilisi", name: "Tbilisi", price: 0 },
+  { id: "phuket", name: "Phuket", price: 400 },
+  { id: "nhatrang", name: "Nha Trang", price: 300 },
+  { id: "danang", name: "Da Nang", price: 300 },
+  { id: "prague", name: "Prague", price: 500 },
+  { id: "marrakech", name: "Marrakech", price: 550 },
+  { id: "antalya", name: "Antalya", price: 350 },
+];
+
+const entries = await getCollection(
+  "services",
+  ({ id, data }) => data.published !== false && id.startsWith(`${lang}/`),
+);
+
+const sortedServices = entries
+  .sort((a, b) => (a.data.order || 0) - (b.data.order || 0))
+  .map((entry) => {
+    // id: "ru/marquees" → slug: "marquees"
+    const slug = entry.id.includes("/")
+      ? entry.id.split("/").slice(1).join("/")
+      : entry.id;
+
+    return {
+      id: slug,
+      url: `${prefix}/services/${slug}?service=${slug}#calculator`,
+      data: {
+        title: entry.data.title,
+        description: entry.data.description,
+        price: entry.data.price || t.defaultPrice,
+        images: entry.data.images?.length
+          ? entry.data.images
+          : [
+              "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+            ],
+        order: entry.data.order || 99,
+        features: entry.data.features || [],
+      },
+    };
+  });
+---
+
+<Layout title={t.seoTitle} description={t.seoDescription} lang={lang}>
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="ru" href="/ru/all-services" />
+    <link rel="alternate" hreflang="en" href="/eng/all-services" />
+    <link rel="alternate" hreflang="es" href="/esp/all-services" />
+    <link rel="alternate" hreflang="hy" href="/arm/all-services" />
+    <link rel="alternate" hreflang="x-default" href="/ru/all-services" />
+  </Fragment>
+
+  <main class="services-page pt-32 pb-24 min-h-screen bg-[#fcfcfc]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div
+          class="inline-block px-4 py-1.5 rounded-full bg-zinc-200/60 border border-zinc-300/50 text-xs text-zinc-700 uppercase tracking-widest mb-6 font-semibold"
+        >
+          {t.eyebrow}
+        </div>
+        <h1
+          class="text-4xl md:text-6xl font-serif tracking-tight text-zinc-900"
+        >
+          {t.heading}
+        </h1>
+      </div>
+
+      <div class="services-container mb-24">
+        <div class="services-grid">
+          {
+            sortedServices.map((service) => (
+              <a
+                href={service.url}
+                class="service-card group bg-white rounded-2xl overflow-hidden border border-zinc-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+              >
+                <div class="relative h-64 overflow-hidden bg-zinc-100 flex-shrink-0">
+                  <img
+                    src={service.data.images[0]}
+                    alt={service.data.title}
+                    loading="lazy"
+                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-zinc-900 shadow-sm">
+                    {service.data.price}
+                  </div>
+                </div>
+
+                <div class="p-6 flex flex-col flex-grow">
+                  <h3 class="text-2xl font-serif text-zinc-900 mb-3 group-hover:text-emerald-600 transition-colors">
+                    {service.data.title}
+                  </h3>
+                  <p class="text-zinc-600 text-sm leading-relaxed mb-6 flex-grow font-light">
+                    {service.data.description}
+                  </p>
+
+                  {service.data.features &&
+                    service.data.features.length > 0 && (
+                      <ul class="space-y-1.5 mb-6 text-xs text-zinc-500 border-t border-zinc-100 pt-4">
+                        {service.data.features.slice(0, 3).map((feat) => (
+                          <li class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            {feat}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                  <div class="flex items-center justify-between text-sm font-medium text-zinc-900 pt-4 border-t border-zinc-100 mt-auto">
+                    <span class="group-hover:text-emerald-600 transition-colors">
+                      {t.ctaButton}
+                    </span>
+                    <span class="w-8 h-8 rounded-full bg-zinc-100 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition-colors">
+                      →
+                    </span>
+                  </div>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <div id="calculator" class="event-calculator">
+        <div class="calc-grid">
+          <div class="calc-controls">
+            <h3 class="calc-title">
+              {t.calcTitle}
+              <span id="active-service-title">General</span>
+            </h3>
+
+            <div class="calc-group">
+              <label>{t.guestsLabel}</label>
+              <div class="guests-picker-wrapper">
+                <button type="button" class="guest-btn" id="guest-minus"
+                  >-</button
+                >
+                <input
+                  type="number"
+                  id="calc-guests"
+                  min="5"
+                  max="500"
+                  value="50"
+                  class="calc-input-number"
+                />
+                <button type="button" class="guest-btn" id="guest-plus"
+                  >+</button
+                >
+                <span class="guest-label-suffix">{t.guestsSuffix}</span>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <label>{t.locationLabel}</label>
+              <div class="custom-select-container" id="city-dropdown-container">
+                <div class="select-selected" id="city-selected-display">
+                  <span>{citiesList[0].name}</span>
+                  <span class="select-arrow">▼</span>
+                </div>
+                <div class="select-items select-hide" id="city-options-list">
+                  <div class="city-search-box">
+                    <input
+                      type="text"
+                      id="city-search-input"
+                      placeholder={t.searchPlaceholder}
+                    />
+                  </div>
+                  <div class="city-scroll-list">
+                    {
+                      citiesList.map((city, idx) => (
+                        <div
+                          class={`city-option ${idx === 0 ? "selected" : ""}`}
+                          data-value={city.id}
+                          data-price={city.price}
+                        >
+                          <span>{city.name}</span>
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+                <input
+                  type="hidden"
+                  id="calc-location"
+                  value={citiesList[0].id}
+                />
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <label for="calc-date">{t.dateLabel}</label>
+              <input type="date" id="calc-date" class="calc-input-date" />
+            </div>
+
+            <div class="calc-group">
+              <label>{t.optionsLabel}</label>
+              <div class="calc-checkbox-group-vertical">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="calc-option"
+                    value="catering"
+                    data-price="1500"
+                    checked
+                  />
+                  {t.optCatering}
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="calc-option"
+                    value="tent"
+                    data-price="2000"
+                  />
+                  {t.optTent}
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="calc-option"
+                    value="sound"
+                    data-price="1200"
+                  />
+                  {t.optSound}
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="calc-option"
+                    value="toilets"
+                    data-price="800"
+                  />
+                  {t.optToilets}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-preview-panel">
+            <div class="preview-header">
+              <span>{t.previewSchema}</span>
+              <span class="preview-badge" id="preview-location-badge"
+                >{t.defaultLocationBadge}</span
+              >
+            </div>
+
+            <div class="blueprint-container">
+              <svg viewBox="0 0 400 280" class="blueprint-svg">
+                <rect width="400" height="280" fill="#18181b" rx="8"></rect>
+                <g id="blueprint-tent" class="blueprint-element">
+                  <rect
+                    x="110"
+                    y="50"
+                    width="180"
+                    height="110"
+                    rx="6"
+                    fill="rgba(16, 185, 129, 0.15)"
+                    stroke="#10b981"
+                    stroke-dasharray="4 4"
+                    stroke-width="1.5"></rect>
+                  <text
+                    x="200"
+                    y="110"
+                    fill="#10b981"
+                    font-size="11"
+                    text-anchor="middle"
+                    font-family="sans-serif">{t.tentText}</text
+                  >
+                </g>
+                <g id="blueprint-catering" class="blueprint-element">
+                  <rect
+                    x="50"
+                    y="180"
+                    width="90"
+                    height="55"
+                    rx="4"
+                    fill="rgba(244, 63, 94, 0.15)"
+                    stroke="#f43f5e"
+                    stroke-width="1"></rect>
+                  <text
+                    x="95"
+                    y="212"
+                    fill="#f43f5e"
+                    font-size="10"
+                    text-anchor="middle"
+                    font-family="sans-serif">{t.cateringText}</text
+                  >
+                </g>
+                <g
+                  id="blueprint-sound"
+                  class="blueprint-element"
+                  style="display:none;"
+                >
+                  <text
+                    x="200"
+                    y="42"
+                    fill="#a855f7"
+                    font-size="9"
+                    text-anchor="middle"
+                    font-family="sans-serif">{t.soundText}</text
+                  >
+                </g>
+                <g id="blueprint-guests">
+                  <text
+                    x="200"
+                    y="145"
+                    fill="#a1a1aa"
+                    font-size="9"
+                    text-anchor="middle"
+                    font-family="sans-serif"
+                    id="blueprint-guest-text"
+                    >{t.guestsTextPrefix}50 {t.guestsSuffix}</text
+                  >
+                </g>
+              </svg>
+            </div>
+
+            <div class="calc-result">
+              <div class="calc-price-box">
+                <span>{t.budgetLabel}</span>
+                <strong id="calc-total">от $5,000</strong>
+              </div>
+              <a
+                href={`${prefix}/booking`}
+                class="calc-submit-btn"
+                id="open-calc-modal"
+              >
+                {t.submitBtn}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline define:vars={{ lang, t, prefix }}>
+  document.addEventListener("DOMContentLoaded", () => {
+    const calculator = document.querySelector("#calculator");
+    if (!calculator) return;
+
+    const guestsInput = calculator.querySelector("#calc-guests");
+    const guestMinus = calculator.querySelector("#guest-minus");
+    const guestPlus = calculator.querySelector("#guest-plus");
+    const locationInput = calculator.querySelector("#calc-location");
+    const locationDisplay = calculator.querySelector("#city-selected-display");
+    const optionsList = calculator.querySelector("#city-options-list");
+    const searchInput = calculator.querySelector("#city-search-input");
+    const cityOptions = calculator.querySelectorAll(".city-option");
+    const optionCheckboxes = calculator.querySelectorAll(
+      'input[name="calc-option"]',
+    );
+    const totalEl = calculator.querySelector("#calc-total");
+    const titleSpan = calculator.querySelector("#active-service-title");
+    const bookBtn = calculator.querySelector("#open-calc-modal");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceParam = urlParams.get("service");
+    if (serviceParam && titleSpan) {
+      titleSpan.textContent = serviceParam;
+    }
+
+    guestMinus?.addEventListener("click", () => {
+      let val = parseInt(guestsInput.value) || 50;
+      if (val > 5) {
+        guestsInput.value = String(val - 5);
+        updateCalculator();
+      }
+    });
+
+    guestPlus?.addEventListener("click", () => {
+      let val = parseInt(guestsInput.value) || 50;
+      if (val < 500) {
+        guestsInput.value = String(val + 5);
+        updateCalculator();
+      }
+    });
+
+    locationDisplay?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      optionsList?.classList.toggle("select-hide");
+    });
+
+    document.addEventListener("click", () =>
+      optionsList?.classList.add("select-hide"),
+    );
+
+    searchInput?.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      cityOptions.forEach((opt) => {
+        opt.style.display = opt.textContent.toLowerCase().includes(query)
+          ? "block"
+          : "none";
+      });
+    });
+
+    let selectedCityPrice = 400;
+    let selectedCityName = "Bali";
+
+    cityOptions.forEach((opt) => {
+      opt.addEventListener("click", () => {
+        cityOptions.forEach((o) => o.classList.remove("selected"));
+        opt.classList.add("selected");
+        locationInput.value = opt.dataset.value;
+        selectedCityPrice = parseInt(opt.dataset.price) || 0;
+        selectedCityName = opt.textContent.trim();
+        locationDisplay.querySelector("span").textContent = selectedCityName;
+        optionsList.classList.add("select-hide");
+        updateCalculator();
+      });
+    });
+
+    function updateCalculator() {
+      const guests = parseInt(guestsInput.value) || 50;
+      const guestText = calculator.querySelector("#blueprint-guest-text");
+      if (guestText) {
+        guestText.textContent = `${t.guestsTextPrefix}${guests} ${t.guestsSuffix}`;
+      }
+
+      let total = guests * 100 + selectedCityPrice;
+      optionCheckboxes.forEach((box) => {
+        if (box.checked) total += parseInt(box.dataset.price) || 0;
+      });
+
+      totalEl.textContent = `от $${total.toLocaleString("en-US")}`;
+
+      if (bookBtn) {
+        const params = new URLSearchParams({
+          service: serviceParam || "",
+          guests: String(guests),
+          location: selectedCityName,
+          estimate: `от $${total.toLocaleString("en-US")}`,
+        });
+        bookBtn.setAttribute("href", `${prefix}/booking?${params.toString()}`);
+      }
+    }
+
+    guestsInput?.addEventListener("input", updateCalculator);
+    optionCheckboxes.forEach((c) =>
+      c.addEventListener("change", updateCalculator),
+    );
+    updateCalculator();
+  });
+</script>
+
+<style>
+  .event-calculator {
+    background: #09090b;
+    color: #f4f4f5;
+    padding: 2.5rem;
+    border-radius: 24px;
+    border: 1px solid #27272a;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+  @media (max-width: 768px) {
+    .calc-grid {
+      grid-template-columns: 1fr;
+    }
+    .event-calculator {
+      padding: 1.25rem;
+    }
+  }
+  .calc-title {
+    font-size: 1.35rem;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    font-family: serif;
+  }
+  .calc-group {
+    margin-bottom: 1.25rem;
+  }
+  .calc-group label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+  }
+  .guests-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .guest-btn {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .calc-input-number {
+    width: 90px;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.65rem;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .calc-input-date {
+    width: 100%;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    color-scheme: dark;
+  }
+  .guest-label-suffix {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+  }
+  .custom-select-container {
+    position: relative;
+  }
+  .select-selected {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+  }
+  .select-items {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    margin-top: 4px;
+    z-index: 10;
+  }
+  .select-hide {
+    display: none;
+  }
+  .city-search-box {
+    padding: 0.5rem;
+    border-bottom: 1px solid #27272a;
+  }
+  .city-search-box input {
+    width: 100%;
+    background: #121215;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 6px;
+  }
+  .city-scroll-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .city-option {
+    padding: 0.65rem 0.75rem;
+    cursor: pointer;
+    color: #d4d4d8;
+  }
+  .city-option:hover {
+    background: #27272a;
+    color: #fff;
+  }
+  .city-option.selected {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+  .calc-checkbox-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .calc-checkbox-group-vertical label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f4f4f5;
+    cursor: pointer;
+    text-transform: none;
+  }
+  .calc-preview-panel {
+    background: #121215;
+    border: 1px solid #27272a;
+    padding: 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #71717a;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .preview-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+  .blueprint-container {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #27272a;
+    margin-bottom: 1.5rem;
+  }
+  .blueprint-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .calc-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #27272a;
+    gap: 1rem;
+  }
+  .calc-price-box span {
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    display: block;
+    text-transform: uppercase;
+  }
+  .calc-price-box strong {
+    font-size: 1.4rem;
+    color: #10b981;
+  }
+  .calc-submit-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .services-container {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-sizing: border-box;
+  }
+  .services-container::-webkit-scrollbar {
+    display: none;
+  }
+  .services-grid {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1rem;
+  }
+  .service-card {
+    min-width: 290px;
+    max-width: 320px;
+    width: 82vw;
+    flex-shrink: 0;
+  }
+  @media (min-width: 768px) {
+    .services-container {
+      width: 100%;
+      margin-left: 0;
+      padding-left: 0;
+      padding-right: 0;
+      overflow-x: visible;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    .service-card {
+      min-width: auto;
+      max-width: none;
+      width: 100%;
+    }
+  }
+  @media (min-width: 1024px) {
+    .services-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
