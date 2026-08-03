@@ -3,7 +3,6 @@ import { defineConfig } from "astro/config";
 import solidJs from "@astrojs/solid-js";
 import mdx from "@astrojs/mdx";
 import tailwind from "@astrojs/tailwind";
-import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 
 // Должен совпадать с SITE_URL в src/config/site.ts (без слэша в конце)
@@ -12,11 +11,8 @@ const SITE = "https://your-domain.com";
 // https://astro.build/config
 export default defineConfig({
   site: SITE,
-  // server + node: API (booking/contact) работают; страницы с prerender=true — статика при билде
-  output: "server",
-  adapter: node({
-    mode: "standalone",
-  }),
+  // Для чистого статического билда на Vercel адаптер не нужен
+  output: "static",
   integrations: [
     solidJs(),
     mdx(),
