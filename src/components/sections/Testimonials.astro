@@ -9,14 +9,12 @@ const { lang: propLang } = Astro.props;
 const { lang: paramLang, locale } = Astro.params;
 const lang = propLang || paramLang || locale || "ru";
 
-// Получаем все отзывы
 const entries = await getCollection("testimonials");
 
 const sorted = [...entries].sort(
   (a, b) => (b.data.date?.getTime() || 0) - (a.data.date?.getTime() || 0),
 );
 
-// Локализация роли по умолчанию в зависимости от языка
 const defaultRoleMap: Record<string, string> = {
   ru: "Клиент",
   eng: "Client",
@@ -24,11 +22,9 @@ const defaultRoleMap: Record<string, string> = {
   arm: "Հաճախորդ",
 };
 
-// Маппинг ключей языка для авторов и событий, если вы их заполнили мультиязычно
 const testimonialsList = sorted.map((entry, idx) => {
   const data = entry.data;
 
-  // Динамический выбор перевода текста и автора в зависимости от активного языка
   let currentAuthor = data.author;
   if (lang === "eng" && data.authorEn) currentAuthor = data.authorEn;
   if (lang === "esp" && data.authorEsp) currentAuthor = data.authorEsp;
@@ -55,51 +51,37 @@ const testimonialsList = sorted.map((entry, idx) => {
   };
 });
 
-// Переводы текстов интерфейса секции
 const t = {
   ru: {
     title: "Что говорят наши клиенты",
     subtitle:
-      "Истории живых эмоций, доверия и безупречно реализованных проектов по всему миру.",
+      "Истории живых эмоций, доверия и безупречно реализованных проектов.",
     emptyText: "Отзывы пока не добавлены.",
-    seoKeywords:
-      "отзывы о мероприятиях, отзывы клиентов, ивент агентство отзывы, впечатления клиентов",
   },
   eng: {
     title: "What Our Clients Say",
     subtitle:
-      "Stories of genuine emotions, trust, and flawlessly executed projects around the world.",
+      "Stories of genuine emotions, trust, and flawlessly executed projects.",
     emptyText: "No reviews added yet.",
-    seoKeywords:
-      "event reviews, client feedback, event agency testimonials, customer impressions",
   },
   esp: {
     title: "Lo que dicen nuestros clientes",
     subtitle:
-      "Historias de emociones reales, confianza y proyectos ejecutados a la perfección en todo el mundo.",
+      "Historias de emociones reales, confianza y proyectos ejecutados.",
     emptyText: "Aún no hay reseñas agregadas.",
-    seoKeywords:
-      "reseñas de eventos, opiniones de clientes, testimonios agencia de eventos",
   },
   arm: {
     title: "Ինչ են ասում մեր հաճախորդները",
-    subtitle:
-      "Իրական էմոցիաների, վստահության և աշխարհով մեկ կատարյալ իրականացված ծրագրերի պատմություններ:",
+    subtitle: "Իրական էմոցիաների, վստահության և կատարյալ իրականացված ծրագրերի:",
     emptyText: "Կարծիքներ դեռ ավելացված չեն:",
-    seoKeywords:
-      "կարծիքներ միջոցառումների մասին, հաճախորդների կարծիքներ, իվենթ գործակալություն",
   },
 }[lang as "ru" | "eng" | "esp" | "arm"] || {
   title: "Что говорят наши клиенты",
   subtitle:
-    "Истории живых эмоций, доверия и безупречно реализованных проектов по всему миру.",
+    "Истории живых эмоций, доверия и безупречно реализованных проектов.",
   emptyText: "Отзывы пока не добавлены.",
-  seoKeywords: "отзывы о мероприятиях, отзывы клиентов, ивент агентство отзывы",
 };
 ---
-
-<!-- SEO ключевые слова для индексации -->
-<meta name="keywords" content={t.seoKeywords} />
 
 <section
   id="testimonials"
@@ -107,17 +89,59 @@ const t = {
   lang={lang}
 >
   <div class="max-w-6xl mx-auto px-6">
-    <div class="text-center mb-12">
-      <h2
-        class="text-3xl md:text-4xl font-serif tracking-tight text-white mb-3"
-      >
-        {t.title}
-      </h2>
-      <p
-        class="text-sm md:text-base text-zinc-400 font-light max-w-2xl mx-auto"
-      >
-        {t.subtitle}
-      </p>
+    <div
+      class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
+    >
+      <div class="text-center md:text-left">
+        <h2
+          class="text-3xl md:text-4xl font-serif tracking-tight text-white mb-3"
+        >
+          {t.title}
+        </h2>
+        <p class="text-sm md:text-base text-zinc-400 font-light max-w-xl">
+          {t.subtitle}
+        </p>
+      </div>
+
+      <!-- Кнопки управления (на десктопе всегда flex, на мобилках скрыты) -->
+      {
+        testimonialsList.length > 0 && (
+          <div class="desktop-arrows-wrapper">
+            <button
+              id="prevTestimonial"
+              class="w-12 h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+              aria-label="Previous"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              id="nextTestimonial"
+              class="w-12 h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+              aria-label="Next"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+        )
+      }
     </div>
 
     {
@@ -126,28 +150,28 @@ const t = {
           <p>{t.emptyText}</p>
         </div>
       ) : (
-        <div class="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-thin scrollbar-thumb-zinc-800">
+        <div id="testimonialsTrack" class="testimonials-container">
           {testimonialsList.map((item) => (
-            <div class="min-w-[300px] md:min-w-[380px] max-w-[400px] flex-shrink-0 snap-start bg-zinc-900/40 p-6 md:p-8 rounded-3xl border border-zinc-800/80 flex flex-col justify-between shadow-xl relative group">
-              <span class="absolute top-5 right-6 text-5xl font-serif text-zinc-800 group-hover:text-red-500/20 transition-colors pointer-events-none">
+            <div class="testimonial-card">
+              <span class="absolute top-4 right-5 md:top-5 md:right-6 text-4xl md:text-5xl font-serif text-zinc-800 pointer-events-none">
                 “
               </span>
 
-              <p class="text-zinc-300 text-sm md:text-base leading-relaxed font-light mb-8 relative z-10 italic">
+              <p class="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-light mb-6 md:mb-8 relative z-10 italic">
                 {item.content}
               </p>
 
-              <div class="flex items-center space-x-4 border-t border-zinc-800/60 pt-5">
+              <div class="flex items-center space-x-3 md:space-x-4 border-t border-zinc-800/60 pt-4 md:pt-5">
                 <img
                   src={item.avatar}
                   alt={item.name}
-                  class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border border-zinc-700 bg-zinc-800"
+                  class="w-9 h-9 md:w-12 md:h-12 rounded-full object-cover border border-zinc-700 bg-zinc-800"
                 />
                 <div>
-                  <h4 class="text-white font-medium text-sm tracking-wide">
+                  <h4 class="text-white font-medium text-xs md:text-sm tracking-wide">
                     {item.name}
                   </h4>
-                  <p class="text-xs text-zinc-500 font-light mt-0.5">
+                  <p class="text-[11px] md:text-xs text-zinc-500 font-light mt-0.5">
                     {item.role}
                   </p>
                 </div>
@@ -159,3 +183,79 @@ const t = {
     }
   </div>
 </section>
+
+<script>
+  const track = document.getElementById(
+    "testimonialsTrack",
+  ) as HTMLDivElement | null;
+  const prevBtn = document.getElementById(
+    "prevTestimonial",
+  ) as HTMLButtonElement | null;
+  const nextBtn = document.getElementById(
+    "nextTestimonial",
+  ) as HTMLButtonElement | null;
+
+  if (track && prevBtn && nextBtn) {
+    prevBtn.addEventListener("click", () => {
+      const cardWidth =
+        track.querySelector(".testimonial-card")?.clientWidth || 350;
+      track.scrollBy({ left: -(cardWidth + 24), behavior: "smooth" });
+    });
+
+    nextBtn.addEventListener("click", () => {
+      const cardWidth =
+        track.querySelector(".testimonial-card")?.clientWidth || 350;
+      track.scrollBy({ left: cardWidth + 24, behavior: "smooth" });
+    });
+  }
+</script>
+
+<style>
+  /* Контейнер ленты отзывов */
+  .testimonials-container {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory; /* Жесткая привязка */
+    padding-bottom: 1rem;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .testimonials-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  /* Карточка отзыва */
+  .testimonial-card {
+    flex: 0 0 100%; /* На мобилках карточка занимает ровно 100 ширины экрана */
+    scroll-snap-align: start; /* Резкая фиксация по началу карточки */
+    background: rgba(24, 24, 27, 0.4);
+    border: 1px solid rgba(39, 39, 42, 0.8);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  /* Управление видимостью стрелок */
+  .desktop-arrows-wrapper {
+    display: none; /* По умолчанию скрыты (на мобилках) */
+  }
+
+  /* Планшеты и десктоп (от 768px и выше) */
+  @media (min-width: 768px) {
+    .testimonial-card {
+      flex: 0 0 380px; /* На десктопе фиксированная ширина карточки */
+      padding: 2rem;
+      border-radius: 1.5rem;
+    }
+
+    .desktop-arrows-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+  }
+</style>
