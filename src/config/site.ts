@@ -79,6 +79,6 @@ export const STATIC_PATHS = [
 
 /** ID аналитики — после регистрации в GA4 / Метрике */
 export const ANALYTICS = {
-  ga4Id: "", // например "G-XXXXXXXXXX"
+  ga4Id: "G-T1B2J8TT6R", // например "G-XXXXXXXXXX"
   metrikaId: "111282708", // например "12345678"
 };
