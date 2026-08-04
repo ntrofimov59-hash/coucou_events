@@ -5,7 +5,7 @@ export const SITE_NAME = "Coucou";
 // 1. SITE_URL — реальный домен БЕЗ слэша в конце
 // 2. CONTACT — телефон, WhatsApp, Telegram, email, Instagram
 // 3. ANALYTICS — ga4Id и metrikaId
-export const SITE_URL = "https://your-domain.com";
+export const SITE_URL = "coucou-events.com";
 
 export const SITE_DESCRIPTION =
   "Организация свадеб, корпоративов и частных мероприятий под ключ: аренда шатров, кейтеринг, декор, фото и трансфер. Coucou — 15 городов мира, база в Ереване.";
