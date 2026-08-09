@@ -19,6 +19,7 @@
     "@astrojs/tailwind": "^5.1.0",
     "@fontsource-variable/inter": "^5.0.0",
     "@fontsource/playfair-display": "^5.0.0",
+    "@notionhq/client": "^5.24.0",
     "astro": "^7.1.0",
     "lucide-solid": "^1.24.0",
     "sass": "^1.101.0",
