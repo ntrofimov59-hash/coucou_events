@@ -8,6 +8,8 @@ on:
 jobs:
   send-report:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Важно: дает право боту делать коммиты в репозиторий
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,3 +26,11 @@ jobs:
           YANDEX_TOKEN: ${{ secrets.YANDEX_TOKEN }}
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: node scripts/generate-report.js
+
+      - name: Save previous metrics to repo
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add previous_metrics.json
+          git commit -m "chore: update previous metrics for weekly report" || exit 0
+          git push

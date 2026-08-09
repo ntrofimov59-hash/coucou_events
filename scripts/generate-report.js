@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import fs from 'fs';
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -66,6 +67,15 @@ async function getCounterId() {
   }
 }
 
+// Функция для расчета динамики (разница с прошлой неделей)
+function calculateDiff(current, previous) {
+  if (previous === undefined || previous === null) return "";
+  const diff = current - previous;
+  if (diff === 0) return " (⚖️ без изменений)";
+  const sign = diff > 0 ? "+" : "";
+  return ` (${sign}${diff} по сравнению с прошлым отчетом)`;
+}
+
 // Собираем метрики из Яндекс и Google
 async function collectMetrics() {
   // --- 1. ЯНДЕКС МЕТРИКА ---
@@ -114,7 +124,7 @@ async function collectMetrics() {
   if (gcpKeyRaw) {
     const googleAccessToken = await getGoogleAccessToken(gcpKeyRaw);
     if (googleAccessToken) {
-      const siteUrl = "https://coucou-events.com"; 
+      const siteUrl = "https://coucouevents.am"; 
       const gscUrl = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
       
       const d = new Date();
@@ -163,23 +173,36 @@ async function collectMetrics() {
   };
 }
 
-// Отправка отчета в Telegram
+// Отправка отчета в Telegram и сохранение динамики
 async function sendReport() {
   const metrics = await collectMetrics();
+
+  // Загружаем данные прошлого отчета для сравнения (если файл существует)
+  let prevMetrics = null;
+  try {
+    if (fs.existsSync('previous_metrics.json')) {
+      prevMetrics = JSON.parse(fs.readFileSync('previous_metrics.json', 'utf8'));
+    }
+  } catch (e) {
+    console.error("Не удалось прочитать предыдущие метрики:", e);
+  }
+
+  const visitsDiff = prevMetrics ? calculateDiff(metrics.yandex.visits, prevMetrics.yandex.visits) : "";
+  const clicksDiff = prevMetrics ? calculateDiff(metrics.google.clicks, prevMetrics.google.clicks) : "";
 
   const message = `
 📊 *Еженедельный отчет по проекту Coucou Events*
 📅 Период: ${metrics.period}
 
 🔵 *Яндекс.Метрика:*
-• Визиты за неделю: *${metrics.yandex.visits}*
+• Визиты за неделю: *${metrics.yandex.visits}*${visitsDiff}
 • Среднее время: *${metrics.yandex.time}*
 • Популярные страницы:
 • ${metrics.yandex.pages}
 • Поисковые запросы: ${metrics.yandex.searchQueries}
 
 🟢 *Google Search Console:*
-• Клики из поиска: *${metrics.google.clicks}*
+• Клики из поиска: *${metrics.google.clicks}*${clicksDiff}
 • Показы в поиске: *${metrics.google.impressions}*
 
 🚀 _Отчет сгенерирован автоматически через GitHub Actions_
@@ -201,6 +224,9 @@ async function sendReport() {
     const data = await response.json();
     if (data.ok) {
       console.log("✅ Сводный отчет успешно отправлен в Telegram!");
+      
+      // Сохраняем текущие результаты в файл для следующей недели
+      fs.writeFileSync('previous_metrics.json', JSON.stringify(metrics, null, 2));
     } else {
       console.error("❌ Ошибка от Telegram API:", data);
     }
