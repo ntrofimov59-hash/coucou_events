@@ -13,12 +13,25 @@ async function checkYandexToken() {
     return null;
   }
 
-  const url = "https://api-metrika.yandex.net/stat/v1/counters";
+  // Добавляем параметр pretty=1 и правильный заголовок
+  const url = "https://api-metrika.yandex.net/management/v1/counters";
   try {
     const response = await fetch(url, {
-      headers: { "Authorization": `OAuth ${yandexToken}` }
+      headers: { 
+        "Authorization": `OAuth ${yandexToken}`,
+        "Content-Type": "application/json"
+      }
     });
-    const data = await response.json();
+
+    const textResponse = await response.text();
+    
+    // Проверяем, не пришел ли HTML вместо JSON
+    if (textResponse.trim().startsWith("<")) {
+      console.error("❌ Яндекс вернул HTML вместо JSON. Проверьте правильность токена.");
+      return null;
+    }
+
+    const data = JSON.parse(textResponse);
     
     if (response.ok) {
       console.log("✅ Яндекс Токен актуален! Счетчиков найдено:", data.counters ? data.counters.length : 0);
@@ -28,7 +41,7 @@ async function checkYandexToken() {
       return null;
     }
   } catch (error) {
-    console.error("❌ Ошибка сети при проверке Яндекса:", error);
+    console.error("❌ Ошибка при обращении к Яндексу:", error);
     return null;
   }
 }
