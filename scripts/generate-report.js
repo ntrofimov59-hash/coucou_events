@@ -13,7 +13,6 @@ async function checkYandexToken() {
     return null;
   }
 
-  // Добавляем параметр pretty=1 и правильный заголовок
   const url = "https://api-metrika.yandex.net/management/v1/counters";
   try {
     const response = await fetch(url, {
@@ -25,7 +24,6 @@ async function checkYandexToken() {
 
     const textResponse = await response.text();
     
-    // Проверяем, не пришел ли HTML вместо JSON
     if (textResponse.trim().startsWith("<")) {
       console.error("❌ Яндекс вернул HTML вместо JSON. Проверьте правильность токена.");
       return null;
@@ -56,10 +54,10 @@ async function collectMetrics() {
     };
   }
 
-  // Запрос статистики визитов за последние 7 дней
+  // 1. Запрос статистики визитов за последние 7 дней
   const statsUrl = `https://api-metrika.yandex.net/stat/v1/data?metrics=ym:s:visits&date1=7daysAgo&date2=today&id=${counterId}`;
+  let visitsCount = "0";
   
-  let visitsCount = "Нет данных";
   try {
     const response = await fetch(statsUrl, {
       headers: { "Authorization": `OAuth ${yandexToken}` }
@@ -67,18 +65,40 @@ async function collectMetrics() {
     const data = await response.json();
     
     if (response.ok && data.data && data.data.length > 0) {
-      // Суммируем визиты за выбранный период
       visitsCount = data.data[0].metrics[0];
     }
   } catch (error) {
     console.error("❌ Ошибка при получении статистики визитов:", error);
   }
 
+  // 2. Запрос популярных поисковых запросов
+  const queryUrl = `https://api-metrika.yandex.net/stat/v1/data?metrics=ym:s:visits&dimensions=ym:s:query&date1=7daysAgo&date2=today&id=${counterId}&limit=3`;
+  let topQueries = "Нет данных / Прямые заходы";
+
+  try {
+    const response = await fetch(queryUrl, {
+      headers: { "Authorization": `OAuth ${yandexToken}` }
+    });
+    const data = await response.json();
+    
+    if (response.ok && data.data && data.data.length > 0) {
+      const queries = data.data
+        .map(item => item.dimensions[0].name)
+        .filter(q => q && q !== "(direct)" && q !== "не определено");
+      
+      if (queries.length > 0) {
+        topQueries = queries.join(", ");
+      }
+    }
+  } catch (error) {
+    console.error("❌ Ошибка при получении поисковых запросов:", error);
+  }
+
   return {
     period: "Прошедшая неделя",
     yandex: {
       visits: visitsCount,
-      searchQueries: "В разработке"
+      searchQueries: topQueries
     },
     google: {
       clicks: "В разработке",
@@ -94,8 +114,8 @@ async function sendReport() {
 📊 *Еженедельный отчет по проекту Coucou Events*
 📅 Период: ${metrics.period}
 
-🔵 *Яндекс (Метрика / Вебмастер):*
-• Статус: ${metrics.yandex.visits}
+🔵 *Яндекс.Метрика:*
+• Визиты за неделю: *${metrics.yandex.visits}*
 • Поисковые запросы: ${metrics.yandex.searchQueries}
 
 🟢 *Google (Search Console / GA4):*
