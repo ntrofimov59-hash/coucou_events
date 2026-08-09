@@ -48,10 +48,36 @@ async function checkYandexToken() {
 
 async function collectMetrics() {
   const counterId = await checkYandexToken();
+  if (!counterId) {
+    return {
+      period: "Прошедшая неделя",
+      yandex: { visits: "Ошибка доступа", searchQueries: "Ошибка доступа" },
+      google: { clicks: "В разработке", impressions: "В разработке" }
+    };
+  }
+
+  // Запрос статистики визитов за последние 7 дней
+  const statsUrl = `https://api-metrika.yandex.net/stat/v1/data?metrics=ym:s:visits&date1=7daysAgo&date2=today&id=${counterId}`;
+  
+  let visitsCount = "Нет данных";
+  try {
+    const response = await fetch(statsUrl, {
+      headers: { "Authorization": `OAuth ${yandexToken}` }
+    });
+    const data = await response.json();
+    
+    if (response.ok && data.data && data.data.length > 0) {
+      // Суммируем визиты за выбранный период
+      visitsCount = data.data[0].metrics[0];
+    }
+  } catch (error) {
+    console.error("❌ Ошибка при получении статистики визитов:", error);
+  }
+
   return {
     period: "Прошедшая неделя",
     yandex: {
-      visits: counterId ? "Подключено (ID:" + counterId + ")" : "Ошибка/Не задан",
+      visits: visitsCount,
       searchQueries: "В разработке"
     },
     google: {
