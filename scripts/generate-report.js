@@ -21,6 +21,20 @@ async function collectMetrics() {
   };
 }
 
+async function checkCommands() {
+  const url = `https://api.telegram.org/bot${token}/getUpdates`;
+  const response = await fetch(url);
+  const data = await response.json();
+  
+  if (data.ok && data.result.length > 0) {
+    const lastMessage = data.result[data.result.length - 1].message;
+    if (lastMessage && lastMessage.text === '/report') {
+      return true; // Команда получена!
+    }
+  }
+  return false;
+}
+
 async function sendReport() {
   const metrics = await collectMetrics();
 
