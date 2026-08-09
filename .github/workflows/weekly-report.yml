@@ -2,14 +2,14 @@ name: Weekly Analytics Report
 
 on:
   schedule:
-    - cron: '0 9 * * 1'
-  workflow_dispatch: 
+    - cron: '0 9 * * 1' # Запуск каждый понедельник в 09:00
+  workflow_dispatch:     # Позволяет запускать вручную из вкладки Actions
 
 jobs:
   send-report:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Важно: дает право боту делать коммиты в репозиторий
+      contents: write # Разрешает боту делать коммиты
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: '20'
 
+      # Убедитесь, что у вас есть package.json, если используете модули,
+      # либо просто запускайте скрипт как есть
       - name: Run report script
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -29,8 +31,15 @@ jobs:
 
       - name: Save previous metrics to repo
         run: |
+          # Настройка автора коммита
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
+          
+          # Проверяем, есть ли изменения в файле
           git add previous_metrics.json
-          git commit -m "chore: update previous metrics for weekly report" || exit 0
+          
+          # Делаем коммит, если изменения есть
+          git commit -m "chore: update previous metrics for weekly report" || echo "No changes to commit"
+          
+          # Отправляем изменения обратно в репозиторий
           git push
