@@ -19,14 +19,17 @@ jobs:
         with:
           node-version: '20'
 
-      # Убедитесь, что у вас есть package.json, если используете модули,
-      # либо просто запускайте скрипт как есть
+      - name: Install dependencies
+        run: npm install
+
       - name: Run report script
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           YANDEX_TOKEN: ${{ secrets.YANDEX_TOKEN }}
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: node scripts/generate-report.js
 
       - name: Save previous metrics to repo

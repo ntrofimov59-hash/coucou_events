@@ -1,5 +1,57 @@
 import crypto from 'crypto';
 import fs from 'fs';
+import { Client } from '@notionhq/client';
+
+const notionToken = process.env.NOTION_TOKEN;
+const notionDatabaseId = process.env.NOTION_DATABASE_ID;
+const notion = new Client({ auth: notionToken });
+
+// Функция сбора статистики по лидам из Notion
+async function getNotionMetrics() {
+  if (!notionToken || !notionDatabaseId) return null;
+
+  try {
+    const response = await notion.databases.query({
+      database_id: notionDatabaseId,
+    });
+
+    let totalLeads = 0;
+    let inProgress = 0;
+    let successCount = 0;
+    let refusedCount = 0;
+    const sources = { Telegram: 0, WhatsApp: 0, Instagram: 0, Сайт: 0 };
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    response.results.forEach(page => {
+      const props = page.properties;
+      const createdTime = new Date(page.created_time);
+
+      // Считаем только за последнюю неделю
+      if (createdTime >= oneWeekAgo) {
+        totalLeads++;
+
+        // Источник
+        const sourceName = props.Source?.select?.name;
+        if (sourceName && sources[sourceName] !== undefined) {
+          sources[sourceName]++;
+        }
+
+        // Статус сделки
+        const status = props.Status?.status?.name || props.Status?.select?.name;
+        if (status === 'В работе' || status === 'Договор отправлен') inProgress++;
+        if (status === 'Оплачено') successCount++;
+        if (status === 'Отказ') refusedCount++;
+      }
+    });
+
+    return { totalLeads, inProgress, successCount, refusedCount, sources };
+  } catch (error) {
+    console.error("❌ Ошибка при чтении из Notion:", error);
+    return null;
+  }
+}
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -76,7 +128,7 @@ function calculateDiff(current, previous) {
   return ` (${sign}${diff} по сравнению с прошлым отчетом)`;
 }
 
-// Собираем метрики из Яндекс и Google
+// Собираем метрики из Яндекс, Google и Notion
 async function collectMetrics() {
   // --- 1. ЯНДЕКС МЕТРИКА ---
   const counterId = await getCounterId();
@@ -158,6 +210,9 @@ async function collectMetrics() {
     }
   }
 
+  // --- 3. NOTION CRM METRICS ---
+  const notionMetrics = await getNotionMetrics();
+
   return {
     period: "Прошедшая неделя",
     yandex: {
@@ -169,7 +224,8 @@ async function collectMetrics() {
     google: {
       clicks: googleClicks,
       impressions: googleImpressions
-    }
+    },
+    notion: notionMetrics
   };
 }
 
@@ -190,6 +246,26 @@ async function sendReport() {
   const visitsDiff = prevMetrics ? calculateDiff(metrics.yandex.visits, prevMetrics.yandex.visits) : "";
   const clicksDiff = prevMetrics ? calculateDiff(metrics.google.clicks, prevMetrics.google.clicks) : "";
 
+  // Формируем блок по Notion CRM, если он настроен
+  let notionBlock = "";
+  if (metrics.notion) {
+    const n = metrics.notion;
+    notionBlock = `
+💼 *Продажи и заявки (Notion):*
+• Всего заявок: *${n.totalLeads}*
+  - Telegram: ${n.sources.Telegram}
+  - WhatsApp: ${n.sources.WhatsApp}
+  - Instagram: ${n.sources.Instagram}
+  - Сайт: ${n.sources.Сайт}
+• В работе: *${n.inProgress}*
+• Успешных сделок: *${n.successCount}*
+• Провалено / Отказ: *${n.refusedCount}*`;
+  } else {
+    notionBlock = `
+💼 *Продажи и заявки (Notion):*
+• _Не настроено или нет данных_`;
+  }
+
   const message = `
 📊 *Еженедельный отчет по проекту Coucou Events*
 📅 Период: ${metrics.period}
@@ -204,6 +280,7 @@ async function sendReport() {
 🟢 *Google Search Console:*
 • Клики из поиска: *${metrics.google.clicks}*${clicksDiff}
 • Показы в поиске: *${metrics.google.impressions}*
+${notionBlock}
 
 🚀 _Отчет сгенерирован автоматически через GitHub Actions_
   `;
