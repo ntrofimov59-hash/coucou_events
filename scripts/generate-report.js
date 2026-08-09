@@ -1,17 +1,44 @@
-// scripts/generate-report.js
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
+const yandexToken = process.env.YANDEX_TOKEN;
 
 if (!token || !chatId) {
   console.error("❌ Ошибка: Не заданы TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID");
   process.exit(1);
 }
 
+async function checkYandexToken() {
+  if (!yandexToken) {
+    console.log("⚠️ YANDEX_TOKEN не задан, пропуск проверки Метрики");
+    return null;
+  }
+
+  const url = "https://api-metrika.yandex.net/stat/v1/counters";
+  try {
+    const response = await fetch(url, {
+      headers: { "Authorization": `OAuth ${yandexToken}` }
+    });
+    const data = await response.json();
+    
+    if (response.ok) {
+      console.log("✅ Яндекс Токен актуален! Счетчиков найдено:", data.counters ? data.counters.length : 0);
+      return data.counters && data.counters.length > 0 ? data.counters[0].id : null;
+    } else {
+      console.error("❌ Ошибка от Яндекс API:", data);
+      return null;
+    }
+  } catch (error) {
+    console.error("❌ Ошибка сети при проверке Яндекса:", error);
+    return null;
+  }
+}
+
 async function collectMetrics() {
+  const counterId = await checkYandexToken();
   return {
     period: "Прошедшая неделя",
     yandex: {
-      visits: "В разработке",
+      visits: counterId ? "Подключено (ID:" + counterId + ")" : "Ошибка/Не задан",
       searchQueries: "В разработке"
     },
     google: {
@@ -19,20 +46,6 @@ async function collectMetrics() {
       impressions: "В разработке"
     }
   };
-}
-
-async function checkCommands() {
-  const url = `https://api.telegram.org/bot${token}/getUpdates`;
-  const response = await fetch(url);
-  const data = await response.json();
-  
-  if (data.ok && data.result.length > 0) {
-    const lastMessage = data.result[data.result.length - 1].message;
-    if (lastMessage && lastMessage.text === '/report') {
-      return true; // Команда получена!
-    }
-  }
-  return false;
 }
 
 async function sendReport() {
@@ -43,7 +56,7 @@ async function sendReport() {
 📅 Период: ${metrics.period}
 
 🔵 *Яндекс (Метрика / Вебмастер):*
-• Визиты: ${metrics.yandex.visits}
+• Статус: ${metrics.yandex.visits}
 • Поисковые запросы: ${metrics.yandex.searchQueries}
 
 🟢 *Google (Search Console / GA4):*
@@ -67,8 +80,6 @@ async function sendReport() {
     });
 
     const data = await response.json();
-    console.log("Ответ от Telegram API:", JSON.stringify(data));
-
     if (data.ok) {
       console.log("✅ Еженедельный отчет успешно отправлен в Telegram!");
     } else {
