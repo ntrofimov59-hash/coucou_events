@@ -8,8 +8,6 @@ if (!token || !chatId) {
 }
 
 async function collectMetrics() {
-  // Здесь в будущем будут реальные запросы к API Яндекса и Google
-  // А пока для примера формируем структуру данных отчета за неделю:
   return {
     period: "Прошедшая неделя",
     yandex: {
@@ -55,6 +53,8 @@ async function sendReport() {
     });
 
     const data = await response.json();
+    console.log("Ответ от Telegram API:", JSON.stringify(data));
+
     if (data.ok) {
       console.log("✅ Еженедельный отчет успешно отправлен в Telegram!");
     } else {
