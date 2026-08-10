@@ -9,7 +9,8 @@ const { Client: WhatsAppClient, LocalAuth } = pkg;
 import qrcode from 'qrcode-terminal';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
-import fs from 'fs';
+import { ImapFlow } from 'imapflow';
+import { simpleParser } from 'mailparser';
 
 dotenv.config();
 
@@ -26,11 +27,11 @@ const groq = new OpenAI({
 const notion = new NotionClient({ auth: process.env.NOTION_TOKEN });
 const DATABASE_ID = process.env.NOTION_DATABASE_ID;
 
-const MODEL = 'llama-3.3-70b-versatile'; // более умная и грамотная модель
+const MODEL = 'llama-3.3-70b-versatile';
 
 const userSessions = {};
 const lastActivity = {};
-const stats = { total: 0, relevant: 0, saved: 0, objections: 0 };
+const stats = { total: 0, relevant: 0, saved: 0, objections: 0, email: 0, spam: 0 };
 
 // ====================== БАЗА ЗНАНИЙ ======================
 const SYSTEM_PROMPT = `Ты — Анна, старший менеджер агентства Coucou Events.
@@ -58,8 +59,9 @@ const SYSTEM_PROMPT = `Ты — Анна, старший менеджер аге
 6. Максимум 1–2 вопроса за раз.
 7. При вопросе о цене называй реальные стартовые цены.
 8. При возражениях используй сильные аргументы и веди дальше.
-9. Когда есть имя + город + детали — вызывай save_lead_to_notion.
-10. Цель — довести до созвона или запроса сметы.`;
+9. Когда есть имя + город + детали — обязательно вызывай save_lead_to_notion.
+10. Если клиент написал по email — всё равно собирай данные и сохраняй в CRM.
+11. Цель — довести до созвона или запроса сметы.`;
 
 const OBJECTION_SCRIPTS = {
   expensive: `Понимаю вопрос бюджета.
@@ -67,25 +69,25 @@ const OBJECTION_SCRIPTS = {
 Стоимость зависит от города, даты, наполнения и количества гостей. Мы всегда готовим 2–3 варианта сметы — от более компактного до премиального.
 
 Какой ориентировочный бюджет вы рассматриваете?`,
-  
+
   think: `Конечно, решение важное.
 
 Чтобы вам было проще сравнить, я могу подготовить короткое коммерческое предложение с 2–3 вариантами под ваши вводные.
 
 Как удобнее получить — сюда в чат или на почту?`,
-  
+
   compare: `Правильно, что сравниваете.
 
 Наше отличие: мы не просто посредники, а команда с собственным продакшеном и прямыми контрактами на площадках. Это даёт контроль качества и обычно экономит 15–25%.
 
 Могу подготовить сравнительную структуру, что входит в нашу смету.`,
-  
+
   later: `Хорошо, без давления.
 
 Лучшие даты и подрядчики бронируются заранее. Если дата уже близко — лучше зафиксировать предварительный интерес.
 
 Напомнить вам через пару дней?`,
-  
+
   default: `Понимаю ваши сомнения.
 
 Давайте уточним ключевые детали — и я сразу покажу, как это можно реализовать в рамках вашего запроса.`
@@ -96,7 +98,7 @@ const tools = [{
   type: "function",
   function: {
     name: "save_lead_to_notion",
-    description: "Сохранить или обновить лид в CRM",
+    description: "Сохранить или обновить лид в CRM Notion. Вызывай при появлении имени, города и деталей запроса.",
     parameters: {
       type: "object",
       properties: {
@@ -107,7 +109,8 @@ const tools = [{
         eventDate: { type: "string" },
         budget: { type: "string" },
         details: { type: "string" },
-        stage: { type: "string", description: "New Lead | Qualification | Proposal | Negotiation" }
+        stage: { type: "string", description: "New Lead | Qualification | Proposal | Negotiation" },
+        source: { type: "string", description: "Telegram | WhatsApp | Email" }
       },
       required: ["clientName", "city", "details"]
     }
@@ -116,19 +119,19 @@ const tools = [{
 
 // ====================== УТИЛИТЫ ======================
 function isRelevantMessage(text) {
-  const lower = text.toLowerCase();
+  const lower = (text || '').toLowerCase();
   const keywords = [
     'шатер', 'шатёр', 'тент', 'свадьб', 'корпоратив', 'мероприятие',
     'банкет', 'день рожден', 'юбилей', 'аренда', 'организ', 'праздник',
     'гости', 'дата', 'бюджет', 'локация', 'площадка', 'кейтеринг',
     'гоа', 'бали', 'ереван', 'тбилиси', 'прага', 'пхукет', 'анталья',
-    'дананг', 'нячанг', 'марракеш', 'будапешт', 'белград'
+    'дананг', 'нячанг', 'марракеш', 'будапешт', 'белград', 'заявк', 'смет'
   ];
   return keywords.some(k => lower.includes(k));
 }
 
 function detectObjection(text) {
-  const lower = text.toLowerCase();
+  const lower = (text || '').toLowerCase();
   if (/(дорог|бюджет|не потяну|дороговат|не по карману)/.test(lower)) return 'expensive';
   if (/(подумаю|подумать|не сейчас|позже|отложим)/.test(lower)) return 'think';
   if (/(сравниваю|другие|конкурент|варианты|еще посмотрю)/.test(lower)) return 'compare';
@@ -137,13 +140,21 @@ function detectObjection(text) {
 }
 
 function humanDelay(text) {
-  const delay = Math.min(900 + text.length * 15, 4000);
+  const delay = Math.min(900 + String(text || '').length * 15, 4000);
   return new Promise(r => setTimeout(r, delay));
 }
 
-function logStat(type) {
-  stats[type] = (stats[type] || 0) + 1;
-  console.log(`📊 Статистика: всего=${stats.total}, релевантных=${stats.relevant}, сохранено=${stats.saved}, возражений=${stats.objections}`);
+function getSourceFromSessionKey(sessionKey) {
+  if (sessionKey.startsWith('tg_')) return 'Telegram';
+  if (sessionKey.startsWith('wa_')) return 'WhatsApp';
+  if (sessionKey.startsWith('email_')) return 'Email';
+  return 'Unknown';
+}
+
+function logStat() {
+  console.log(
+    `📊 Статистика: всего=${stats.total}, релевантных=${stats.relevant}, сохранено=${stats.saved}, возражений=${stats.objections}, email=${stats.email}, spam=${stats.spam}`
+  );
 }
 
 // ====================== CRM ======================
@@ -159,7 +170,6 @@ async function findLeadInNotion(phone, name, city) {
     if (city && city !== 'N/A') {
       filters.push({ property: 'City', rich_text: { contains: city } });
     }
-
     if (filters.length === 0) return null;
 
     const response = await notion.databases.query({
@@ -191,12 +201,15 @@ async function saveOrUpdateLead(args) {
       ? Number(String(args.budget).replace(/[^0-9]/g, ''))
       : null;
 
+    const source = args.source || 'Unknown';
+    const detailsWithSource = `[${source}] ${args.details || 'N/A'}`;
+
     const properties = {
       "Name": { title: [{ text: { content: args.clientName || "Клиент" } }] },
       "Phone": { rich_text: [{ text: { content: args.phone || "N/A" } }] },
       "City": { rich_text: [{ text: { content: args.city || "N/A" } }] },
       "Language": { select: { name: args.language || "Russian" } },
-      "Details": { rich_text: [{ text: { content: args.details || "N/A" } }] },
+      "Details": { rich_text: [{ text: { content: detailsWithSource } }] },
       "Status": { select: { name: args.stage || "New Lead" } }
     };
 
@@ -205,17 +218,17 @@ async function saveOrUpdateLead(args) {
 
     if (existing) {
       await notion.pages.update({ page_id: existing.id, properties });
-      console.log("🔄 Лид обновлён в Notion");
+      console.log(`🔄 Лид обновлён в Notion [${source}]`);
     } else {
       await notion.pages.create({
         parent: { database_id: DATABASE_ID },
         properties
       });
-      console.log("💾 Новый лид создан в Notion");
+      console.log(`💾 Новый лид создан в Notion [${source}]`);
     }
 
     stats.saved++;
-    logStat('saved');
+    logStat();
   } catch (e) {
     console.error("Ошибка CRM:", e.message);
   }
@@ -227,23 +240,22 @@ async function generateReply(sessionKey, userMessage) {
     userSessions[sessionKey] = {
       messages: [{ role: "system", content: SYSTEM_PROMPT }],
       data: {},
-      stage: 'New Lead'
+      stage: 'New Lead',
+      source: getSourceFromSessionKey(sessionKey)
     };
   }
 
   const session = userSessions[sessionKey];
   session.messages.push({ role: "user", content: userMessage });
 
-  // Ограничение истории
   if (session.messages.length > 16) {
     session.messages = [session.messages[0], ...session.messages.slice(-12)];
   }
 
-  // Возражение
   const objection = detectObjection(userMessage);
   if (objection) {
     stats.objections++;
-    logStat('objections');
+    logStat();
     const script = OBJECTION_SCRIPTS[objection] || OBJECTION_SCRIPTS.default;
     session.messages.push({ role: "assistant", content: script });
     return script;
@@ -261,11 +273,11 @@ async function generateReply(sessionKey, userMessage) {
 
     const message = completion.choices[0].message;
 
-    // Tool call
     if (message.tool_calls?.length > 0) {
       const toolCall = message.tool_calls[0];
       const args = JSON.parse(toolCall.function.arguments || "{}");
       args.stage = args.stage || session.stage || 'Qualification';
+      args.source = session.source || getSourceFromSessionKey(sessionKey);
 
       console.log("🛠 CRM:", args);
       await saveOrUpdateLead(args);
@@ -304,7 +316,7 @@ async function generateReply(sessionKey, userMessage) {
   }
 }
 
-// ====================== ОБРАБОТКА ======================
+// ====================== ОБРАБОТКА СООБЩЕНИЙ ======================
 async function handleIncoming(sessionKey, text, sendFn) {
   stats.total++;
   lastActivity[sessionKey] = Date.now();
@@ -324,6 +336,160 @@ async function handleIncoming(sessionKey, text, sendFn) {
   await humanDelay(reply);
   await sendFn(reply);
   console.log(`💬 Ответ:\n${reply}\n`);
+  logStat();
+}
+
+// ====================== EMAIL + SPAM FILTER ======================
+const SPAM_SENDERS = [
+  'noreply', 'no-reply', 'donotreply', 'do-not-reply',
+  'mailer-daemon', 'postmaster', 'newsletter', 'marketing',
+  'promo', 'notifications', 'bounce', 'daemon'
+];
+
+const SPAM_KEYWORDS = [
+  'unsubscribe', 'viagra', 'casino', 'crypto giveaway',
+  'you won', 'бесплатный приз', 'кликни сюда', 'urgent wire',
+  'nigerian', 'lottery', 'bitcoin investment', 'секс знаком'
+];
+
+function isSpamEmail({ from, subject, text }) {
+  const fromLower = (from || '').toLowerCase();
+  const subjectLower = (subject || '').toLowerCase();
+  const textLower = (text || '').toLowerCase();
+
+  if (!text || text.trim().length < 10) return true;
+  if (SPAM_SENDERS.some(s => fromLower.includes(s))) return true;
+  if (SPAM_KEYWORDS.some(k => subjectLower.includes(k) || textLower.includes(k))) return true;
+
+  const linkCount = (text.match(/https?:\/\//gi) || []).length;
+  if (linkCount > 8) return true;
+
+  if (!isRelevantMessage(text) && !isRelevantMessage(subject || '')) return true;
+
+  return false;
+}
+
+function extractEmailAddress(from) {
+  if (!from) return 'unknown@unknown';
+  const match = from.match(/<([^>]+)>/);
+  return (match ? match[1] : from).trim().toLowerCase();
+}
+
+async function processEmailMessage(parsed) {
+  const from = extractEmailAddress(parsed.from?.text || '');
+  const subject = parsed.subject || '(без темы)';
+  const text = (parsed.text || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  console.log(`\n📧 Письмо от: ${from}`);
+  console.log(`Тема: ${subject}`);
+  const fromLower = from.toLowerCase();
+  if (fromLower.includes('no-reply@accounts.google.com')) return true;
+  if (fromLower.includes('accounts.google.com')) return true;
+  if (isSpamEmail({ from, subject, text })) {
+    stats.spam++;
+    console.log('🚫 Пропущено как спам / нерелевантное');
+    logStat();
+    return;
+  }
+
+  stats.email++;
+  stats.total++;
+  stats.relevant++;
+
+  const sessionKey = `email_${from}`;
+  const content = `Клиент написал на email.\nТема: ${subject}\n\n${text}`;
+
+  // Сразу фиксируем первичный лид в CRM
+  await saveOrUpdateLead({
+    clientName: from.split('@')[0] || 'Клиент',
+    phone: 'N/A',
+    city: 'Уточняется',
+    details: `Email lead. Subject: ${subject}. Body: ${text.slice(0, 500)}`,
+    stage: 'New Lead',
+    source: 'Email'
+  });
+
+  const reply = await generateReply(sessionKey, content);
+  console.log(`💬 Ответ Анны (email, пока только в лог):\n${reply}\n`);
+  logStat();
+}
+
+async function checkEmails() {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('⚠️ Gmail не настроен (GMAIL_USER / GMAIL_APP_PASSWORD)');
+    return;
+  }
+
+  const client = new ImapFlow({
+    host: 'imap.gmail.com',
+    port: 993,
+    secure: true,
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD
+    },
+    logger: false,
+    socketTimeout: 60000,
+    greetingTimeout: 30000
+  });
+
+  // чтобы процесс не падал на timeout
+  client.on('error', (err) => {
+    console.error('IMAP connection error:', err.message);
+  });
+
+  try {
+    await client.connect();
+
+    const lock = await client.getMailboxLock('INBOX');
+    try {
+      // берём только непрочитанные
+      const uids = await client.search({ seen: false });
+
+      if (!uids || uids.length === 0) {
+        // нет новых писем — это нормально
+        return;
+      }
+
+      for (const uid of uids) {
+        try {
+          const msg = await client.fetchOne(uid, { source: true }, { uid: true });
+          if (!msg?.source) continue;
+
+          const parsed = await simpleParser(msg.source);
+          await processEmailMessage(parsed);
+
+          // помечаем как прочитанное
+          await client.messageFlagsAdd({ uid }, ['\\Seen']);
+        } catch (err) {
+          console.error('Ошибка обработки письма:', err.message);
+          // даже при ошибке помечаем, чтобы не зациклиться
+          try {
+            await client.messageFlagsAdd({ uid }, ['\\Seen']);
+          } catch {}
+        }
+      }
+    } finally {
+      lock.release();
+    }
+
+    await client.logout();
+  } catch (err) {
+    console.error('Ошибка IMAP:', err.message);
+  } finally {
+    try {
+      if (client.usable) await client.logout();
+    } catch {}
+  }
+}
+
+function startEmailWatcher() {
+  const intervalSec = Number(process.env.EMAIL_CHECK_INTERVAL || 60);
+  console.log(`📬 Мониторинг почты каждые ${intervalSec} сек`);
+  setTimeout(() => checkEmails(), 5000);
+  setInterval(() => checkEmails(), intervalSec * 1000);
 }
 
 // ====================== WHATSAPP ======================
@@ -397,34 +563,30 @@ cron.schedule('0 11 * * *', async () => {
   const THREE_DAYS = 3 * ONE_DAY;
 
   for (const [key, time] of Object.entries(lastActivity)) {
+    if (!key.startsWith('tg_')) continue;
     const elapsed = now - time;
 
-    // Только Telegram пока (безопаснее)
-    if (!key.startsWith('tg_')) continue;
-
-    let message = null;
     if (elapsed > THREE_DAYS) {
-      message = `Добрый день.\n\nХотели уточнить — удалось ли продвинуться с датами и локацией? Могу подготовить предварительный расчёт.`;
+      console.log(`Автодожим 3д готов для ${key}`);
+      lastActivity[key] = now;
     } else if (elapsed > ONE_DAY) {
-      message = `Добрый день.\n\nНапоминаю о вашем запросе. Если остались вопросы по смете или площадке — я на связи.`;
-    }
-
-    if (message) {
-      try {
-        // автодожим можно включить позже точечно
-        console.log(`Автодожим готов для ${key}`);
-        lastActivity[key] = now;
-      } catch {}
+      console.log(`Автодожим 1д готов для ${key}`);
+      lastActivity[key] = now;
     }
   }
 });
 
 // ====================== ЗАПУСК ======================
 async function main() {
-  console.log('⏳ Запуск усиленного Coucou Events Manager...\n');
+  console.log('⏳ Запуск Coucou Events Manager...\n');
+
   waClient.initialize();
   await startTelegram();
-  console.log('\n🚀 Бот запущен (Telegram + WhatsApp)');
+  startEmailWatcher();
+
+  console.log('\n🚀 Бот запущен');
+  console.log('Каналы: Telegram + WhatsApp + Email');
+  console.log('CRM: Notion (все источники)');
   console.log('Модель:', MODEL);
 }
 
