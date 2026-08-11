@@ -340,34 +340,11 @@ async function handleIncoming(sessionKey, text, sendFn) {
 }
 
 // ====================== EMAIL + SPAM FILTER ======================
-const SPAM_SENDERS = [
-  'noreply', 'no-reply', 'donotreply', 'do-not-reply',
-  'mailer-daemon', 'postmaster', 'newsletter', 'marketing',
-  'promo', 'notifications', 'bounce', 'daemon'
-];
-
 const SPAM_KEYWORDS = [
   'unsubscribe', 'viagra', 'casino', 'crypto giveaway',
   'you won', 'бесплатный приз', 'кликни сюда', 'urgent wire',
   'nigerian', 'lottery', 'bitcoin investment', 'секс знаком'
 ];
-
-function isSpamEmail({ from, subject, text }) {
-  const fromLower = (from || '').toLowerCase();
-  const subjectLower = (subject || '').toLowerCase();
-  const textLower = (text || '').toLowerCase();
-
-  if (!text || text.trim().length < 10) return true;
-  if (SPAM_SENDERS.some(s => fromLower.includes(s))) return true;
-  if (SPAM_KEYWORDS.some(k => subjectLower.includes(k) || textLower.includes(k))) return true;
-
-  const linkCount = (text.match(/https?:\/\//gi) || []).length;
-  if (linkCount > 8) return true;
-
-  if (!isRelevantMessage(text) && !isRelevantMessage(subject || '')) return true;
-
-  return false;
-}
 
 function extractEmailAddress(from) {
   if (!from) return 'unknown@unknown';
@@ -378,18 +355,55 @@ function extractEmailAddress(from) {
 async function processEmailMessage(parsed) {
   const from = extractEmailAddress(parsed.from?.text || '');
   const subject = parsed.subject || '(без темы)';
-  const text = (parsed.text || '')
-    .replace(/\s+/g, ' ')
-    .trim();
+
+  // text + html fallback
+  let text = (parsed.text || '').trim();
+  if (!text && parsed.html) {
+    text = String(parsed.html)
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
 
   console.log(`\n📧 Письмо от: ${from}`);
   console.log(`Тема: ${subject}`);
+  console.log(`Текст (первые 200): ${text.slice(0, 200)}`);
+
   const fromLower = from.toLowerCase();
-  if (fromLower.includes('no-reply@accounts.google.com')) return true;
-  if (fromLower.includes('accounts.google.com')) return true;
-  if (isSpamEmail({ from, subject, text })) {
+
+  if (
+    fromLower.includes('accounts.google.com') ||
+    fromLower.includes('no-reply@') ||
+    fromLower.includes('noreply@') ||
+    fromLower.includes('mailer-daemon')
+  ) {
     stats.spam++;
-    console.log('🚫 Пропущено как спам / нерелевантное');
+    console.log('🚫 Причина: системный отправитель');
+    logStat();
+    return;
+  }
+
+  if (!text || text.length < 5) {
+    stats.spam++;
+    console.log('🚫 Причина: пустое тело письма');
+    logStat();
+    return;
+  }
+
+  const relevant = isRelevantMessage(text) || isRelevantMessage(subject);
+  if (!relevant) {
+    stats.spam++;
+    console.log('🚫 Причина: не похоже на заявку по мероприятию');
+    logStat();
+    return;
+  }
+
+  if (SPAM_KEYWORDS.some(k => text.toLowerCase().includes(k) || subject.toLowerCase().includes(k))) {
+    stats.spam++;
+    console.log('🚫 Причина: спам-слова');
     logStat();
     return;
   }
@@ -401,7 +415,7 @@ async function processEmailMessage(parsed) {
   const sessionKey = `email_${from}`;
   const content = `Клиент написал на email.\nТема: ${subject}\n\n${text}`;
 
-  // Сразу фиксируем первичный лид в CRM
+  // сразу пишем в CRM
   await saveOrUpdateLead({
     clientName: from.split('@')[0] || 'Клиент',
     phone: 'N/A',
@@ -412,7 +426,7 @@ async function processEmailMessage(parsed) {
   });
 
   const reply = await generateReply(sessionKey, content);
-  console.log(`💬 Ответ Анны (email, пока только в лог):\n${reply}\n`);
+  console.log(`💬 Ответ Анны (email):\n${reply}\n`);
   logStat();
 }
 
@@ -435,23 +449,20 @@ async function checkEmails() {
     greetingTimeout: 30000
   });
 
-  // чтобы процесс не падал на timeout
   client.on('error', (err) => {
     console.error('IMAP connection error:', err.message);
   });
 
   try {
     await client.connect();
+    console.log('✅ IMAP подключён, проверяю входящие...');
 
     const lock = await client.getMailboxLock('INBOX');
     try {
-      // берём только непрочитанные
       const uids = await client.search({ seen: false });
+      console.log(`🔍 Непрочитанных писем: ${uids?.length || 0}`);
 
-      if (!uids || uids.length === 0) {
-        // нет новых писем — это нормально
-        return;
-      }
+      if (!uids || uids.length === 0) return;
 
       for (const uid of uids) {
         try {
@@ -461,11 +472,9 @@ async function checkEmails() {
           const parsed = await simpleParser(msg.source);
           await processEmailMessage(parsed);
 
-          // помечаем как прочитанное
           await client.messageFlagsAdd({ uid }, ['\\Seen']);
         } catch (err) {
           console.error('Ошибка обработки письма:', err.message);
-          // даже при ошибке помечаем, чтобы не зациклиться
           try {
             await client.messageFlagsAdd({ uid }, ['\\Seen']);
           } catch {}

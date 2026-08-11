@@ -1,3 +1,6 @@
-2026/08/11-02:03:16.237 26d440 Reusing MANIFEST /Users/nikitatrofimov/Downloads/coucou_events/.wwebjs_auth/session-coucou-anna/Default/Local Storage/leveldb/MANIFEST-000001
-2026/08/11-02:03:16.251 26d440 Recovering log #3
-2026/08/11-02:03:16.252 26d440 Reusing old log /Users/nikitatrofimov/Downloads/coucou_events/.wwebjs_auth/session-coucou-anna/Default/Local Storage/leveldb/000003.log 
+2026/08/11-02:41:57.968 27bbfb Reusing MANIFEST /Users/nikitatrofimov/Downloads/coucou_events/.wwebjs_auth/session-coucou-anna/Default/Local Storage/leveldb/MANIFEST-000001
+2026/08/11-02:41:58.004 27bbfb Recovering log #3
+2026/08/11-02:41:58.015 27bbfb Reusing old log /Users/nikitatrofimov/Downloads/coucou_events/.wwebjs_auth/session-coucou-anna/Default/Local Storage/leveldb/000003.log 
+2026/08/11-02:42:58.049 27bbff Level-0 table #5: started
+2026/08/11-02:42:58.079 27bbff Level-0 table #5: 19620 bytes OK
+2026/08/11-02:42:58.620 27bbff Delete type=0 #3
