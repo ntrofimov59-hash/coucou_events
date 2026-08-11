@@ -11,6 +11,7 @@ import cron from 'node-cron';
 import dotenv from 'dotenv';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
