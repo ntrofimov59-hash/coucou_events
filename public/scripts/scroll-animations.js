@@ -1,13 +1,26 @@
 // Плавное появление секций при скролле
 document.addEventListener('DOMContentLoaded', () => {
-  const elements = document.querySelectorAll('.glass, section, .process-section');
+  // Важно: :not(.no-fade-anim) исключает секции, содержащие sticky-элементы
+  // (например .summary-col в конфигураторе). Заданный на предке transform
+  // создаёт новый containing block и ломает position: sticky у потомков,
+  // поэтому такие секции анимировать нельзя.
+  const elements = document.querySelectorAll(
+    '.glass:not(.no-fade-anim), section:not(.no-fade-anim), .process-section:not(.no-fade-anim)'
+  );
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
+        // transform: 'none', а не 'translateY(0)' — иначе свойство transform
+        // остаётся объявленным навсегда и продолжает создавать containing
+        // block для дочерних sticky/fixed элементов даже после анимации.
+        entry.target.style.transform = 'none';
         observer.unobserve(entry.target);
+
+        window.setTimeout(() => {
+          entry.target.style.transition = '';
+        }, 850);
       }
     });
   }, {
