@@ -20,7 +20,7 @@ const uiTranslations = {
     title: "Конфигуратор события",
     subtitle:
       "Настройте параметры вашей площадки. Масштаб схемы, планировка столов и итоговый бюджет в USD пересчитываются мгновенно.",
-    cityLabel: "0. Выберите город проведения",
+    cityLabel: "Выберите город проведения",
     tentLabel: "1. Габариты и тип шатра",
     cateringLabel: "2. Кейтеринг и вместимость",
     guestsLabel: "Количество гостей на площадке",
@@ -64,7 +64,7 @@ const uiTranslations = {
     title: "Event Configurator",
     subtitle:
       "Customize your venue parameters. The layout, table arrangement, and total budget in USD update instantly.",
-    cityLabel: "0. Select the city",
+    cityLabel: "Select the city",
     tentLabel: "1. Tent size and type",
     cateringLabel: "2. Catering and capacity",
     guestsLabel: "Number of guests",
@@ -108,7 +108,7 @@ const uiTranslations = {
     title: "Configurador de eventos",
     subtitle:
       "Ajuste los parámetros de su lugar. La escala del plano, la disposición de las mesas y el presupuesto total en USD se actualizan al instante.",
-    cityLabel: "0. Seleccione la ciudad",
+    cityLabel: "Seleccione la ciudad",
     tentLabel: "1. Tamaño y tipo de carpa",
     cateringLabel: "2. Catering y capacidad",
     guestsLabel: "Número de invitados",
@@ -152,7 +152,7 @@ const uiTranslations = {
     title: "Конфигуратор события",
     subtitle:
       "Настройте параметры вашей площадки. Масштаб схемы, планировка столов и итоговый бюджет в USD пересчитываются мгновенно.",
-    cityLabel: "0. Выберите город проведения",
+    cityLabel: "Выберите город проведения",
     tentLabel: "1. Габариты и тип шатра",
     cateringLabel: "2. Кейтеринг и вместимость",
     guestsLabel: "Количество гостей на площадке",
@@ -211,106 +211,138 @@ const bioBase = SERVICES_PRICING.biotoilets.baseUsd;
 const tentOptionsMap = {
   ru: [
     {
-      id: "tent-s",
-      label: "Малый шатёр",
-      note: "до 30 гостей, 10x10 м",
-      price: Math.round(marqueeBase * 0.8),
-      width: 120,
-      height: 120,
-    },
-    {
       id: "tent-m",
-      label: "Средний шатёр",
-      note: "до 80 гостей, 10x20 м",
+      label: "M",
+      note: "до 80 гостей, 10×20 м",
       price: marqueeBase,
-      width: 180,
-      height: 120,
+      width: 160,
+      height: 110,
     },
     {
       id: "tent-l",
-      label: "Большой шатёр",
-      note: "до 200 гостей, 20x40 м",
+      label: "L",
+      note: "до 200 гостей, 20×40 м",
       price: Math.round(marqueeBase * 2.2),
+      width: 200,
+      height: 130,
+    },
+    {
+      id: "tent-xl",
+      label: "XL",
+      note: "до 350 гостей, 25×50 м",
+      price: Math.round(marqueeBase * 3.5),
       width: 240,
-      height: 140,
+      height: 150,
+    },
+    {
+      id: "tent-xxl",
+      label: "XXL",
+      note: "до 500 гостей, 30×60 м",
+      price: Math.round(marqueeBase * 5),
+      width: 270,
+      height: 170,
     },
   ],
   eng: [
     {
-      id: "tent-s",
-      label: "Small tent",
-      note: "up to 30 guests, 10x10 m",
-      price: Math.round(marqueeBase * 0.8),
-      width: 120,
-      height: 120,
-    },
-    {
       id: "tent-m",
-      label: "Medium tent",
-      note: "up to 80 guests, 10x20 m",
+      label: "M",
+      note: "up to 80 guests, 10×20 m",
       price: marqueeBase,
-      width: 180,
-      height: 120,
+      width: 160,
+      height: 110,
     },
     {
       id: "tent-l",
-      label: "Large tent",
-      note: "up to 200 guests, 20x40 m",
+      label: "L",
+      note: "up to 200 guests, 20×40 m",
       price: Math.round(marqueeBase * 2.2),
+      width: 200,
+      height: 130,
+    },
+    {
+      id: "tent-xl",
+      label: "XL",
+      note: "up to 350 guests, 25×50 m",
+      price: Math.round(marqueeBase * 3.5),
       width: 240,
-      height: 140,
+      height: 150,
+    },
+    {
+      id: "tent-xxl",
+      label: "XXL",
+      note: "up to 500 guests, 30×60 m",
+      price: Math.round(marqueeBase * 5),
+      width: 270,
+      height: 170,
     },
   ],
   esp: [
     {
-      id: "tent-s",
-      label: "Carpa pequeña",
-      note: "hasta 30 invitados, 10x10 m",
-      price: Math.round(marqueeBase * 0.8),
-      width: 120,
-      height: 120,
-    },
-    {
       id: "tent-m",
-      label: "Carpa mediana",
-      note: "hasta 80 invitados, 10x20 m",
+      label: "M",
+      note: "hasta 80 invitados, 10×20 m",
       price: marqueeBase,
-      width: 180,
-      height: 120,
+      width: 160,
+      height: 110,
     },
     {
       id: "tent-l",
-      label: "Carpa grande",
-      note: "hasta 200 invitados, 20x40 m",
+      label: "L",
+      note: "hasta 200 invitados, 20×40 m",
       price: Math.round(marqueeBase * 2.2),
+      width: 200,
+      height: 130,
+    },
+    {
+      id: "tent-xl",
+      label: "XL",
+      note: "hasta 350 invitados, 25×50 m",
+      price: Math.round(marqueeBase * 3.5),
       width: 240,
-      height: 140,
+      height: 150,
+    },
+    {
+      id: "tent-xxl",
+      label: "XXL",
+      note: "hasta 500 invitados, 30×60 m",
+      price: Math.round(marqueeBase * 5),
+      width: 270,
+      height: 170,
     },
   ],
   arm: [
     {
-      id: "tent-s",
-      label: "Малый шатёр",
-      note: "до 30 гостей, 10x10 м",
-      price: Math.round(marqueeBase * 0.8),
-      width: 120,
-      height: 120,
-    },
-    {
       id: "tent-m",
-      label: "Средний шатёр",
-      note: "до 80 гостей, 10x20 м",
+      label: "M",
+      note: "до 80 гостей, 10×20 м",
       price: marqueeBase,
-      width: 180,
-      height: 120,
+      width: 160,
+      height: 110,
     },
     {
       id: "tent-l",
-      label: "Большой шатёр",
-      note: "до 200 гостей, 20x40 м",
+      label: "L",
+      note: "до 200 гостей, 20×40 м",
       price: Math.round(marqueeBase * 2.2),
+      width: 200,
+      height: 130,
+    },
+    {
+      id: "tent-xl",
+      label: "XL",
+      note: "до 350 гостей, 25×50 м",
+      price: Math.round(marqueeBase * 3.5),
       width: 240,
-      height: 140,
+      height: 150,
+    },
+    {
+      id: "tent-xxl",
+      label: "XXL",
+      note: "до 500 гостей, 30×60 м",
+      price: Math.round(marqueeBase * 5),
+      width: 270,
+      height: 170,
     },
   ],
 };
@@ -327,7 +359,6 @@ const cateringOptionsMap = {
       id: "catering-base",
       label: "Базовый",
       note: "легкий фуршет",
-      pricePerArgument: 0,
       pricePerGuest: Math.round(cateringBasePerGuest * 0.5),
     },
     {
@@ -796,8 +827,15 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
     <link rel="alternate" hreflang="x-default" href="/ru/configurator" />
   </Fragment>
 
+  <!--
+    ВАЖНО: класс "no-fade-anim" исключает эту секцию из общего скролл-скрипта
+    /scripts/scroll-animations.js. Этот скрипт навешивает transform на все
+    <section> на странице для fade-up анимации, а transform на предке
+    создаёт новый containing block и полностью ломает position: sticky у
+    потомков (.summary-col). Не убирайте этот класс.
+  -->
   <section
-    class="configurator-page bg-white text-zinc-900 min-h-screen font-sans py-16"
+    class="configurator-page no-fade-anim bg-white text-zinc-900 min-h-screen font-sans py-16"
   >
     <div class="container max-w-6xl mx-auto px-6">
       <div
@@ -817,53 +855,73 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
       </p>
 
       <div class="configurator-grid">
-        <div class="options space-y-8">
+        <div class="options space-y-4">
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
-            <h2
-              class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
-            >
-              {t.cityLabel}
-            </h2>
-            <div class="relative">
-              <select
-                id="city-select"
-                class="w-full bg-white border-2 border-zinc-400 rounded-xl px-4 py-3 text-zinc-950 font-bold text-base focus:outline-none focus:border-zinc-950 cursor-pointer appearance-none shadow-sm"
-              >
-                {
-                  cityOptions.map((opt, i) => (
-                    <option
-                      value={opt.id}
-                      data-multiplier={opt.multiplier}
-                      selected={i === 0}
-                    >
-                      {opt.label}
-                    </option>
-                  ))
-                }
-              </select>
-              <div
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-700"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            <div class="city-guests-row">
+              <div class="city-guests-item">
+                <h2
+                  class="text-base font-extrabold uppercase tracking-wider mb-3 text-zinc-900"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M19 9l-7 7-7-7"></path>
-                </svg>
+                  {t.cityLabel}
+                </h2>
+                <div class="relative">
+                  <select
+                    id="city-select"
+                    class="w-full bg-white border-2 border-zinc-400 rounded-xl px-4 py-3 text-zinc-950 font-bold text-base focus:outline-none focus:border-zinc-950 cursor-pointer appearance-none shadow-sm"
+                  >
+                    {
+                      cityOptions.map((opt, i) => (
+                        <option
+                          value={opt.id}
+                          data-multiplier={opt.multiplier}
+                          selected={i === 0}
+                        >
+                          {opt.label}
+                        </option>
+                      ))
+                    }
+                  </select>
+                  <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-700"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="city-guests-item">
+                <h2
+                  class="text-base font-extrabold uppercase tracking-wider mb-3 text-zinc-900"
+                >
+                  {t.guestsLabel}
+                </h2>
+                <div class="guests-field">
+                  <input
+                    type="number"
+                    id="guests"
+                    min="1"
+                    value="40"
+                    class="bg-white border-2 border-zinc-400 rounded-xl px-4 py-3 text-zinc-900 font-extrabold text-base focus:outline-none focus:border-zinc-950 w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
@@ -897,30 +955,13 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
             >
               {t.cateringLabel}
             </h2>
-            <div
-              class="guests-field mb-5 p-4 bg-zinc-50 border-2 border-zinc-300 rounded-xl"
-            >
-              <label
-                for="guests"
-                class="text-xs text-zinc-900 block mb-2 font-extrabold uppercase tracking-wide"
-              >
-                {t.guestsLabel}
-              </label>
-              <input
-                type="number"
-                id="guests"
-                min="1"
-                value="40"
-                class="bg-white border-2 border-zinc-400 rounded-lg px-4 py-2.5 text-zinc-900 font-extrabold text-base focus:outline-none focus:border-zinc-950 w-36"
-              />
-            </div>
             <div class="swatches">
               {
                 cateringOptions.map((opt, i) => (
@@ -948,7 +989,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
@@ -989,7 +1030,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
@@ -1022,7 +1063,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
@@ -1055,7 +1096,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
@@ -1088,7 +1129,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <h2
               class="text-base font-extrabold uppercase tracking-wider mb-4 text-zinc-900"
@@ -1122,7 +1163,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="option-group p-5 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
+            class="option-group p-4 bg-white border-2 border-zinc-300 rounded-2xl shadow-sm"
           >
             <label
               class="swatch border border-zinc-200 flex-row items-center justify-between cursor-pointer"
@@ -1148,7 +1189,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
 
         <aside class="summary-col">
           <div
-            class="bg-white p-6 rounded-2xl border-2 border-zinc-300 shadow-sm overflow-hidden"
+            class="bg-white p-4 rounded-2xl border-2 border-zinc-300 shadow-sm overflow-hidden"
           >
             <p
               class="text-xs text-zinc-700 uppercase tracking-wider mb-4 font-extrabold"
@@ -1224,7 +1265,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
                 class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] text-zinc-700 font-mono bg-white/90 border border-zinc-200 px-2 py-1 rounded font-extrabold"
               >
                 <span>{t.blueprintScale}</span>
-                <span id="bp-legend-text">Шатёр M</span>
+                <span id="bp-legend-text">M</span>
               </div>
             </div>
             <p
@@ -1235,7 +1276,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
           </div>
 
           <div
-            class="bg-white p-6 rounded-2xl border-2 border-zinc-300 shadow-sm"
+            class="bg-white p-4 rounded-2xl border-2 border-zinc-300 shadow-sm"
           >
             <h2
               class="text-sm uppercase tracking-wider font-extrabold text-zinc-900 mb-4"
@@ -1269,6 +1310,23 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
         </aside>
       </div>
     </div>
+
+    <!-- Плавающая панель с итогом — только для мобильных, где sticky-колонка не активна (см. .configurator-grid, <960px раскладка column) -->
+    <div id="floating-summary" class="floating-summary">
+      <div class="floating-summary__inner">
+        <div class="floating-summary__price">
+          <span class="floating-summary__label">{t.totalLabel}</span>
+          <span id="floating-total" class="floating-summary__value">0 $</span>
+        </div>
+        <a
+          href={`${prefix}/booking`}
+          id="floating-cta"
+          class="floating-summary__cta"
+        >
+          {t.ctaText}
+        </a>
+      </div>
+    </div>
   </section>
 </Layout>
 
@@ -1276,85 +1334,195 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
   .configurator-grid {
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 1.75rem;
   }
   @media (min-width: 960px) {
     .configurator-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 360px;
+      grid-template-columns: minmax(0, 1fr) 340px;
       align-items: start;
+      gap: 2rem;
     }
   }
+
+  /* Город + гости всегда 1+1 (бок о бок) */
+  .city-guests-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: end;
+  }
+  .city-guests-item {
+    min-width: 0;
+  }
+  .city-guests-item h2 {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Сетка опций всегда 2 колонки, компактная */
   .swatches {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .option-group h2 {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.6rem !important;
+    letter-spacing: 0.05em;
   }
   .swatch {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    padding: 1.15rem;
-    border-radius: 12px;
+    gap: 0.1rem;
+    padding: 0.85rem;
+    border-radius: 10px;
     background: #ffffff;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   }
   .swatch:hover {
     border-color: #18181b;
     background: #fafafa;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
   }
   .swatch input[type="radio"] {
     position: absolute;
-    top: 1.15rem;
-    right: 1.15rem;
+    top: 0.75rem;
+    right: 0.75rem;
     accent-color: #18181b;
+    width: 14px;
+    height: 14px;
   }
   .swatch:has(input:checked) {
     border-color: #18181b;
     background: #ffffff;
     box-shadow:
       0 0 0 1px #18181b inset,
-      0 4px 12px rgba(0, 0, 0, 0.04);
+      0 3px 10px rgba(0, 0, 0, 0.04);
   }
   .swatch__label {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: #18181b;
-    padding-right: 1.5rem;
+    padding-right: 1.25rem;
+    line-height: 1.25;
   }
   .swatch__dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     display: inline-block;
   }
   .swatch__note {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #71717a;
+    line-height: 1.3;
   }
   .swatch__price {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #18181b;
     font-weight: 700;
-    margin-top: 0.25rem;
+    margin-top: 0.15rem;
   }
+
+  /*
+    Sticky sidebar — едет вместе со страницей вниз и вверх.
+    Никакого overflow/max-height здесь быть не должно: они превращают
+    блок в собственный внутренний скролл-контейнер вместо того, чтобы
+    он просто "прилипал" к вьюпорту. sticky сам естественно перестаёт
+    липнуть, когда доезжает до конца родительской grid-колонки — то
+    есть плавно "подъезжает" и останавливается под последней опцией,
+    как только колонка с опциями заканчивается.
+  */
   .summary-col {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
+    position: -webkit-sticky;
     position: sticky;
-    top: 1.5rem;
+    top: 1rem;
     align-self: start;
-    z-index: 10;
+    z-index: 20;
   }
-  @media (max-width: 959px) {
-    .summary-col {
-      position: static;
+
+  /* Плавающая панель внизу (мобильные, где grid превращается в колонку) */
+  .floating-summary {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid #e4e4e7;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    padding: 0.75rem 1rem;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  .floating-summary__inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .floating-summary__price {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .floating-summary__label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #71717a;
+  }
+  .floating-summary__value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    font-family: serif;
+    color: #18181b;
+    line-height: 1.1;
+  }
+  .floating-summary__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #18181b;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+  }
+  .floating-summary__cta:hover {
+    background: #27272a;
+  }
+
+  /* На десктопе right-колонка уже sticky и всегда видна — дублирующая
+     нижняя панель не нужна, скрываем её начиная с той же точки, где
+     включается grid-раскладка (960px). */
+  @media (min-width: 960px) {
+    .floating-summary {
+      display: none;
     }
+    .configurator-page {
+      padding-bottom: 4rem;
+    }
+  }
+
+  /* Отступ снизу у страницы на мобильных, чтобы контент не прятался под панелью */
+  .configurator-page {
+    padding-bottom: 5.5rem;
   }
 </style>
 
@@ -1364,6 +1532,8 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
   const summaryList = document.getElementById("summary-list");
   const summaryTotal = document.getElementById("summary-total");
   const summaryCta = document.getElementById("summary-cta");
+  const floatingTotal = document.getElementById("floating-total");
+  const floatingCta = document.getElementById("floating-cta");
   const lighting = document.getElementById("lighting");
 
   const bpTent = document.getElementById("bp-tent");
@@ -1582,68 +1752,71 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
       })
       .join("");
 
-    summaryTotal.textContent = formatPriceUSD(finalTotal);
+    const totalText = formatPriceUSD(finalTotal);
+    summaryTotal.textContent = totalText;
+    if (floatingTotal) floatingTotal.textContent = totalText;
 
-    if (summaryCta) {
-      const selectedTent =
-        checkedIn("tent")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
-      const selectedCatering =
-        checkedIn("catering")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
-      const selectedDecor =
-        checkedIn("decor")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
-      const selectedEnt =
-        checkedIn("entertainment")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
-      const selectedPhoto =
-        checkedIn("photo")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
-      const selectedTransfer =
-        checkedIn("transfer")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
-      const selectedBio =
-        checkedIn("bio")
-          ?.closest(".swatch")
-          ?.querySelector(".swatch__label")
-          ?.textContent?.trim() || "";
+    const selectedTent =
+      checkedIn("tent")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
+    const selectedCatering =
+      checkedIn("catering")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
+    const selectedDecor =
+      checkedIn("decor")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
+    const selectedEnt =
+      checkedIn("entertainment")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
+    const selectedPhoto =
+      checkedIn("photo")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
+    const selectedTransfer =
+      checkedIn("transfer")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
+    const selectedBio =
+      checkedIn("bio")
+        ?.closest(".swatch")
+        ?.querySelector(".swatch__label")
+        ?.textContent?.trim() || "";
 
-      const configParams = new URLSearchParams({
-        service: t.serviceName,
-        guests: guestsInput?.value || "0",
-        location: cityName,
-        estimate: formatPriceUSD(finalTotal),
-        options: [
-          selectedTent,
-          selectedCatering ? `${t.optionCatering}: ${selectedCatering}` : "",
-          selectedDecor ? `${t.optionDecor}: ${selectedDecor}` : "",
-          selectedEnt ? `${t.optionMusic}: ${selectedEnt}` : "",
-          selectedPhoto ? `${t.optionPhoto}: ${selectedPhoto}` : "",
-          selectedTransfer ? `${t.optionTransfer}: ${selectedTransfer}` : "",
-          selectedBio ? `${t.optionBio}: ${selectedBio}` : "",
-          lighting?.checked ? t.optionLighting : "",
-        ]
-          .filter(Boolean)
-          .join(", "),
-      });
+    const configParams = new URLSearchParams({
+      service: t.serviceName,
+      guests: guestsInput?.value || "0",
+      location: cityName,
+      estimate: totalText,
+      options: [
+        selectedTent,
+        selectedCatering ? `${t.optionCatering}: ${selectedCatering}` : "",
+        selectedDecor ? `${t.optionDecor}: ${selectedDecor}` : "",
+        selectedEnt ? `${t.optionMusic}: ${selectedEnt}` : "",
+        selectedPhoto ? `${t.optionPhoto}: ${selectedPhoto}` : "",
+        selectedTransfer ? `${t.optionTransfer}: ${selectedTransfer}` : "",
+        selectedBio ? `${t.optionBio}: ${selectedBio}` : "",
+        lighting?.checked ? t.optionLighting : "",
+      ]
+        .filter(Boolean)
+        .join(", "),
+    });
 
-      const langPrefix =
-        window.location.pathname.match(/^\/(ru|eng|esp|arm)/)?.[0] || "/ru";
-      summaryCta.href = `${langPrefix}/booking?${configParams.toString()}`;
-    }
+    const langPrefix =
+      window.location.pathname.match(/^\/(ru|eng|esp|arm)/)?.[0] || "/ru";
+    const bookingHref = `${langPrefix}/booking?${configParams.toString()}`;
+
+    if (summaryCta) summaryCta.href = bookingHref;
+    if (floatingCta) floatingCta.href = bookingHref;
 
     updateBlueprint();
   }
