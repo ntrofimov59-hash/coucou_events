@@ -90,7 +90,23 @@ const t = uiTexts[lang as keyof typeof uiTexts] || uiTexts.ru;
   lang={lang}
   image={(data.images && data.images[1]) || bgImage || undefined}
 >
-  <section
+  <Fragment slot="head">
+    {
+      (["ru", "eng", "esp", "arm"] as const).map((l) => (
+        <link
+          rel="alternate"
+          hreflang={l === "eng" ? "en" : l === "arm" ? "hy" : l}
+          href={`https://coucou-events.com/${l}/services/${slug}`}
+        />
+      ))
+    }
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={`https://coucou-events.com/ru/services/${slug}`}
+    />
+  </Fragment>
+ <section
     class="service-hero"
     style={bgImage ? `background-image: url('${bgImage}');` : ""}
   >

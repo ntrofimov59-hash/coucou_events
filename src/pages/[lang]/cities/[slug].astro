@@ -109,20 +109,20 @@ const jsonLd = {
   lang={lang}
   image={city.image}
 >
-  <Fragment slot="head">
+    <Fragment slot="head">
     {
       (["ru", "eng", "esp", "arm"] as const).map((l) => (
         <link
           rel="alternate"
           hreflang={l === "eng" ? "en" : l === "arm" ? "hy" : l}
-          href={`/${l}/cities/${city.slug}`}
+          href={`https://coucou-events.com/${l}/cities/${city.slug}`}
         />
       ))
     }
     <link
       rel="alternate"
       hreflang="x-default"
-      href={`/ru/cities/${city.slug}`}
+      href={`https://coucou-events.com/ru/cities/${city.slug}`}
     />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>

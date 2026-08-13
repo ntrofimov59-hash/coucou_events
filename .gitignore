@@ -35,3 +35,16 @@ styled-system-studio
 .wwebjs_auth/
 .wwebjs_cache/
 .wwebjs_cashe/
+
+# secrets & local
+.env
+.env.*
+3324
+3324.pub
+*.pem
+*.key
+agent.js.bak
+*.astro.save
+data/
+.wwebjs_auth/
+.wwebjs_cache/

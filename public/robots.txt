@@ -5,4 +5,4 @@ Disallow: /api/
 Disallow: /*/thank-you
 Disallow: /*/thank-you/
 
-Sitemap: https://your-domain.com/sitemap-index.xml
+Sitemap: https://coucou-events.com/sitemap.xml

@@ -30,6 +30,7 @@
     "mailparser": "^3.9.15",
     "node-cron": "^4.6.0",
     "node-telegram-bot-api": "^1.2.0",
+    "nodemailer": "^9.0.5",
     "openai": "^7.4.0",
     "pdfkit": "^0.19.1",
     "pizzip": "^3.2.0",

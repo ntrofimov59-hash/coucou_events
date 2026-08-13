@@ -11,6 +11,7 @@ import cron from 'node-cron';
 import dotenv from 'dotenv';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
+import fs from 'fs';
 import nodemailer from 'nodemailer';
 
 dotenv.config();
@@ -33,7 +34,41 @@ const MODEL = 'llama-3.3-70b-versatile';
 const userSessions = {};
 const lastActivity = {};
 const stats = { total: 0, relevant: 0, saved: 0, objections: 0, email: 0, spam: 0 };
+// ===== Persistent storage =====
+const SESSIONS_FILE = './data/sessions.json';
+const ACTIVITY_FILE = './data/activity.json';
 
+function ensureDataDir() {
+  if (!fs.existsSync('./data')) fs.mkdirSync('./data', { recursive: true });
+}
+
+function loadJson(file, fallback = {}) {
+  try {
+    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (e) {
+    console.error('Ошибка чтения', file, e.message);
+  }
+  return fallback;
+}
+
+function saveJson(file, data) {
+  try {
+    ensureDataDir();
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('Ошибка записи', file, e.message);
+  }
+}
+
+// Загружаем при старте
+Object.assign(userSessions, loadJson(SESSIONS_FILE, {}));
+Object.assign(lastActivity, loadJson(ACTIVITY_FILE, {}));
+
+// Сохраняем каждые 2 минуты
+setInterval(() => {
+  saveJson(SESSIONS_FILE, userSessions);
+  saveJson(ACTIVITY_FILE, lastActivity);
+}, 2 * 60 * 1000);
 // ====================== БАЗА ЗНАНИЙ ======================
 const SYSTEM_PROMPT = `Ты — Анна, старший менеджер агентства Coucou Events.
 Стиль: деловой, уверенный, конкретный. Пиши грамотно на русском литературном языке.
@@ -239,11 +274,12 @@ async function saveOrUpdateLead(args) {
 async function generateReply(sessionKey, userMessage) {
   if (!userSessions[sessionKey]) {
     userSessions[sessionKey] = {
-      messages: [{ role: "system", content: SYSTEM_PROMPT }],
-      data: {},
-      stage: 'New Lead',
-      source: getSourceFromSessionKey(sessionKey)
-    };
+  messages: [{ role: "system", content: SYSTEM_PROMPT }],
+  data: {},
+  stage: 'New Lead',
+  source: getSourceFromSessionKey(sessionKey),
+  followupLevel: 0
+};
   }
 
   const session = userSessions[sessionKey];
@@ -427,10 +463,39 @@ async function processEmailMessage(parsed) {
   });
 
   const reply = await generateReply(sessionKey, content);
-  console.log(`💬 Ответ Анны (email):\n${reply}\n`);
-  logStat();
+console.log(`💬 Ответ Анны (email):\n${reply}\n`);
+
+try {
+  await sendEmailReply(from, subject, reply);
+} catch (e) {
+  console.error('Ошибка отправки email-ответа:', e.message);
 }
 
+logStat();
+}
+async function sendEmailReply(to, subject, text) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.log('⚠️ Не могу отправить email: нет GMAIL_USER / GMAIL_APP_PASSWORD');
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"Coucou Events | Анна" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: subject.startsWith('Re:') ? subject : `Re: ${subject}`,
+    text,
+  });
+
+  console.log(`📤 Email-ответ отправлен → ${to}`);
+}
 async function checkEmails() {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     console.log('⚠️ Gmail не настроен (GMAIL_USER / GMAIL_APP_PASSWORD)');
@@ -507,7 +572,7 @@ const waClient = new WhatsAppClient({
   authStrategy: new LocalAuth({ clientId: "coucou-anna" }),
   puppeteer: {
     headless: true,
-    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    executablePath: '/usr/bin/chromium-browser',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
   }
 });
@@ -530,7 +595,7 @@ waClient.on('message', async (msg) => {
 });
 
 // ====================== TELEGRAM ======================
-async function startTelegram() {
+async function startTelegram() {  // tgClient будет доступен для автодожима
   const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
 
   await client.start({
@@ -545,45 +610,98 @@ async function startTelegram() {
   await client.getDialogs({ limit: 5 });
   setInterval(() => client.getMe().catch(() => {}), 60000);
 
-  client.addEventHandler(async (event) => {
-    const message = event.message;
-    if (!message?.message || message.out) return;
+ client.addEventHandler(async (event) => {
+  const message = event.message;
+  if (!message?.message || message.out) return;
 
-    try {
-      const chat = await message.getChat();
-      if (chat?.className !== 'User') return;
+  try {
+    const chat = await message.getChat();
+    if (chat?.className !== 'User') return;
 
-      const senderId = Number(message.senderId.toString());
-      await handleIncoming(`tg_${senderId}`, message.message.trim(), async (reply) => {
-        await client.sendMessage(senderId, { message: reply });
-      });
-    } catch (err) {
-      console.error("TG error:", err.message);
+    // Не отвечаем ботам
+    const sender = await message.getSender();
+    if (sender?.bot) return;
+
+    const text = message.message.trim();
+
+    // Игнор уведомлений от бота заявок
+    if (
+      text.includes('Новая заявка на бронирование') ||
+      text.includes('Новое сообщение из контактной формы') ||
+      text.startsWith('🔥') ||
+      text.startsWith('📩')
+    ) {
+      return;
     }
-  }, new NewMessage({ incoming: true }));
 
+    const senderId = Number(message.senderId.toString());
+    await handleIncoming(`tg_${senderId}`, text, async (reply) => {
+      await client.sendMessage(senderId, { message: reply });
+    });
+  } catch (err) {
+    console.error("TG error:", err.message);
+  }
+}, new NewMessage({ incoming: true }));
+
+  globalThis.tgClient = client;
   return client;
 }
 
 // ====================== АВТОДОЖИМ ======================
+const FOLLOWUP_1D = `Здравствуйте! Это Анна из Coucou Events.
+
+Хотела уточнить — остались ли у вас вопросы по организации мероприятия? Могу подготовить короткий расчёт под ваши вводные.
+
+Напишите, когда будет удобно.`;
+
+const FOLLOWUP_3D = `Добрый день! Анна, Coucou Events.
+
+Напоминаю о себе. Если дата ещё актуальна — лучше заранее зафиксировать интерес, хорошие площадки и подрядчики бронируются быстро.
+
+Готова помочь с вариантами сметы. Напишите, если актуально.`;
+
 cron.schedule('0 11 * * *', async () => {
   console.log('⏰ Проверка автодожима...');
   const now = Date.now();
   const ONE_DAY = 24 * 60 * 60 * 1000;
   const THREE_DAYS = 3 * ONE_DAY;
+  const client = globalThis.tgClient;
+
+  if (!client) {
+    console.log('⚠️ Telegram-клиент ещё не готов, автодожим пропущен');
+    return;
+  }
 
   for (const [key, time] of Object.entries(lastActivity)) {
     if (!key.startsWith('tg_')) continue;
-    const elapsed = now - time;
 
-    if (elapsed > THREE_DAYS) {
-      console.log(`Автодожим 3д готов для ${key}`);
-      lastActivity[key] = now;
-    } else if (elapsed > ONE_DAY) {
-      console.log(`Автодожим 1д готов для ${key}`);
-      lastActivity[key] = now;
+    const elapsed = now - time;
+    const senderId = Number(key.replace('tg_', ''));
+    if (!senderId) continue;
+
+    // Уже отправляли дожим недавно — не спамим
+    const session = userSessions[key];
+    if (!session) continue;
+
+    try {
+      if (elapsed > THREE_DAYS && session.followupLevel < 2) {
+        await client.sendMessage(senderId, { message: FOLLOWUP_3D });
+        session.followupLevel = 2;
+        lastActivity[key] = now;
+        console.log(`📤 Автодожим 3д отправлен → ${key}`);
+      } else if (elapsed > ONE_DAY && (!session.followupLevel || session.followupLevel < 1)) {
+        await client.sendMessage(senderId, { message: FOLLOWUP_1D });
+        session.followupLevel = 1;
+        lastActivity[key] = now;
+        console.log(`📤 Автодожим 1д отправлен → ${key}`);
+      }
+    } catch (e) {
+      console.error(`Ошибка автодожима ${key}:`, e.message);
     }
   }
+
+  saveJson(SESSIONS_FILE, userSessions);
+  saveJson(ACTIVITY_FILE, lastActivity);
 });
 
 // ====================== ЗАПУСК ======================
@@ -592,7 +710,7 @@ async function main() {
 
   waClient.initialize();
   await startTelegram();
-  startEmailWatcher();
+ // startEmailWatcher();
 
   console.log('\n🚀 Бот запущен');
   console.log('Каналы: Telegram + WhatsApp + Email');
