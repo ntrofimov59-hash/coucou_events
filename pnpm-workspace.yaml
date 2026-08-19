@@ -1,15 +1,11 @@
 allowBuilds:
-  '@google/genai': set this to true or false
-  '@parcel/watcher': false
-  bufferutil: set this to true or false
-  core-js: set this to true or false
-  es5-ext: set this to true or false
+  '@google/genai': true
+  bufferutil: true
+  core-js: true
+  es5-ext: true
   esbuild: true
-  protobufjs: set this to true or false
-  puppeteer: set this to true or false
+  protobufjs: true
+  puppeteer: true
+  utf-8-validate: true
   sharp: true
-  utf-8-validate: set this to true or false
-
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - esbuild
+  # '@parcel/watcher': false   # можно оставить false, если не нужен
