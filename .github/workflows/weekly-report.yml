@@ -25,7 +25,7 @@ jobs:
           version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run report script
         env:
@@ -49,5 +49,5 @@ jobs:
           # Делаем коммит, если изменения есть
           git commit -m "chore: update previous metrics for weekly report" || echo "No changes to commit"
           
-          # Отправляем изменения обратно в репозиторий
-          git push
+          # Отправляем изменения обратно в репозиторий (явно указываем ветку main)
+          git push origin main
