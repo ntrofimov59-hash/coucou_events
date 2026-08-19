@@ -1,11 +1,11 @@
 allowBuilds:
   '@google/genai': true
+  '@parcel/watcher': true
   bufferutil: true
   core-js: true
   es5-ext: true
   esbuild: true
   protobufjs: true
   puppeteer: true
-  utf-8-validate: true
   sharp: true
-  # '@parcel/watcher': false   # можно оставить false, если не нужен
+  utf-8-validate: true
