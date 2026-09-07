@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-Disallow: /api/
-Disallow: /*/thank-you
-Disallow: /*/thank-you/
-
-Sitemap: https://your-domain.com/sitemap-index.xml
