@@ -58,22 +58,25 @@ const ogLocales: Record<string, string> = {
 };
 const ogLocale = ogLocales[currentLang] || "ru_RU";
 
+// Динамический Schema.org в зависимости от текущей страницы
+const isCityPage = Astro.url.pathname.includes("/cities/");
+const currentCitySlug = isCityPage ? Astro.url.pathname.split("/").filter(Boolean)[1] : null;
+const foundCity = currentCitySlug ? CITIES.find(c => (typeof c === "object" && c.slug === currentCitySlug)) : null;
+const cityName = foundCity && typeof foundCity === "object" ? foundCity.name : null;
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  name: SITE_NAME,
-  description: SITE_DESCRIPTION,
-  url: SITE_URL,
+  name: cityName ? `${SITE_NAME} - ${cityName}` : SITE_NAME,
+  description: description,
+  url: canonicalURL,
   image: ogImageURL,
   telephone: CONTACT.phone,
   email: CONTACT.email,
   serviceType: "Event Planning",
-  areaServed: CITIES.map((city) => ({
+  areaServed: cityName ? { "@type": "City", name: cityName } : CITIES.map((city) => ({
     "@type": "City",
-    name:
-      typeof city === "string"
-        ? city
-        : (city as { name?: string }).name || String(city),
+    name: typeof city === "string" ? city : (city.name || String(city)),
   })),
 };
 
