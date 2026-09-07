@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import Layout from "@/layouts/Layout.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import { CITIES_PAGES } from "@/data/cities";
 import { CONTACT } from "@/config/site";
 
@@ -81,6 +82,12 @@ const ui = {
   whatsapp: "WhatsApp",
 };
 
+const breadcrumbItems = [
+  { name: ui.breadcrumbHome, url: prefix },
+  { name: ui.breadcrumbCities, url: `${prefix}/cities` },
+  { name: name, url: `${prefix}/cities/${city.slug}` }
+];
+
 const waHref =
   CONTACT.whatsappHref ||
   (CONTACT.whatsapp
@@ -129,13 +136,7 @@ const jsonLd = {
 
   <section class="city-page">
     <div class="container">
-      <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a href={prefix}>{ui.breadcrumbHome}</a>
-        <span>/</span>
-        <a href={`${prefix}/cities`}>{ui.breadcrumbCities}</a>
-        <span>/</span>
-        <span>{name}</span>
-      </nav>
+      <Breadcrumbs items={breadcrumbItems} />
 
       <div class="hero-grid">
         <div>
@@ -207,21 +208,6 @@ const jsonLd = {
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 1.5rem;
-  }
-  .breadcrumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: #71717a;
-    margin-bottom: 2rem;
-  }
-  .breadcrumb a {
-    color: #52525b;
-    text-decoration: none;
-  }
-  .breadcrumb a:hover {
-    color: #18181b;
   }
   .hero-grid {
     display: grid;
