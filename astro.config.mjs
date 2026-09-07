@@ -7,7 +7,7 @@ import sitemap from "@astrojs/sitemap";
 import node from "@astrojs/node";
 
 // Должен совпадать с SITE_URL в src/config/site.ts (без слэша в конце)
-const SITE = "https://your-domain.com";
+const SITE = "https://coucou-events";
 
 // https://astro.build/config
 export default defineConfig({
