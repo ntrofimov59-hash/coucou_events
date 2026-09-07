@@ -8,6 +8,15 @@ interface Props {
   canonicalURL?: string;
   locale?: string;
   type?: 'website' | 'article';
+  // Данные для Service schema (передаём только на страницах услуг)
+  service?: {
+    name: string;
+    description: string;
+    serviceType?: string;
+    image?: string;
+    price?: string;          // например "от $450"
+    priceCurrency?: string;  // "USD"
+  };
 }
 
 const {
@@ -16,7 +25,8 @@ const {
   image = '/images/og-default.jpg',
   canonicalURL = new URL(Astro.url.pathname, SITE_URL).href,
   locale = 'ru',
-  type = 'website'
+  type = 'website',
+  service
 } = Astro.props;
 
 const fullImageURL = image.startsWith('http') ? image : `${SITE_URL}${image}`;
@@ -47,13 +57,8 @@ const organizationSchema = {
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday"
+      "Monday", "Tuesday", "Wednesday", "Thursday",
+      "Friday", "Saturday", "Sunday"
     ],
     "opens": "09:00",
     "closes": "21:00"
@@ -65,23 +70,47 @@ const organizationSchema = {
   ].filter(Boolean),
   "priceRange": "$$",
   "areaServed": [
-    "Yerevan",
-    "Barcelona",
-    "Bali",
-    "Phuket",
-    "Nha Trang",
-    "Da Nang",
-    "Prague",
-    "Marrakech",
-    "Casablanca",
-    "Antalya",
-    "Belgrade",
-    "Budapest",
-    "Tbilisi",
-    "Goa",
-    "Sri Lanka"
+    "Yerevan", "Barcelona", "Bali", "Phuket", "Nha Trang", "Da Nang",
+    "Prague", "Marrakech", "Casablanca", "Antalya", "Belgrade",
+    "Budapest", "Tbilisi", "Goa", "Sri Lanka"
   ]
 };
+
+// Service schema (только если передали данные услуги)
+const serviceSchema = service ? {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": service.name,
+  "description": service.description,
+  "serviceType": service.serviceType || service.name,
+  "provider": {
+    "@type": "LocalBusiness",
+    "name": SITE_NAME,
+    "url": SITE_URL,
+    "telephone": CONTACT.phone,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": CONTACT.address,
+      "addressLocality": "Yerevan",
+      "addressCountry": "AM"
+    }
+  },
+  "areaServed": organizationSchema.areaServed,
+  "url": canonicalURL,
+  "image": service.image ? (service.image.startsWith('http') ? service.image : `${SITE_URL}${service.image}`) : fullImageURL,
+  ...(service.price && {
+    "offers": {
+      "@type": "Offer",
+      "price": service.price.replace(/[^\d.]/g, '') || undefined,
+      "priceCurrency": service.priceCurrency || "USD",
+      "availability": "https://schema.org/InStock",
+      "url": canonicalURL
+    }
+  })
+} : null;
+
+const schemas = [organizationSchema];
+if (serviceSchema) schemas.push(serviceSchema);
 ---
 
 <!-- Основные SEO теги -->
@@ -89,7 +118,7 @@ const organizationSchema = {
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL} />
 
-<!-- Open Graph / соцсети -->
+<!-- Open Graph -->
 <meta property="og:type" content={type} />
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={title} />
@@ -106,4 +135,6 @@ const organizationSchema = {
 <meta name="twitter:image" content={fullImageURL} />
 
 <!-- Schema.org -->
-<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+{schemas.map((schema) => (
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+))}

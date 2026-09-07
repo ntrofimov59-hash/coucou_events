@@ -1,6 +1,5 @@
 ---
 export const prerender = true;
-
 import { getCollection, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
@@ -12,13 +11,11 @@ export async function getStaticPaths() {
     "services",
     ({ data }) => data.published !== false,
   );
-
   return services.map((service) => {
     const parts = service.id.split("/");
     const lang = parts.length > 1 ? parts[0] : "ru";
     let slug = parts.length > 1 ? parts.slice(1).join("/") : parts[0];
     slug = slug.replace(/\.(mdx|md)$/, "");
-
     return {
       params: { lang, slug },
       props: { service },
@@ -27,14 +24,12 @@ export async function getStaticPaths() {
 }
 
 const { service } = Astro.props;
-
 if (!service) {
   return Astro.redirect("/404");
 }
 
 const { data, id } = service;
 const { Content } = await render(service);
-
 const parts = id.split("/");
 const lang = parts.length > 1 ? parts[0] : "ru";
 const slug = (parts.length > 1 ? parts.slice(1).join("/") : parts[0]).replace(
@@ -105,6 +100,14 @@ const breadcrumbItems = [
   description={data.description}
   lang={lang}
   image={(data.images && data.images[1]) || bgImage || undefined}
+  service={{
+    name: data.title,
+    description: data.description,
+    serviceType: data.title,
+    image: (data.images && data.images[1]) || bgImage || undefined,
+    price: displayPrice,
+    priceCurrency: "USD"
+  }}
 >
   <section
     class="service-hero"
@@ -117,7 +120,6 @@ const breadcrumbItems = [
       </div>
       <h1>{data.title}</h1>
       <p class="service-lead">{data.description}</p>
-
       <div class="hero-action-bar">
         <div class="hero-price">
           <span>{t.priceLabel}</span>
@@ -277,7 +279,6 @@ const breadcrumbItems = [
     font-size: 1.1rem;
     margin-bottom: 3.5rem;
   }
-
   .mdx-article :global(*) {
     color: #d4d4d8;
   }
@@ -309,7 +310,6 @@ const breadcrumbItems = [
   .mdx-article :global(li) {
     margin-bottom: 0.5rem;
   }
-
   .features-box {
     background: #121215;
     border: 1px solid rgba(255, 255, 255, 0.08);
