@@ -8,7 +8,7 @@ Allow: /
 Disallow: */thank-you
 Disallow: */api/
 
-Sitemap: ${SITE_URL}/sitemap-index.xml
+Sitemap: ${SITE_URL}/sitemap.xml
   `.trim();
 
   return new Response(robotsTxt, {
