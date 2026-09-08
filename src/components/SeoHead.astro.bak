@@ -1,0 +1,43 @@
+---
+import { SITE_URL } from '@/config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  canonicalURL?: string;
+  locale?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title,
+  description,
+  image = '/images/og-default.jpg',
+  canonicalURL = new URL(Astro.url.pathname, SITE_URL).href,
+  locale = 'ru',
+  type = 'website'
+} = Astro.props;
+
+const fullImageURL = image.startsWith('http') ? image : `${SITE_URL}${image}`;
+---
+
+<!-- Основные SEO теги -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph / соцсети (Telegram, WhatsApp, Facebook) -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={fullImageURL} />
+<meta property="og:locale" content={locale} />
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={fullImageURL} />

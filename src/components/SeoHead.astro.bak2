@@ -1,0 +1,109 @@
+---
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, CONTACT } from '@/config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  canonicalURL?: string;
+  locale?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title,
+  description,
+  image = '/images/og-default.jpg',
+  canonicalURL = new URL(Astro.url.pathname, SITE_URL).href,
+  locale = 'ru',
+  type = 'website'
+} = Astro.props;
+
+const fullImageURL = image.startsWith('http') ? image : `${SITE_URL}${image}`;
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": ["Organization", "LocalBusiness"],
+  "name": SITE_NAME,
+  "alternateName": "Coucou Events",
+  "url": SITE_URL,
+  "logo": `${SITE_URL}/logo.svg`,
+  "image": `${SITE_URL}/og-image.jpg`,
+  "description": SITE_DESCRIPTION,
+  "telephone": CONTACT.phone,
+  "email": CONTACT.email,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": CONTACT.address,
+    "addressLocality": "Yerevan",
+    "postalCode": "0012",
+    "addressCountry": "AM"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "40.1872",
+    "longitude": "44.5152"
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "opens": "09:00",
+    "closes": "21:00"
+  },
+  "sameAs": [
+    CONTACT.telegram,
+    CONTACT.instagram,
+    CONTACT.whatsappHref
+  ].filter(Boolean),
+  "priceRange": "$$",
+  "areaServed": [
+    "Yerevan",
+    "Barcelona",
+    "Bali",
+    "Phuket",
+    "Nha Trang",
+    "Da Nang",
+    "Prague",
+    "Marrakech",
+    "Casablanca",
+    "Antalya",
+    "Belgrade",
+    "Budapest",
+    "Tbilisi",
+    "Goa",
+    "Sri Lanka"
+  ]
+};
+---
+
+<!-- Основные SEO теги -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph / соцсети -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={fullImageURL} />
+<meta property="og:locale" content={locale} />
+<meta property="og:site_name" content={SITE_NAME} />
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={fullImageURL} />
+
+<!-- Schema.org -->
+<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  coucou-events:
+    build: .
+    container_name: coucou-events-app
+    restart: always
+    ports:
+      - "4321:4321"
+    env_file:
+      - .env
+    volumes:
+      - ./.wwebjs_auth:/app/.wwebjs_auth
+      - ./.wwebjs_cache:/app/.wwebjs_cache
+      - ./previous_metrics.json:/app/previous_metrics.json
+    networks:
+      - coucou-network
+
+networks:
+  coucou-network:
+    driver: bridge

@@ -1,5 +1,10 @@
 ---
 import SeoHead from '@/components/SeoHead.astro';
+import Header from "@/components/Header/Header.astro";
+import { Footer } from "@/components/Footer";
+import FloatingActions from "@/components/ui/FloatingActions.astro";
+import Analytics from "@/components/ui/Analytics.astro";
+import "../styles/global.css";
 
 interface Props {
   title: string;
@@ -7,6 +12,7 @@ interface Props {
   image?: string;
   locale?: string;
   lang?: string;
+  currentPath?: string;
   service?: {
     name: string;
     description: string;
@@ -23,10 +29,12 @@ const {
   image, 
   locale = 'ru',
   lang,
+  currentPath,
   service 
 } = Astro.props;
 
 const currentLocale = lang || locale;
+const pagePath = currentPath || Astro.url.pathname;
 ---
 <!doctype html>
 <html lang={currentLocale}>
@@ -41,8 +49,13 @@ const currentLocale = lang || locale;
       locale={currentLocale}
       service={service}
     />
+    <slot name="head" />
   </head>
   <body class="bg-white text-gray-900 antialiased min-h-screen flex flex-col">
+    <Header currentPath={pagePath} lang={currentLocale} />
     <slot />
+    <Footer currentPath={pagePath} lang={currentLocale} />
+    <FloatingActions />
+    <Analytics />
   </body>
 </html>
