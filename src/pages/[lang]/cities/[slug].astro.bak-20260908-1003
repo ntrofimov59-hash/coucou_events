@@ -4,8 +4,7 @@ export const prerender = true;
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import { CITIES_PAGES } from "@/data/cities";
-import { CONTACT, SITE_URL } from "@/config/site";
-import { SERVICE_SLUGS, SERVICE_NAMES } from "@/data/services-map";
+import { CONTACT } from "@/config/site";
 
 export function getStaticPaths() {
   const langs = ["ru", "eng", "esp", "arm"] as const;
@@ -31,11 +30,6 @@ const ui = {
     breadcrumbCities: "Города",
     eventsLabel: "Форматы",
     whyLabel: "Почему Coucou",
-    seasonLabel: "Сезон",
-    priceLabel: "Бюджет",
-    logisticsLabel: "Логистика и визы",
-    venuesLabel: "Площадки-партнёры",
-    faqLabel: "Частые вопросы",
     ctaTitle: "Готовы обсудить мероприятие?",
     ctaLead: "Оставьте заявку — подготовим предложение под ваш город и формат.",
     ctaBtn: "Оставить заявку",
@@ -47,14 +41,9 @@ const ui = {
     breadcrumbCities: "Cities",
     eventsLabel: "Formats",
     whyLabel: "Why Coucou",
-    seasonLabel: "Best season",
-    priceLabel: "Budget",
-    logisticsLabel: "Logistics & visas",
-    venuesLabel: "Partner venues",
-    faqLabel: "FAQ",
     ctaTitle: "Ready to plan your event?",
     ctaLead:
-      "Submit a request — we'll prepare a proposal for your city and format.",
+      "Submit a request — we’ll prepare a proposal for your city and format.",
     ctaBtn: "Submit request",
     configurator: "Open configurator",
     whatsapp: "WhatsApp",
@@ -64,11 +53,6 @@ const ui = {
     breadcrumbCities: "Ciudades",
     eventsLabel: "Formatos",
     whyLabel: "Por qué Coucou",
-    seasonLabel: "Mejor temporada",
-    priceLabel: "Presupuesto",
-    logisticsLabel: "Logística y visados",
-    venuesLabel: "Venues asociados",
-    faqLabel: "Preguntas frecuentes",
     ctaTitle: "¿Listo para planear tu evento?",
     ctaLead: "Envía una solicitud; prepararemos una propuesta para tu ciudad.",
     ctaBtn: "Enviar solicitud",
@@ -80,11 +64,6 @@ const ui = {
     breadcrumbCities: "Քաղաքներ",
     eventsLabel: "Ձևաչափեր",
     whyLabel: "Ինչու Coucou",
-    seasonLabel: "Լավագույն սեզոն",
-    priceLabel: "Բյուջե",
-    logisticsLabel: "Լոգիստիկա և վիզա",
-    venuesLabel: "Գործընկեր հարթակներ",
-    faqLabel: "Հաճախակի հարցեր",
     ctaTitle: "Պատրա՞ստ եք քննարկել միջոցառումը",
     ctaLead: "Թողեք հայտ՝ կպատրաստենք առաջարկ ձեր քաղաքի և ձևաչափի համար:",
     ctaBtn: "Թողնել հայտ",
@@ -96,11 +75,6 @@ const ui = {
   breadcrumbCities: "Города",
   eventsLabel: "Форматы",
   whyLabel: "Почему Coucou",
-  seasonLabel: "Сезон",
-  priceLabel: "Бюджет",
-  logisticsLabel: "Логистика и визы",
-  venuesLabel: "Площадки-партнёры",
-  faqLabel: "Частые вопросы",
   ctaTitle: "Готовы обсудить мероприятие?",
   ctaLead: "Оставьте заявку.",
   ctaBtn: "Оставить заявку",
@@ -111,7 +85,7 @@ const ui = {
 const breadcrumbItems = [
   { name: ui.breadcrumbHome, url: prefix },
   { name: ui.breadcrumbCities, url: `${prefix}/cities` },
-  { name: name, url: `${prefix}/cities/${city.slug}` },
+  { name: name, url: `${prefix}/cities/${city.slug}` }
 ];
 
 const waHref =
@@ -120,75 +94,20 @@ const waHref =
     ? `https://wa.me/${String(CONTACT.whatsapp).replace(/\D/g, "")}`
     : "#");
 
-const pageUrl = `${SITE_URL}${prefix}/cities/${city.slug}`;
-
-// --- Service schema (усиленная: гео + офферы) ---
-const serviceJsonLd = {
+const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Service",
   name: city.seoTitle[L] || city.seoTitle.ru,
   description: city.seoDescription[L] || city.seoDescription.ru,
-  serviceType: "Event planning",
-  url: pageUrl,
-  image: city.image ? `${SITE_URL}${city.image}` : undefined,
   provider: {
     "@type": "ProfessionalService",
     name: "Coucou",
-    url: SITE_URL,
-    telephone: CONTACT.phone,
   },
   areaServed: {
     "@type": "City",
     name: name,
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: city.geo.lat,
-      longitude: city.geo.lng,
-    },
-  },
-  hasOfferCatalog: {
-    "@type": "OfferCatalog",
-    name: `Event services in ${name}`,
-    itemListElement: (city.eventTypes[L] || city.eventTypes.ru).map(
-      (t: string) => ({
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: t,
-        },
-      }),
-    ),
   },
 };
-
-// --- BreadcrumbList schema ---
-const breadcrumbJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: breadcrumbItems.map((item, i) => ({
-    "@type": "ListItem",
-    position: i + 1,
-    name: item.name,
-    item: `${SITE_URL}${item.url}`,
-  })),
-};
-
-// --- FAQPage schema ---
-const faqJsonLd =
-  city.faq && city.faq.length
-    ? {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: city.faq.map((item: any) => ({
-          "@type": "Question",
-          name: item.q[L] || item.q.ru,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.a[L] || item.a.ru,
-          },
-        })),
-      }
-    : null;
 ---
 
 <Layout
@@ -212,11 +131,7 @@ const faqJsonLd =
       hreflang="x-default"
       href={`/ru/cities/${city.slug}`}
     />
-    <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
-    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
-    {faqJsonLd && (
-      <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
-    )}
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
 
   <section class="city-page">
@@ -229,100 +144,56 @@ const faqJsonLd =
           <h1>{city.heading[L] || city.heading.ru}</h1>
           <p class="lead">{city.lead[L] || city.lead.ru}</p>
           <div class="hero-actions">
-            <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a>
-            <a href={`${prefix}/configurator`} class="btn btn-outline">{ui.configurator}</a>
+            <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a
+            >
+            <a href={`${prefix}/configurator`} class="btn btn-outline"
+              >{ui.configurator}</a
+            >
           </div>
         </div>
-        {city.image && (
-          <div class="hero-image">
-            <img
-              src={city.image}
-              alt={`${city.heading[L] || city.heading.ru} — Coucou`}
-              loading="eager"
-            />
-          </div>
-        )}
+        {
+          city.image && (
+            <div class="hero-image">
+              <img src={city.image} alt={name} loading="eager" />
+            </div>
+          )
+        }
       </div>
 
       <div class="content-grid">
         <div>
           <h2>{ui.whyLabel}</h2>
           <ul class="highlights">
-            {(city.highlights[L] || city.highlights.ru).map((item: string) => (
-              <li>{item}</li>
-            ))}
+            {
+              (city.highlights[L] || city.highlights.ru).map((item) => (
+                <li>{item}</li>
+              ))
+            }
           </ul>
         </div>
         <div>
           <h2>{ui.eventsLabel}</h2>
           <div class="tags">
-            {(city.eventTypes[L] || city.eventTypes.ru).map((tag: string) => (
-              <span class="tag">{tag}</span>
-            ))}
+            {
+              (city.eventTypes[L] || city.eventTypes.ru).map((tag) => (
+                <span class="tag">{tag}</span>
+              ))
+            }
           </div>
         </div>
       </div>
-
-      <div class="info-grid">
-        <div class="info-card">
-          <h3>{ui.seasonLabel}</h3>
-          <p>{city.season[L] || city.season.ru}</p>
-        </div>
-        <div class="info-card">
-          <h3>{ui.priceLabel}</h3>
-          <p>{city.priceNote[L] || city.priceNote.ru}</p>
-        </div>
-        <div class="info-card">
-          <h3>{ui.logisticsLabel}</h3>
-          <p>{city.logistics[L] || city.logistics.ru}</p>
-        </div>
-      </div>
-
-      {city.venues && city.venues.length > 0 && (
-        <div class="venues-block">
-          <h2>{ui.venuesLabel}</h2>
-          <div class="venues-grid">
-            {city.venues.map((v: any) => (
-              <div class="venue-card">
-                <h4>{v.name}</h4>
-                <p>{v.note[L] || v.note.ru}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div class="services-block">
-        <h2>{L === "ru" ? `Услуги в ${name}` : L === "eng" ? `Services in ${name}` : L === "esp" ? `Servicios en ${name}` : `Ծառայություններ՝ ${name}`}</h2>
-        <div class="tags">
-          {SERVICE_SLUGS.map((s) => (
-            <a href={`${prefix}/services/${s}`} class="tag tag-link">
-              {SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {city.faq && city.faq.length > 0 && (
-        <div class="faq-block">
-          <h2>{ui.faqLabel}</h2>
-          <div class="faq-list">
-            {city.faq.map((item: any) => (
-              <details class="faq-item">
-                <summary>{item.q[L] || item.q.ru}</summary>
-                <p>{item.a[L] || item.a.ru}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div class="cta-block">
         <h2>{ui.ctaTitle}</h2>
         <p>{ui.ctaLead}</p>
         <div class="cta-actions">
           <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a>
-          <a href={waHref} class="btn btn-whatsapp" target="_blank" rel="noopener noreferrer">{ui.whatsapp}</a>
+          <a
+            href={waHref}
+            class="btn btn-whatsapp"
+            target="_blank"
+            rel="noopener noreferrer">{ui.whatsapp}</a
+          >
         </div>
       </div>
     </div>
@@ -388,10 +259,7 @@ const faqJsonLd =
     gap: 2rem;
     margin-bottom: 3rem;
   }
-  .content-grid h2,
-  .venues-block h2,
-  .services-block h2,
-  .faq-block h2 {
+  .content-grid h2 {
     font-size: 1.15rem;
     margin: 0 0 1rem;
     color: #18181b;
@@ -407,17 +275,6 @@ const faqJsonLd =
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  .tag-link {
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .tag-link:hover {
-    background: #e4e4e7;
-  }
-  .services-block {
-    margin-bottom: 3rem;
-  }
   .tag {
     background: #f4f4f5;
     border: 1px solid #e4e4e7;
@@ -425,78 +282,6 @@ const faqJsonLd =
     padding: 0.4rem 0.9rem;
     font-size: 0.85rem;
     color: #27272a;
-  }
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    margin-bottom: 3rem;
-  }
-  .info-card {
-    background: #fafafa;
-    border: 1px solid #e4e4e7;
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-  }
-  .info-card h3 {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #71717a;
-    margin: 0 0 0.5rem;
-  }
-  .info-card p {
-    margin: 0;
-    color: #27272a;
-    line-height: 1.6;
-    font-size: 0.95rem;
-  }
-  .venues-block {
-    margin-bottom: 3rem;
-  }
-  .venues-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-  .venue-card {
-    border: 1px solid #e4e4e7;
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-  }
-  .venue-card h4 {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-    color: #18181b;
-  }
-  .venue-card p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #52525b;
-    line-height: 1.5;
-  }
-  .faq-block {
-    margin-bottom: 3rem;
-  }
-  .faq-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .faq-item {
-    border: 1px solid #e4e4e7;
-    border-radius: 14px;
-    padding: 1rem 1.25rem;
-  }
-  .faq-item summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: #18181b;
-  }
-  .faq-item p {
-    margin: 0.75rem 0 0;
-    color: #3f3f46;
-    line-height: 1.6;
   }
   .cta-block {
     background: #09090b;
@@ -546,8 +331,7 @@ const faqJsonLd =
   }
   @media (max-width: 768px) {
     .hero-grid,
-    .content-grid,
-    .info-grid {
+    .content-grid {
       grid-template-columns: 1fr;
     }
   }
