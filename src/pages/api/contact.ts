@@ -100,16 +100,16 @@ export const POST: APIRoute = async ({ request }) => {
     }
     if (userMessage) text += `▪️ Сообщение:\n${userMessage}\n`;
 
-    const token = envStr("TELEGRAM_BOT_TOKEN");
-    const chatId = envStr("TELEGRAM_CHAT_ID");
+    const token = envStr("BOOKING_BOT_TOKEN");
+    const chatId = envStr("BOOKING_CHAT_ID");
 
     if (!token || !chatId) {
-      console.error("TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы");
+      console.error("BOOKING_BOT_TOKEN или BOOKING_CHAT_ID не заданы");
       return json(
         {
           success: false,
           error:
-            "Сервер не настроен: задайте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в .env и перезапустите dev/сервер",
+            "Сервер не настроен: задайте BOOKING_BOT_TOKEN и BOOKING_CHAT_ID в .env и перезапустите dev/сервер",
         },
         500,
       );

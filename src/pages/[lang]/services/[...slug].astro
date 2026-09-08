@@ -5,6 +5,7 @@ import Layout from "@/layouts/Layout.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import EventCalculator from "@/components/EventCalculator.astro";
 import { formatPriceFrom } from "@/data/pricingData";
+import { CITIES_PAGES } from "@/data/cities";
 
 export async function getStaticPaths() {
   const services = await getCollection(
@@ -55,6 +56,7 @@ const uiTexts = {
     bookBtn: "Забронировать дату",
     featuresTitle: "Что входит в стоимость услуги",
     seoTitle: "Частые запросы",
+    citiesTitle: "Города проведения",
   },
   eng: {
     home: "Home",
@@ -64,6 +66,7 @@ const uiTexts = {
     bookBtn: "Book a Date",
     featuresTitle: "What is included",
     seoTitle: "Popular searches",
+    citiesTitle: "Available cities",
   },
   esp: {
     home: "Inicio",
@@ -73,6 +76,7 @@ const uiTexts = {
     bookBtn: "Reservar fecha",
     featuresTitle: "Qué incluye el servicio",
     seoTitle: "Búsquedas populares",
+    citiesTitle: "Ciudades disponibles",
   },
   arm: {
     home: "Գլխավոր",
@@ -82,6 +86,7 @@ const uiTexts = {
     bookBtn: "Ամրագրել ամսաթիվը",
     featuresTitle: "Ինչ է ներառված ծառայության մեջ",
     seoTitle: "Հաճախակի որոնվող հարցումներ",
+    citiesTitle: "Քաղաքներ, որտեղ մատչելի է",
   },
 };
 
@@ -93,6 +98,13 @@ const breadcrumbItems = [
   { name: t.servicesMenu, url: `${prefix}/all-services` },
   { name: data.title, url: `${prefix}/services/${slug}` }
 ];
+
+// Сортируем города по названию на текущем языке
+const sortedCities = [...CITIES_PAGES].sort((a, b) => {
+  const nameA = a.name[lang] || a.name.ru;
+  const nameB = b.name[lang] || b.name.ru;
+  return nameA.localeCompare(nameB);
+});
 ---
 
 <Layout
@@ -170,6 +182,21 @@ const breadcrumbItems = [
           </div>
         )
       }
+
+      <!-- БЛОК ГОРОДОВ -->
+      <div class="cities-block">
+        <h3>{t.citiesTitle}</h3>
+        <div class="cities-grid">
+          {sortedCities.map((city) => {
+            const cityName = city.name[lang] || city.name.ru;
+            return (
+              <a href={`${prefix}/cities/${city.slug}`} class="city-tag">
+                {cityName}
+              </a>
+            );
+          })}
+        </div>
+      </div>
 
       <div id="calculator" class="calc-section">
         <EventCalculator
@@ -375,6 +402,38 @@ const breadcrumbItems = [
     border-radius: 8px;
     font-size: 0.85rem;
   }
+
+  /* Блок городов */
+  .cities-block {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 2rem;
+    margin-bottom: 3rem;
+  }
+  .cities-block h3 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  .cities-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .city-tag {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #d4d4d8;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .city-tag:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #10b981;
+  }
+
   .calc-section {
     margin-top: 4rem;
   }
