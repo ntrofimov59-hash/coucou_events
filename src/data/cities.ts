@@ -69,17 +69,17 @@ function city(
     country: countries,
     image,
     geo,
-    seoTitle: {
-      ru: `Организация мероприятий в ${names.ru} под ключ | Coucou`,
-      eng: `Event planning in ${names.eng} turnkey | Coucou`,
-      esp: `Organización de eventos en ${names.esp} | Coucou`,
-      arm: `Միջոցառումների կազմակերպում՝ ${names.arm} | Coucou`,
+        seoTitle: {
+      ru: `Организация мероприятий в ${names.ru} под ключ | Свадьбы, корпоративы | Coucou`,
+      eng: `Event planning in ${names.eng} turnkey | Weddings & Corporates | Coucou`,
+      esp: `Organización de eventos en ${names.esp} | Bodas y corporativos | Coucou`,
+      arm: `Միջոցառումների կազմակերպում ${names.arm}-ում | Coucou`,
     },
     seoDescription: {
-      ru: `Coucou организует свадьбы, корпоративы и частные праздники в ${names.ru}. Шатры, кейтеринг, декор и полное сопровождение.`,
-      eng: `Coucou organizes weddings, corporates and private parties in ${names.eng}. Tents, catering, decor and full production.`,
-      esp: `Coucou organiza bodas, corporativos y fiestas privadas en ${names.esp}.`,
-      arm: `Coucou-ն կազմակերպում է միջոցառումներ ${names.arm} քաղաքում։`,
+      ru: `Полная организация свадеб, корпоративов и частных мероприятий в ${names.ru}. Шатры, кейтеринг, декор, координация дня. Работаем локально + международные проекты. Смета за 24 часа.`,
+      eng: `Full-service wedding, corporate and private event planning in ${names.eng}. Tents, catering, decor, day-of coordination. Local team + international projects. Quote in 24h.`,
+      esp: `Organización integral de bodas, eventos corporativos y privados en ${names.esp}. Carpas, catering, decoración y coordinación. Equipo local + proyectos internacionales.`,
+      arm: `Հարսանիքների, կորպորատիվ և մասնավոր միջոցառումների ամբողջական կազմակերպում ${names.arm}-ում։ Վրաններ, քեյթերինգ, դեկոր, օրվա համակարգում։`,
     },
     heading: {
       ru: `Организация мероприятий в ${names.ru} под ключ`,
