@@ -139,8 +139,8 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    const token = envStr("BOOKING_BOT_TOKEN");
-    const chatId = envStr("BOOKING_CHAT_ID");
+    const token = envStr("BOOKING_BOT_TOKEN") || envStr("TELEGRAM_BOT_TOKEN");
+    const chatId = envStr("BOOKING_CHAT_ID") || envStr("TELEGRAM_CHAT_ID");
 
     if (!token || !chatId) {
       console.error("BOOKING_BOT_TOKEN или BOOKING_CHAT_ID не заданы");
