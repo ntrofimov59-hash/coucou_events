@@ -53,8 +53,8 @@ async function getNotionMetrics() {
   }
 }
 
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.TELEGRAM_CHAT_ID;
+const token = process.env.ANALYTICS_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+const chatId = process.env.ANALYTICS_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
 const yandexToken = process.env.YANDEX_TOKEN;
 const gcpKeyRaw = process.env.GCP_SA_KEY;
 
