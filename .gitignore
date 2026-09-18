@@ -37,3 +37,5 @@ styled-system-studio
 .wwebjs_cashe/
 .wwebjs_auth/
 gcp-key.json
+*.bak-*
+*.patch

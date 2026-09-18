@@ -1,0 +1,433 @@
+---
+export const prerender = true;
+
+import Layout from "@/layouts/Layout.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
+import { CITIES_PAGES } from "@/data/cities";
+import { CONTACT, SITE_URL } from "@/config/site";
+import { SERVICE_SLUGS, SERVICE_NAMES } from "@/data/services-map";
+import {
+  SERVICE_PROFILES,
+  pairMeta,
+  fill,
+  LANGS,
+  type Lang,
+} from "@/data/service-city";
+
+export function getStaticPaths() {
+  return LANGS.flatMap((lang) =>
+    CITIES_PAGES.flatMap((city) =>
+      SERVICE_SLUGS.filter((s) => SERVICE_PROFILES[s]).map((service) => ({
+        params: { lang, slug: city.slug, service },
+        props: { city, profile: SERVICE_PROFILES[service] },
+      })),
+    ),
+  );
+}
+
+const { lang = "ru", slug, service } = Astro.params;
+const { city, profile } = Astro.props;
+const L = lang as Lang;
+const prefix = `/${lang}`;
+
+const meta = pairMeta(profile, city, L);
+const pageUrl = `${SITE_URL}${prefix}/cities/${slug}/${service}`;
+
+const ui = {
+  ru: {
+    home: "Главная",
+    cities: "Города",
+    included: "Что входит",
+    how: "Как мы работаем",
+    season: "Сезон в городе",
+    budget: "Бюджет",
+    logistics: "Логистика и визы",
+    venues: "Где проводим",
+    faqLabel: "Частые вопросы",
+    otherServices: "Другие услуги в этом городе",
+    otherCities: "Эта услуга в других городах",
+    allInCity: "Все услуги в городе",
+    ctaTitle: "Посчитаем вашу смету",
+    ctaLead: "Опишите формат и количество гостей — вернёмся с расчётом и вариантами.",
+    ctaBtn: "Оставить заявку",
+    configurator: "Собрать смету в конфигураторе",
+    whatsapp: "Написать в WhatsApp",
+  },
+  eng: {
+    home: "Home",
+    cities: "Cities",
+    included: "What's included",
+    how: "How we work",
+    season: "Season in the city",
+    budget: "Budget",
+    logistics: "Logistics & visas",
+    venues: "Where we work",
+    faqLabel: "FAQ",
+    otherServices: "Other services in this city",
+    otherCities: "This service in other cities",
+    allInCity: "All services in the city",
+    ctaTitle: "Let's price your event",
+    ctaLead: "Tell us the format and guest count — we'll come back with numbers and options.",
+    ctaBtn: "Request a quote",
+    configurator: "Build an estimate",
+    whatsapp: "Message on WhatsApp",
+  },
+  esp: {
+    home: "Inicio",
+    cities: "Ciudades",
+    included: "Qué incluye",
+    how: "Cómo trabajamos",
+    season: "Temporada",
+    budget: "Presupuesto",
+    logistics: "Logística y visados",
+    venues: "Dónde trabajamos",
+    faqLabel: "Preguntas frecuentes",
+    otherServices: "Otros servicios en esta ciudad",
+    otherCities: "Este servicio en otras ciudades",
+    allInCity: "Todos los servicios",
+    ctaTitle: "Calculemos tu presupuesto",
+    ctaLead: "Cuéntanos el formato y el número de invitados.",
+    ctaBtn: "Solicitar presupuesto",
+    configurator: "Abrir configurador",
+    whatsapp: "Escribir por WhatsApp",
+  },
+  arm: {
+    home: "Գլխավոր",
+    cities: "Քաղաքներ",
+    included: "Ինչ է ներառված",
+    how: "Ինչպես ենք աշխատում",
+    season: "Սեզոն",
+    budget: "Բյուջե",
+    logistics: "Լոգիստիկա և վիզա",
+    venues: "Որտեղ ենք աշխատում",
+    faqLabel: "Հաճախակի հարցեր",
+    otherServices: "Այլ ծառայություններ այս քաղաքում",
+    otherCities: "Այս ծառայությունը այլ քաղաքներում",
+    allInCity: "Բոլոր ծառայությունները",
+    ctaTitle: "Հաշվարկենք ձեր բյուջեն",
+    ctaLead: "Նկարագրեք ձևաչափը և հյուրերի քանակը։",
+    ctaBtn: "Թողնել հայտ",
+    configurator: "Բացել կոնֆիգուրատորը",
+    whatsapp: "Գրել WhatsApp-ով",
+  },
+}[L];
+
+const breadcrumbItems = [
+  { name: ui.home, url: prefix },
+  { name: ui.cities, url: `${prefix}/cities` },
+  { name: meta.cityName, url: `${prefix}/cities/${slug}` },
+  { name: profile.titleForm[L], url: `${prefix}/cities/${slug}/${service}` },
+];
+
+const waHref =
+  CONTACT.whatsappHref ||
+  (CONTACT.whatsapp
+    ? `https://wa.me/${String(CONTACT.whatsapp).replace(/\D/g, "")}`
+    : "#");
+
+const deliverables = profile.deliverables[L] || profile.deliverables.ru;
+const process = profile.process[L] || profile.process.ru;
+const faqItems = profile.faq.map((f) => ({
+  q: fill(f.q[L] || f.q.ru, meta.cityName),
+  a: fill(f.a[L] || f.a.ru, meta.cityName),
+}));
+
+const otherServices = SERVICE_SLUGS.filter(
+  (s) => s !== service && SERVICE_PROFILES[s],
+);
+const otherCities = CITIES_PAGES.filter((c) => c.slug !== slug);
+
+// --- JSON-LD ---
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: `${profile.titleForm[L]} — ${meta.cityName}`,
+  description: meta.description,
+  serviceType: profile.serviceType,
+  url: pageUrl,
+  image: city.image ? `${SITE_URL}${city.image}` : undefined,
+  provider: {
+    "@type": "ProfessionalService",
+    name: "Coucou",
+    url: SITE_URL,
+    telephone: CONTACT.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: CONTACT.address,
+      addressLocality: "Yerevan",
+      addressCountry: "AM",
+    },
+  },
+  areaServed: {
+    "@type": "City",
+    name: meta.cityName,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: meta.cityName,
+      addressCountry: meta.country,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: city.geo.lat,
+      longitude: city.geo.lng,
+    },
+  },
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: `${profile.titleForm[L]} — ${meta.cityName}`,
+    itemListElement: deliverables.map((d: string) => ({
+      "@type": "Offer",
+      itemOffered: { "@type": "Service", name: d },
+    })),
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: breadcrumbItems.map((item, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: item.name,
+    item: `${SITE_URL}${item.url}`,
+  })),
+};
+
+const faqJsonLd = faqItems.length
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    }
+  : null;
+
+const hreflangOf = (l: string) =>
+  l === "eng" ? "en" : l === "arm" ? "hy" : l === "esp" ? "es" : l;
+---
+
+<Layout
+  title={meta.title}
+  description={meta.description}
+  lang={lang}
+  image={city.image}
+>
+  <Fragment slot="head">
+    {
+      LANGS.map((l) => (
+        <link
+          rel="alternate"
+          hreflang={hreflangOf(l)}
+          href={`${SITE_URL}/${l}/cities/${slug}/${service}`}
+        />
+      ))
+    }
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={`${SITE_URL}/ru/cities/${slug}/${service}`}
+    />
+    <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+    {faqJsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+    )}
+  </Fragment>
+
+  <section class="sc-page">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">{meta.cityName}, {meta.country}</p>
+          <h1>{meta.h1}</h1>
+          <p class="lead">{meta.lead}</p>
+          <div class="hero-actions">
+            <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a>
+            <a href={`${prefix}/configurator`} class="btn btn-outline">{ui.configurator}</a>
+          </div>
+        </div>
+        {city.image && (
+          <div class="hero-image">
+            <img src={city.image} alt={`${meta.h1} — Coucou`} loading="eager" />
+          </div>
+        )}
+      </div>
+
+      <div class="content-grid">
+        <div>
+          <h2>{ui.included}</h2>
+          <ul class="ticks">
+            {deliverables.map((d: string) => <li>{d}</li>)}
+          </ul>
+        </div>
+        <div>
+          <h2>{ui.how}</h2>
+          <ol class="steps">
+            {process.map((p: string) => <li>{p}</li>)}
+          </ol>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>{ui.season}</h3>
+          <p>{city.season[L] || city.season.ru}</p>
+        </div>
+        <div class="info-card">
+          <h3>{ui.budget}</h3>
+          <p>{profile.budgetHint[L] || profile.budgetHint.ru}</p>
+          <p class="muted">{city.priceNote[L] || city.priceNote.ru}</p>
+        </div>
+        <div class="info-card">
+          <h3>{ui.logistics}</h3>
+          <p>{city.logistics[L] || city.logistics.ru}</p>
+        </div>
+      </div>
+
+      {city.venues && city.venues.length > 0 && (
+        <div class="block">
+          <h2>{ui.venues}</h2>
+          <div class="venues-grid">
+            {city.venues.map((v: any) => (
+              <div class="venue-card">
+                <h4>{v.name}</h4>
+                <p>{v.note[L] || v.note.ru}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {faqItems.length > 0 && (
+        <div class="block">
+          <h2>{ui.faqLabel}</h2>
+          <div class="faq-list">
+            {faqItems.map((f) => (
+              <details class="faq-item">
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div class="cta-block">
+        <h2>{ui.ctaTitle}</h2>
+        <p>{ui.ctaLead}</p>
+        <div class="cta-actions">
+          <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a>
+          <a href={waHref} class="btn btn-whatsapp" target="_blank" rel="noopener noreferrer">{ui.whatsapp}</a>
+        </div>
+      </div>
+
+      <div class="block linkset">
+        <h2>{ui.otherServices}</h2>
+        <div class="tags">
+          {otherServices.map((s) => (
+            <a href={`${prefix}/cities/${slug}/${s}`} class="tag tag-link">
+              {SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru}
+            </a>
+          ))}
+          <a href={`${prefix}/cities/${slug}`} class="tag tag-link tag-strong">
+            {ui.allInCity}
+          </a>
+        </div>
+      </div>
+
+      <div class="block linkset">
+        <h2>{ui.otherCities}</h2>
+        <div class="tags">
+          {otherCities.map((c) => (
+            <a href={`${prefix}/cities/${c.slug}/${service}`} class="tag tag-link">
+              {c.name[L] || c.name.ru}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .sc-page { padding: 3rem 0 5rem; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+  .hero-grid {
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem; align-items: center; margin-bottom: 3.5rem;
+  }
+  .eyebrow {
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+    color: #71717a; margin: 0 0 .75rem;
+  }
+  h1 {
+    font-family: serif; font-size: clamp(1.9rem, 3.6vw, 2.8rem);
+    line-height: 1.15; color: #18181b; margin: 0 0 1rem;
+  }
+  .lead { font-size: 1.08rem; line-height: 1.7; color: #52525b; margin: 0 0 1.75rem; }
+  .hero-actions, .cta-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+  .hero-image {
+    border-radius: 20px; overflow: hidden; aspect-ratio: 4/3; background: #f4f4f5;
+  }
+  .hero-image img { width: 100%; height: 100%; object-fit: cover; }
+  .content-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-bottom: 3rem;
+  }
+  h2 { font-size: 1.15rem; margin: 0 0 1rem; color: #18181b; }
+  .ticks, .steps { margin: 0; padding-left: 1.2rem; }
+  .ticks li, .steps li {
+    color: #52525b; line-height: 1.65; margin-bottom: .6rem;
+  }
+  .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem; margin-bottom: 3rem;
+  }
+  .info-card {
+    background: #fafafa; border: 1px solid #ececef;
+    border-radius: 14px; padding: 1.25rem;
+  }
+  .info-card h3 { font-size: .95rem; margin: 0 0 .6rem; color: #18181b; }
+  .info-card p { margin: 0 0 .5rem; color: #52525b; line-height: 1.6; font-size: .92rem; }
+  .info-card .muted { color: #8a8a94; font-size: .86rem; }
+  .block { margin-bottom: 3rem; }
+  .venues-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;
+  }
+  .venue-card {
+    border: 1px solid #ececef; border-radius: 12px; padding: 1rem 1.1rem;
+  }
+  .venue-card h4 { margin: 0 0 .4rem; font-size: .95rem; color: #18181b; }
+  .venue-card p { margin: 0; font-size: .86rem; color: #71717a; line-height: 1.55; }
+  .faq-list { display: flex; flex-direction: column; gap: .6rem; }
+  .faq-item {
+    border: 1px solid #ececef; border-radius: 12px; padding: .9rem 1.1rem; background: #fff;
+  }
+  .faq-item summary { cursor: pointer; font-weight: 500; color: #18181b; }
+  .faq-item p { margin: .75rem 0 0; color: #52525b; line-height: 1.65; font-size: .93rem; }
+  .cta-block {
+    background: #18181b; color: #fff; border-radius: 20px;
+    padding: 2.5rem; text-align: center; margin-bottom: 3rem;
+  }
+  .cta-block h2 { color: #fff; font-size: 1.4rem; }
+  .cta-block p { color: #d4d4d8; margin: 0 0 1.5rem; }
+  .cta-block .cta-actions { justify-content: center; }
+  .tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tag {
+    display: inline-block; padding: .4rem .85rem; border-radius: 999px;
+    background: #f4f4f5; color: #3f3f46; font-size: .85rem;
+  }
+  .tag-link { text-decoration: none; transition: background .15s; }
+  .tag-link:hover { background: #e4e4e7; }
+  .tag-strong { background: #18181b; color: #fff; }
+  .tag-strong:hover { background: #3f3f46; }
+  .linkset h2 { font-size: 1rem; color: #52525b; font-weight: 500; }
+  @media (max-width: 860px) {
+    .hero-grid, .content-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .cta-block { padding: 2rem 1.25rem; }
+  }
+</style>

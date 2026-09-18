@@ -6,6 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import EventCalculator from "@/components/EventCalculator.astro";
 import { formatPriceFrom } from "@/data/pricingData";
 import { CITIES_PAGES } from "@/data/cities";
+import { SERVICE_PROFILES } from "@/data/service-city";
 
 export async function getStaticPaths() {
   const services = await getCollection(
@@ -99,6 +100,9 @@ const breadcrumbItems = [
   { name: data.title, url: `${prefix}/services/${slug}` }
 ];
 
+// Есть ли для этой услуги страницы связок «город × услуга»
+const hasPairPages = Boolean(SERVICE_PROFILES[slug as string]);
+
 // Сортируем города по названию на текущем языке
 const sortedCities = [...CITIES_PAGES].sort((a, b) => {
   const nameA = a.name[lang] || a.name.ru;
@@ -190,7 +194,14 @@ const sortedCities = [...CITIES_PAGES].sort((a, b) => {
           {sortedCities.map((city) => {
             const cityName = city.name[lang] || city.name.ru;
             return (
-              <a href={`${prefix}/cities/${city.slug}`} class="city-tag">
+              <a
+                href={
+                  hasPairPages
+                    ? `${prefix}/cities/${city.slug}/${slug}`
+                    : `${prefix}/cities/${city.slug}`
+                }
+                class="city-tag"
+              >
                 {cityName}
               </a>
             );
