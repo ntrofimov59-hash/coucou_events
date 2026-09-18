@@ -359,7 +359,6 @@ const bookingHref = `/${lang}/booking`;
     </div>
 
     <div class="portfolio-swiper-wrap">
-      <!-- Навигация над кейсами, по центру: стрелка • точки • стрелка -->
       <div class="portfolio-nav">
         <button
           class="portfolio-nav-btn portfolio-nav-prev"
@@ -422,6 +421,7 @@ const bookingHref = `/${lang}/booking`;
                   data-review={item.review}
                   data-client={item.client}
                   data-image={item.images[0]}
+                  data-images={JSON.stringify(item.images)}
                 >
                   <div class="case-gallery" data-count={item.images.length}>
                     {item.images.map((img, idx) => (
@@ -479,8 +479,40 @@ const bookingHref = `/${lang}/booking`;
       &times;
     </button>
 
-    <div class="modal-image-wrapper">
-      <img id="modal-image" src="" alt="" />
+    <div class="modal-gallery">
+      <div class="modal-gallery-track" data-modal-track></div>
+
+      <button
+        class="modal-gallery-arrow modal-gallery-prev"
+        type="button"
+        aria-label="Предыдущее фото"
+        data-modal-prev
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <button
+        class="modal-gallery-arrow modal-gallery-next"
+        type="button"
+        aria-label="Следующее фото"
+        data-modal-next
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <div class="modal-gallery-indicator">
+        <span class="modal-gallery-dots" data-modal-dots></span>
+        <span class="modal-gallery-counter">
+          <span data-modal-current>1</span>
+          <span class="modal-gallery-counter-sep">/</span>
+          <span data-modal-total>1</span>
+        </span>
+      </div>
+
       <span class="modal-tag" id="modal-category">Категория</span>
     </div>
 
@@ -518,7 +550,7 @@ const bookingHref = `/${lang}/booking`;
 </div>
 
 <script is:inline>
-  /* ==== Модалка ==== */
+  /* ==== Модалка с галереей ==== */
   function initPortfolioModal() {
     const cards = document.querySelectorAll(".case-card");
     const modal = document.getElementById("portfolio-modal");
@@ -533,7 +565,82 @@ const bookingHref = `/${lang}/booking`;
     const mDescription = document.getElementById("modal-description");
     const mReview = document.getElementById("modal-review");
     const mClient = document.getElementById("modal-client");
-    const mImage = document.getElementById("modal-image");
+
+    const track = modal.querySelector("[data-modal-track]");
+    const prevBtn = modal.querySelector("[data-modal-prev]");
+    const nextBtn = modal.querySelector("[data-modal-next]");
+    const dotsWrap = modal.querySelector("[data-modal-dots]");
+    const currentEl = modal.querySelector("[data-modal-current]");
+    const totalEl = modal.querySelector("[data-modal-total]");
+
+    let slideCount = 0;
+    let currentIndex = 0;
+    let dots = [];
+
+    function buildGallery(images) {
+      if (!track) return;
+      track.innerHTML = "";
+      if (dotsWrap) dotsWrap.innerHTML = "";
+      dots = [];
+      slideCount = images.length;
+      currentIndex = 0;
+
+      images.forEach((src, i) => {
+        const slide = document.createElement("div");
+        slide.className = "modal-gallery-slide";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        img.loading = i === 0 ? "eager" : "lazy";
+        slide.appendChild(img);
+        track.appendChild(slide);
+
+        if (dotsWrap) {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "modal-gallery-dot" + (i === 0 ? " is-active" : "");
+          dot.setAttribute("aria-label", `Фото ${i + 1}`);
+          dot.addEventListener("click", () => scrollToSlide(i));
+          dotsWrap.appendChild(dot);
+          dots.push(dot);
+        }
+      });
+
+      track.dataset.count = String(slideCount);
+      if (currentEl) currentEl.textContent = "1";
+      if (totalEl) totalEl.textContent = slideCount;
+      track.scrollLeft = 0;
+      updateArrows();
+    }
+
+    function scrollToSlide(i) {
+      if (i < 0 || i >= slideCount) return;
+      const slide = track.children[i];
+      if (slide) {
+        track.scrollTo({ left: slide.offsetLeft, behavior: "smooth" });
+      }
+    }
+
+    function updateArrows() {
+      if (prevBtn) prevBtn.disabled = currentIndex <= 0;
+      if (nextBtn) nextBtn.disabled = currentIndex >= slideCount - 1;
+    }
+
+    function onScroll() {
+      if (!slideCount || !track) return;
+      const w = track.clientWidth;
+      const idx = Math.round(track.scrollLeft / w);
+      if (idx !== currentIndex) {
+        currentIndex = idx;
+        if (currentEl) currentEl.textContent = idx + 1;
+        dots.forEach((d, i) => d.classList.toggle("is-active", i === idx));
+        updateArrows();
+      }
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", () => scrollToSlide(currentIndex - 1));
+    if (nextBtn) nextBtn.addEventListener("click", () => scrollToSlide(currentIndex + 1));
+    if (track) track.addEventListener("scroll", onScroll, { passive: true });
 
     function openFromCard(card) {
       mTitle.textContent = card.dataset.title || "";
@@ -544,8 +651,16 @@ const bookingHref = `/${lang}/booking`;
       mDescription.textContent = card.dataset.description || "";
       mReview.textContent = card.dataset.review || "";
       mClient.textContent = card.dataset.client || "";
-      mImage.src = card.dataset.image || "";
-      mImage.alt = card.dataset.title || "";
+
+      let images = [];
+      try {
+        images = JSON.parse(card.dataset.images || "[]");
+      } catch (e) {
+        images = [];
+      }
+      if (!images.length && card.dataset.image) images = [card.dataset.image];
+      buildGallery(images);
+
       modal.classList.add("active");
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -573,10 +688,8 @@ const bookingHref = `/${lang}/booking`;
           moved = true;
         }
       });
-      card.addEventListener("click", (e) => {
+      card.addEventListener("click", () => {
         if (moved) return;
-        const g = e.target.closest(".case-gallery");
-        if (g && g.dataset.dragged === "1") return;
         openFromCard(card);
       });
       card.addEventListener("keydown", (e) => {
@@ -596,32 +709,8 @@ const bookingHref = `/${lang}/booking`;
     });
   }
 
-  /* ==== Флаг drag для фото-галереи ==== */
-  function initGalleryDragFlag() {
-    document.querySelectorAll(".case-gallery").forEach((gallery) => {
-      if (gallery.dataset.dragInit === "1") return;
-      gallery.dataset.dragInit = "1";
-
-      let startX = 0, startY = 0;
-      gallery.addEventListener("touchstart", (e) => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        gallery.dataset.dragged = "0";
-      }, { passive: true });
-      gallery.addEventListener("touchmove", (e) => {
-        const dx = Math.abs(e.touches[0].clientX - startX);
-        const dy = Math.abs(e.touches[0].clientY - startY);
-        if (dx > 8 && dx > dy) gallery.dataset.dragged = "1";
-      }, { passive: true });
-      gallery.addEventListener("touchend", () => {
-        setTimeout(() => { gallery.dataset.dragged = "0"; }, 60);
-      }, { passive: true });
-    });
-  }
-
   function bootPortfolio() {
     initPortfolioModal();
-    initGalleryDragFlag();
   }
 
   document.addEventListener("DOMContentLoaded", bootPortfolio);
@@ -676,9 +765,7 @@ const bookingHref = `/${lang}/booking`;
     line-height: 1.6;
   }
 
-  /* ============================================================
-     НАВИГАЦИЯ НАД КЕЙСАМИ — центрированная, объёмная
-     ============================================================ */
+  /* Навигация над кейсами */
   .portfolio-swiper-wrap {
     width: 100%;
     position: relative;
@@ -695,15 +782,13 @@ const bookingHref = `/${lang}/booking`;
     box-sizing: border-box;
   }
 
-  /* Объёмная круглая кнопка */
   .portfolio-nav-btn {
     flex: 0 0 auto;
     width: 58px;
     height: 58px;
     border-radius: 50%;
     border: 1px solid rgba(13, 148, 136, 0.22);
-    background:
-      linear-gradient(180deg, #ffffff 0%, #eaf2f0 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #eaf2f0 100%);
     color: #0d9488;
     display: inline-flex !important;
     align-items: center;
@@ -712,12 +797,10 @@ const bookingHref = `/${lang}/booking`;
     cursor: pointer;
     position: relative;
     margin: 0 !important;
-    /* top: auto !important; */ /* убираем возможные правки Swiper */
     top: auto;
     left: auto;
     right: auto;
     bottom: auto;
-    /* Объём: три тени — внутренняя светлая сверху, внутренняя цветная снизу, внешняя мягкая */
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 1),
       inset 0 -3px 6px rgba(13, 148, 136, 0.10),
@@ -751,12 +834,8 @@ const bookingHref = `/${lang}/booking`;
       0 8px 16px -5px rgba(10, 40, 34, 0.16);
   }
 
-  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-prev svg {
-    transform: translateX(-2px);
-  }
-  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-next svg {
-    transform: translateX(2px);
-  }
+  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-prev svg { transform: translateX(-2px); }
+  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-next svg { transform: translateX(2px); }
 
   .portfolio-nav-btn:active:not(.swiper-button-disabled) {
     transform: translateY(-1px) scale(0.97);
@@ -771,7 +850,6 @@ const bookingHref = `/${lang}/booking`;
     outline-offset: 3px;
   }
 
-  /* Заблокированное состояние — от Swiper */
   .portfolio-nav-btn.swiper-button-disabled,
   .portfolio-nav-btn[disabled] {
     cursor: not-allowed;
@@ -786,7 +864,6 @@ const bookingHref = `/${lang}/booking`;
       0 3px 8px -4px rgba(10, 40, 34, 0.15);
   }
 
-  /* Пагинация — точки (рисует сам Swiper) */
   .portfolio-pagination {
     display: flex !important;
     align-items: center;
@@ -831,9 +908,7 @@ const bookingHref = `/${lang}/booking`;
       0 2px 4px -1px rgba(10, 40, 34, 0.15);
   }
 
-  /* ============================================================
-     Swiper
-     ============================================================ */
+  /* Swiper */
   .portfolio-swiper-wrap :global(.swiper) {
     width: 100%;
     overflow: hidden;
@@ -859,7 +934,6 @@ const bookingHref = `/${lang}/booking`;
     position: relative;
   }
 
-  /* Карточка кейса */
   .case-card {
     display: grid;
     grid-template-columns: 1.15fr 1fr;
@@ -888,7 +962,7 @@ const bookingHref = `/${lang}/booking`;
     outline-offset: 3px;
   }
 
-  /* Bento-галерея */
+  /* Bento-галерея (десктоп) */
   .case-gallery {
     display: grid;
     gap: 8px;
@@ -943,7 +1017,7 @@ const bookingHref = `/${lang}/booking`;
 
   .photo-counter { display: none; }
 
-  /* Инфо */
+  /* Инфо кейса */
   .case-info {
     padding: 2.5rem 2.25rem;
     display: flex;
@@ -1038,7 +1112,7 @@ const bookingHref = `/${lang}/booking`;
     transform: translateX(3px);
   }
 
-  /* ==== Modal ==== */
+  /* ==== Модалка ==== */
   .portfolio-modal-overlay {
     position: fixed;
     inset: 0;
@@ -1074,37 +1148,184 @@ const bookingHref = `/${lang}/booking`;
 
   .portfolio-modal-overlay.active .portfolio-modal-content { transform: translateY(0); }
 
-  .modal-image-wrapper { position: relative; height: 220px; width: 100%; }
-  .modal-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-  .modal-image-wrapper::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(22, 22, 25, 0) 50%, rgba(22, 22, 25, 1) 100%);
+  /* Галерея в модалке */
+  .modal-gallery {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    background: #0f0f12;
+    overflow: hidden;
   }
 
-  .modal-image-wrapper .modal-tag {
+  .modal-gallery-track {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .modal-gallery-track::-webkit-scrollbar { display: none; }
+
+  .modal-gallery-slide {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    position: relative;
+  }
+
+  .modal-gallery-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .modal-gallery::after {
+    content: "";
     position: absolute;
-    bottom: 1rem;
-    left: 1.5rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100px;
+    background: linear-gradient(180deg, rgba(22, 22, 25, 0) 0%, rgba(22, 22, 25, 1) 100%);
+    pointer-events: none;
     z-index: 2;
-    background: rgba(13, 148, 136, 0.18);
-    border: 1px solid rgba(13, 148, 136, 0.4);
-    color: #5eead4;
-    padding: 0.25rem 0.75rem;
+  }
+
+  .modal-gallery-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.42);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 4;
+    backdrop-filter: blur(6px);
+    transition: all 0.22s ease;
+    padding: 0;
+    opacity: 0.85;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .modal-gallery-arrow svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+  }
+
+  .modal-gallery-arrow:hover:not(:disabled) {
+    background: rgba(13, 148, 136, 0.9);
+    border-color: rgba(13, 148, 136, 1);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .modal-gallery-arrow:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .modal-gallery-prev { left: 0.6rem; }
+  .modal-gallery-next { right: 0.6rem; }
+
+  .modal-gallery-indicator {
+    position: absolute;
+    bottom: 0.9rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 5;
+    pointer-events: auto;
+  }
+
+  .modal-gallery-dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .modal-gallery-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-gallery-dot:hover {
+    background: rgba(94, 234, 212, 0.75);
+    transform: scale(1.2);
+  }
+
+  .modal-gallery-dot.is-active {
+    background: #5eead4;
+    width: 16px;
+    border-radius: 3px;
+    transform: none;
+  }
+
+  .modal-gallery-counter {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .modal-gallery-counter-sep {
+    opacity: 0.5;
+  }
+
+  .modal-gallery .modal-tag {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 5;
+    background: rgba(13, 148, 136, 0.85);
+    border: 1px solid rgba(94, 234, 212, 0.5);
+    color: #ffffff;
+    padding: 0.3rem 0.75rem;
     border-radius: 20px;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
+    backdrop-filter: blur(6px);
   }
 
   .modal-close {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
     width: 36px;
@@ -1121,9 +1342,9 @@ const bookingHref = `/${lang}/booking`;
     backdrop-filter: blur(4px);
   }
 
-  .modal-close:hover { background: rgba(0, 0, 0, 0.8); }
+  .modal-close:hover { background: rgba(0, 0, 0, 0.85); }
 
-  .modal-body { padding: 0 1.75rem 1.75rem; }
+  .modal-body { padding: 1.5rem 1.75rem 1.75rem; }
 
   .portfolio-modal-content h2 {
     font-size: 1.65rem;
@@ -1206,7 +1427,7 @@ const bookingHref = `/${lang}/booking`;
     box-shadow: 0 10px 28px rgba(13, 148, 136, 0.35);
   }
 
-  /* ==== Адаптив ==== */
+  /* ==== Мобильный ==== */
   @media (max-width: 900px) {
     .portfolio-section { padding: 4rem 0; }
 
@@ -1227,6 +1448,7 @@ const bookingHref = `/${lang}/booking`;
 
     .case-card { grid-template-columns: 1fr; min-height: auto; }
 
+    /* На мобильном — одно фото на карточке */
     .case-gallery,
     .case-gallery[data-count="1"],
     .case-gallery[data-count="2"],
@@ -1236,54 +1458,30 @@ const bookingHref = `/${lang}/booking`;
     .case-gallery[data-count="6"],
     .case-gallery[data-count="7"],
     .case-gallery[data-count="8"] {
-      display: flex !important;
+      display: block !important;
       grid-template-columns: none !important;
       grid-template-rows: none !important;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      gap: 10px;
-      padding: 10px;
-      min-height: 0;
       height: 300px;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
+      padding: 0;
+      gap: 0;
+      overflow: hidden;
+      min-height: 0;
     }
 
-    .case-gallery::-webkit-scrollbar { display: none; }
-
-    .case-gallery > .case-image,
-    .case-gallery[data-count="3"] > .case-image:nth-child(1),
-    .case-gallery[data-count="5"] > .case-image:nth-child(1),
-    .case-gallery[data-count="6"] > .case-image:nth-child(1),
-    .case-gallery[data-count="7"] > .case-image:nth-child(1),
-    .case-gallery[data-count="8"] > .case-image:nth-child(1) {
+    .case-gallery > .case-image {
+      display: none !important;
       grid-row: auto !important;
       grid-column: auto !important;
-      flex: 0 0 84%;
-      scroll-snap-align: center;
-      border-radius: 16px;
+      border-radius: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    .case-gallery > .case-image:first-child {
       display: block !important;
     }
 
-    .photo-counter {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.55);
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-      backdrop-filter: blur(6px);
-      z-index: 3;
-    }
+    .photo-counter { display: none !important; }
 
     .case-info { padding: 1.5rem 1.25rem 2rem; }
     .case-info h3 { font-size: 1.4rem; }
@@ -1301,6 +1499,91 @@ const bookingHref = `/${lang}/booking`;
     }
     .portfolio-pagination :global(.swiper-pagination-bullet-active) {
       width: 22px !important;
+    }
+
+    .modal-gallery { height: 220px; }
+    .modal-body { padding: 1.25rem 1.25rem 1.5rem; }
+    .portfolio-modal-content h2 { font-size: 1.4rem; }
+    .modal-gallery-arrow { width: 34px; height: 34px; }
+  }
+
+  /* ==== Модалка на мобильном — bento-сетка без стрелок ==== */
+  @media (max-width: 900px) {
+    .modal-gallery {
+      height: auto;
+      max-height: 60vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #eef4f2;
+    }
+
+    .modal-gallery-track {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: 130px;
+      grid-template-rows: none;
+      overflow: visible !important;
+      scroll-snap-type: none !important;
+      height: auto;
+      gap: 6px;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+
+    .modal-gallery-track[data-count="1"] {
+      grid-template-columns: 1fr;
+      grid-auto-rows: 220px;
+    }
+    .modal-gallery-track[data-count="3"],
+    .modal-gallery-track[data-count="4"] {
+      grid-template-columns: 1.3fr 1fr;
+      grid-auto-rows: 130px;
+    }
+    .modal-gallery-track[data-count="5"],
+    .modal-gallery-track[data-count="6"],
+    .modal-gallery-track[data-count="7"],
+    .modal-gallery-track[data-count="8"] {
+      grid-template-columns: 1.3fr 1fr 1fr;
+      grid-auto-rows: 130px;
+    }
+    .modal-gallery-track[data-count="3"] > .modal-gallery-slide:nth-child(1),
+    .modal-gallery-track[data-count="5"] > .modal-gallery-slide:nth-child(1),
+    .modal-gallery-track[data-count="6"] > .modal-gallery-slide:nth-child(1),
+    .modal-gallery-track[data-count="7"] > .modal-gallery-slide:nth-child(1),
+    .modal-gallery-track[data-count="8"] > .modal-gallery-slide:nth-child(1) {
+      grid-row: span 2;
+    }
+    .modal-gallery-track[data-count="7"] > .modal-gallery-slide:nth-child(n+7),
+    .modal-gallery-track[data-count="8"] > .modal-gallery-slide:nth-child(n+7) {
+      display: none;
+    }
+
+    .modal-gallery-slide {
+      flex: initial !important;
+      height: 100% !important;
+      min-height: 0;
+      scroll-snap-align: none !important;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .modal-gallery-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    /* Скрываем стрелки, точки, счётчик и градиент */
+    .modal-gallery-arrow,
+    .modal-gallery-indicator,
+    .modal-gallery::after {
+      display: none !important;
+    }
+
+    .modal-gallery .modal-tag {
+      top: 0.9rem;
+      left: 0.9rem;
     }
   }
 </style>
