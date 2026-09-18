@@ -1,3 +1,5 @@
+import { cityIn } from "./city-grammar";
+
 export interface CityPage {
   id: string;
   slug: string;
@@ -61,6 +63,8 @@ function city(
   },
 ): CityPage {
   const n = names.ru;
+  // Русский предложный падеж: «в Ереване», «на Бали»
+  const inCity = cityIn(slug, n);
   return {
     id,
     slug,
@@ -71,7 +75,7 @@ function city(
     seoTitle: {
       ru:
         seoOverride?.seoTitleRu ||
-        `Аренда шатров и организация мероприятий в ${n} под ключ | Coucou`,
+        `Аренда шатров и организация мероприятий ${inCity} под ключ | Coucou`,
       eng: `Tent rental & event planning in ${names.eng} | Coucou`,
       esp: `Alquiler de carpas y eventos en ${names.esp} | Coucou`,
       arm: `Վրանների վարձույթ և միջոցառումներ՝ ${names.arm} | Coucou`,
@@ -79,7 +83,7 @@ function city(
     seoDescription: {
       ru:
         seoOverride?.seoDescRu ||
-        `Организация свадеб и корпоративов в ${n}: аренда шатров, кейтеринг, декор, трансфер. Смета онлайн. Coucou — база в Ереване, проекты в 15 городах.`,
+        `Организация свадеб и корпоративов ${inCity}: аренда шатров, кейтеринг, декор, трансфер. Смета онлайн. Coucou — база в Ереване, проекты в 15 городах.`,
       eng: `Weddings and corporates in ${names.eng}: tent rental, catering, decor, transfers. Get a quote. Coucou — Yerevan base, 15 cities.`,
       esp: `Bodas y corporativos en ${names.esp}: carpas, catering, decoración. Coucou.`,
       arm: `Հարսանիքներ և կորպորատիվներ ${names.arm}՝ վրաններ, քեյթերինգ, դեկոր։ Coucou.`,
@@ -87,7 +91,7 @@ function city(
     heading: {
       ru:
         seoOverride?.headingRu ||
-        `Организация мероприятий в ${n} под ключ`,
+        `Организация мероприятий ${inCity} под ключ`,
       eng: `Turnkey event planning in ${names.eng}`,
       esp: `Organización de eventos en ${names.esp}`,
       arm: `Միջոցառումների կազմակերպում՝ ${names.arm}`,
@@ -100,7 +104,7 @@ function city(
     },
     highlights: {
       ru: [
-        `Аренда шатров и open-air конструкций в ${n}`,
+        `Аренда шатров и open-air конструкций ${inCity}`,
         "Свадьба и корпоратив под ключ: концепция, площадка, день события",
         "Выездной кейтеринг, декор, свет, трансфер гостей",
         "Локальная команда + международные стандарты Coucou",

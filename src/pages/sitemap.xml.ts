@@ -8,6 +8,8 @@ import {
   type SiteLang,
 } from "@/config/site";
 import { CITIES_PAGES } from "@/data/cities";
+import { SERVICE_SLUGS } from "@/data/services-map";
+import { SERVICE_PROFILES } from "@/data/service-city";
 
 export const prerender = true;
 
@@ -114,6 +116,31 @@ export const GET: APIRoute = async () => {
         loc: buildUrl(lang, `cities/${city.slug}`),
         alternates,
       });
+    }
+  }
+
+  // 5. Связки «город × услуга» × языки
+  for (const city of CITIES_PAGES) {
+    for (const svc of SERVICE_SLUGS) {
+      if (!SERVICE_PROFILES[svc]) continue;
+      const path = `cities/${city.slug}/${svc}`;
+
+      const alternates = SUPPORTED_LANGS.map((lang) => ({
+        hreflang: HREFLANG_MAP[lang],
+        href: buildUrl(lang, path),
+      }));
+
+      alternates.push({
+        hreflang: "x-default",
+        href: buildUrl("ru", path),
+      });
+
+      for (const lang of SUPPORTED_LANGS) {
+        urls.push({
+          loc: buildUrl(lang, path),
+          alternates,
+        });
+      }
     }
   }
 

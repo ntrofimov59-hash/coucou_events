@@ -6,6 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import { CITIES_PAGES } from "@/data/cities";
 import { CONTACT, SITE_URL } from "@/config/site";
 import { SERVICE_SLUGS, SERVICE_NAMES } from "@/data/services-map";
+import { cityIn } from "@/data/city-grammar";
 
 export function getStaticPaths() {
   const langs = ["ru", "eng", "esp", "arm"] as const;
@@ -121,6 +122,8 @@ const waHref =
     : "#");
 
 const pageUrl = `${SITE_URL}${prefix}/cities/${city.slug}`;
+// Русский предложный падеж для заголовков и ссылок
+const inCityRu = cityIn(city.slug, city.name.ru);
 
 // --- Service schema (усиленная: гео + офферы) ---
 const serviceJsonLd = {
@@ -293,11 +296,17 @@ const faqJsonLd =
       )}
 
       <div class="services-block">
-        <h2>{L === "ru" ? `Услуги в ${name}` : L === "eng" ? `Services in ${name}` : L === "esp" ? `Servicios en ${name}` : `Ծառայություններ՝ ${name}`}</h2>
+        <h2>{L === "ru" ? `Услуги ${inCityRu}` : L === "eng" ? `Services in ${name}` : L === "esp" ? `Servicios en ${name}` : `Ծառայություններ՝ ${name}`}</h2>
         <div class="tags">
           {SERVICE_SLUGS.map((s) => (
-            <a href={`${prefix}/services/${s}`} class="tag tag-link">
-              {SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru}
+            <a href={`${prefix}/cities/${city.slug}/${s}`} class="tag tag-link">
+              {L === "ru"
+                ? `${SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru} ${inCityRu}`
+                : L === "eng"
+                  ? `${SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru} in ${name}`
+                  : L === "esp"
+                    ? `${SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru} en ${name}`
+                    : `${SERVICE_NAMES[s][L] || SERVICE_NAMES[s].ru} ${name}`}
             </a>
           ))}
         </div>
