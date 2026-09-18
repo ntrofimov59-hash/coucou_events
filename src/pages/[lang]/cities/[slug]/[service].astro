@@ -221,14 +221,14 @@ const hreflangOf = (l: string) =>
         <link
           rel="alternate"
           hreflang={hreflangOf(l)}
-          href={`${SITE_URL}/${l}/cities/${slug}/${service}`}
+          href={`${SITE_URL}/${l}/cities/${slug}/${service}/`}
         />
       ))
     }
     <link
       rel="alternate"
       hreflang="x-default"
-      href={`${SITE_URL}/ru/cities/${slug}/${service}`}
+      href={`${SITE_URL}/ru/cities/${slug}/${service}/`}
     />
     <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />

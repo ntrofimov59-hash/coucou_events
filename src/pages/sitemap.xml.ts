@@ -15,7 +15,10 @@ export const prerender = true;
 
 function buildUrl(lang: SiteLang, path: string): string {
   const clean = path.replace(/^\/+|\/+$/g, "");
-  return clean ? `${SITE_URL}/${lang}/${clean}` : `${SITE_URL}/${lang}`;
+  // Трейлинг-слэш обязателен: именно так Astro рендерит canonical.
+  // Без него sitemap и canonical указывают на разные URL, и Google
+  // считает их конкурирующими версиями одной страницы.
+  return clean ? `${SITE_URL}/${lang}/${clean}/` : `${SITE_URL}/${lang}/`;
 }
 
 export const GET: APIRoute = async () => {
