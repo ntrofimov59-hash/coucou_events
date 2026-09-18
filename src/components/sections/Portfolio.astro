@@ -3,6 +3,7 @@ import { Swiper, SwiperWrapper, SwiperSlide } from "astro-swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { SITE_URL } from "@/config/site";
 
 interface Props {
   lang?: string;
@@ -23,71 +24,111 @@ const t = {
     modalBtnText: "Забронировать похожий проект",
     items: [
       {
-        id: "bali-wedding",
-        title: "Частная вилла на Бали",
-        category: "Свадебное торжество",
-        location: "Бали, Индонезия",
-        guests: "120 гостей",
-        budget: "$150k+",
+        id: "pool-gala",
+        title: "Гала-вечер под прозрачным шатром у бассейна",
+        category: "Приватный праздник",
+        location: "Частная резиденция",
+        guests: "150+ гостей",
+        budget: "от $140k",
+        span: "col-span-2 row-span-2",
         description:
-          "Трехдневное торжество на обрыве скалы с видом на океан. Полная техническая застройка, включая кастомный стеклянный танцпол над бассейном, свет 360° и авторский гастрономический ужин.",
+          "Прозрачный шатёр с панорамной крышей встал прямо над бассейном частной резиденции — гости ужинали и танцевали, глядя в ночное небо, а отражения гирлянд и цветной подсветки ложились на воду. Полная застройка: каркасная конструкция под нестандартную геометрию участка, подиум, барные и коктейльные зоны, архитектурный свет. Наш профиль по аренде шатров: /ru/services/marquees.",
         review:
-          "«Команда превзошла все ожидания. Гости до сих пор вспоминают этот масштаб и безупречный сервис на тропическом острове!»",
-        client: "Артем и София",
+          "«Мы не представляли, что шатёр может выглядеть так невесомо. Гости весь вечер обсуждали не мероприятие, а само пространство.»",
+        client: "Семья организаторов",
         images: [
-          "/images/portfolio/portfolio-bali-hero.webp",
-          "/images/portfolio/portfolio-bali-card.webp",
+          "/images/portfolio/portfolio-pool-gala-hero.webp",
+          "/images/portfolio/portfolio-pool-gala-card.webp",
         ],
       },
       {
-        id: "tbilisi-dinner",
-        title: "Закрытый гастро-ужин",
+        id: "garden-ceremony",
+        title: "Церемония в цветущем саду у моря",
+        category: "Церемония",
+        location: "Курортный отель на побережье",
+        guests: "60 гостей",
+        budget: "$110k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Ряды выездных кресел среди буйно цветущих клумб и пальм — рассадка и вся флористика подобраны так, чтобы церемония читалась как продолжение сада, а не отдельная декорация в нём.",
+        review:
+          "«Нам не пришлось выбирать между садом отеля и своим декором — команда вписала одно в другое так, что не отличить.»",
+        client: "Анна и Карен",
+        images: [
+          "/images/portfolio/portfolio-garden-ceremony-hero.webp",
+          "/images/portfolio/portfolio-garden-ceremony-card.webp",
+        ],
+      },
+      {
+        id: "allium-cake",
+        title: "Свадьба среди аллиумов",
+        category: "Декор и флористика",
+        location: "Загородная усадьба",
+        guests: "100+ гостей",
+        budget: "$90k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Пятиярусный торт на подиуме из шаров аллиума — точка притяжения всего шатра, задающая палитру для остального декора: сиреневые портьеры, живая изгородь фиолетовых соцветий, тёплый свет сквозь прозрачную крышу.",
+        review:
+          "«Торт стал вторым по популярности объектом для фото после нас самих. Ровно то, чего мы хотели.»",
+        client: "Мария К.",
+        images: [
+          "/images/portfolio/portfolio-allium-cake-hero.webp",
+          "/images/portfolio/portfolio-allium-cake-card.webp",
+        ],
+      },
+      {
+        id: "oak-reception",
+        title: "Ужин под вековыми дубами",
+        category: "Свадьба под ключ",
+        location: "Историческая усадьба",
+        guests: "120+ гостей",
+        budget: "от $200k",
+        span: "col-span-2 row-span-1",
+        description:
+          "Прозрачный шатёр поставили так, чтобы кроны столетних дубов с испанским мхом стали частью интерьера, а не фоном за его пределами. Гости ужинали за длинными столами прямо под ветвями — свет шатра проходил сквозь листву, создавая эффект, который не сделать никаким искусственным декором.",
+        review:
+          "«Именно ради этих деревьев мы выбрали площадку — и команда не спрятала их шатром, а построила вечер вокруг них.»",
+        client: "Эмили и Джексон",
+        images: [
+          "/images/portfolio/portfolio-oak-reception-hero.webp",
+          "/images/portfolio/portfolio-oak-reception-card.webp",
+        ],
+      },
+      {
+        id: "beach-dinner",
+        title: "Приватный ужин на берегу океана",
         category: "Частный вечер",
-        location: "Тбилиси, Грузия",
-        guests: "35 гостей",
-        budget: "$45k",
+        location: "Тропический остров",
+        guests: "16 гостей",
+        budget: "$60k",
+        span: "col-span-1 row-span-1",
         description:
-          "Атмосферный вечер на панорамной террасе старого города с живой акустической музыкой, авторской подачей вин и световой инсталляцией.",
+          "Камерный ужин прямо на песке: пагода-шатры с гирляндами, бордовый текстиль, ковры и живая музыка. Формат для тех, кому важнее близость гостей друг к другу, чем масштаб события.",
         review:
-          "«Невероятная камерная атмосфера и абсолютное спокойствие для нас во время самого события.»",
-        client: "Даниил М.",
+          "«Пятнадцать человек, которых мы любим, живая музыка и океан в трёх метрах от стола — идеальный вечер.»",
+        client: "Дарья и Никита",
         images: [
-          "/images/portfolio/portfolio-tbilisi-hero.webp",
-          "/images/portfolio/portfolio-tbilisi-card.webp",
+          "/images/portfolio/portfolio-beach-dinner-hero.webp",
+          "/images/portfolio/portfolio-beach-dinner-card.webp",
         ],
       },
       {
-        id: "barcelona-corp",
-        title: "Бизнес-конференция",
-        category: "Корпоратив",
-        location: "Барселона, Испания",
-        guests: "300 гостей",
-        budget: "$220k",
+        id: "bamboo-bar",
+        title: "Барная зона во внутреннем дворе",
+        category: "Кейтеринг и бар",
+        location: "Городской особняк",
+        guests: "120+ гостей",
+        budget: "$130k",
+        span: "col-span-1 row-span-1",
         description:
-          "Масштабный бизнес-ивент в исторической усадьбе. Интерактивные зоны, синхронный перевод, брендирование пространства и вечернее шоу.",
+          "Барная стойка ручной работы на фоне кирпичной стены и высокого бамбука — часть кейтеринг-программы мероприятия, где зона напитков продумана как отдельное пространство, а не приставной стол.",
         review:
-          "«Четкая логистика, безупречный тайминг и высочайший уровень организации для топ-менеджмента.»",
-        client: "Компания TechCorp",
+          "«Бар выглядел так, будто стоит там годами, а не привезён на один вечер.»",
+        client: "Организационный комитет",
         images: [
-          "/images/portfolio/portfolio-barcelona-hero.webp",
-          "/images/portfolio/portfolio-barcelona-card.webp",
-        ],
-      },
-      {
-        id: "phuket-party",
-        title: "Событие у океана",
-        category: "Юбилей",
-        location: "Пхукет, Таиланд",
-        guests: "80 гостей",
-        budget: "$95k",
-        description:
-          "Празднование юбилея на уединенном пляже с тропическими декорациями, пиротехническим шоу и выступлением хедлайнеров.",
-        review:
-          "«Все было продумано до мелочей. Праздник прошел на одном дыхании!»",
-        client: "Михаил В.",
-        images: [
-          "/images/portfolio/portfolio-phuket-hero.webp",
-          "/images/portfolio/portfolio-phuket-card.webp",
+          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
+          "/images/portfolio/portfolio-bamboo-bar-card.webp",
         ],
       },
     ],
@@ -103,71 +144,111 @@ const t = {
     modalBtnText: "Book a similar project",
     items: [
       {
-        id: "bali-wedding",
-        title: "Private Villa in Bali",
-        category: "Wedding Celebration",
-        location: "Bali, Indonesia",
-        guests: "120 guests",
-        budget: "$150k+",
+        id: "pool-gala",
+        title: "Poolside Gala Under a Clear-Top Marquee",
+        category: "Private Celebration",
+        location: "Private Residence",
+        guests: "150+ guests",
+        budget: "from $140k",
+        span: "col-span-2 row-span-2",
         description:
-          "A three-day cliffside celebration overlooking the ocean. Complete technical setup including a custom glass dance floor over the pool, 360° lighting, and an author's gourmet dinner.",
+          "A clear-roof marquee was built directly over the residence's pool — guests dined and danced looking straight up at the night sky, with the string lights and colour wash reflected on the water. Full build: a frame structure engineered for the site's irregular footprint, a raised dance floor, bar and lounge zones, architectural lighting. See our marquee rental service: /eng/services/marquees.",
         review:
-          "«The team exceeded all expectations. Guests are still talking about the scale and flawless service on the tropical island!»",
-        client: "Artem & Sofia",
+          "«We had no idea a tent could feel this weightless. All night, guests talked about the space itself, not just the party.»",
+        client: "The hosting family",
         images: [
-          "/images/portfolio/portfolio-bali-hero.webp",
-          "/images/portfolio/portfolio-bali-card.webp",
+          "/images/portfolio/portfolio-pool-gala-hero.webp",
+          "/images/portfolio/portfolio-pool-gala-card.webp",
         ],
       },
       {
-        id: "tbilisi-dinner",
-        title: "Private Gastro Dinner",
+        id: "garden-ceremony",
+        title: "Seaside Garden Ceremony",
+        category: "Ceremony",
+        location: "Beachfront Resort",
+        guests: "60 guests",
+        budget: "$110k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Rows of outdoor chairs set among densely blooming beds and palms — seating and florals planned so the ceremony reads as an extension of the garden rather than a decoration placed inside it.",
+        review:
+          "«We didn't have to choose between the resort's garden and our own decor — the team wove them together seamlessly.»",
+        client: "Anna & Karen",
+        images: [
+          "/images/portfolio/portfolio-garden-ceremony-hero.webp",
+          "/images/portfolio/portfolio-garden-ceremony-card.webp",
+        ],
+      },
+      {
+        id: "allium-cake",
+        title: "A Wedding Among Alliums",
+        category: "Decor & Florals",
+        location: "Country Estate",
+        guests: "100+ guests",
+        budget: "$90k",
+        span: "col-span-1 row-span-1",
+        description:
+          "A five-tier cake on a plinth ringed with allium blooms — the focal point that set the palette for the whole marquee: lilac drapery, a living hedge of purple flowers, warm light filtering through the clear roof.",
+        review:
+          "«The cake became the second most-photographed thing at the wedding, right after us. Exactly what we wanted.»",
+        client: "Maria K.",
+        images: [
+          "/images/portfolio/portfolio-allium-cake-hero.webp",
+          "/images/portfolio/portfolio-allium-cake-card.webp",
+        ],
+      },
+      {
+        id: "oak-reception",
+        title: "Dinner Beneath Centuries-Old Oaks",
+        category: "Turnkey Wedding",
+        location: "Historic Estate",
+        guests: "120+ guests",
+        budget: "from $200k",
+        span: "col-span-2 row-span-1",
+        description:
+          "The clear-top marquee was positioned so the canopy of century-old oaks draped in Spanish moss became part of the interior, not a backdrop outside it. Guests dined at long tables directly under the branches — tent light filtering through the foliage in a way no artificial decor could replicate.",
+        review:
+          "«We chose the venue for these exact trees — the team didn't hide them behind a tent, they built the evening around them.»",
+        client: "Emily & Jackson",
+        images: [
+          "/images/portfolio/portfolio-oak-reception-hero.webp",
+          "/images/portfolio/portfolio-oak-reception-card.webp",
+        ],
+      },
+      {
+        id: "beach-dinner",
+        title: "Private Dinner on the Ocean Shore",
         category: "Private Evening",
-        location: "Tbilisi, Georgia",
-        guests: "35 guests",
-        budget: "$45k",
+        location: "Tropical Island",
+        guests: "16 guests",
+        budget: "$60k",
+        span: "col-span-1 row-span-1",
         description:
-          "An atmospheric evening on a panoramic old town terrace featuring live acoustic music, curated wine pairings, and a light installation.",
+          "An intimate dinner set directly on the sand: pagoda tents strung with lights, burgundy linens, rugs, and live music. A format for those who value closeness among guests over sheer scale.",
         review:
-          "«An incredible intimate atmosphere and absolute peace of mind for us during the event itself.»",
-        client: "Daniil M.",
+          "«Fifteen people we love, live music, and the ocean three metres from the table — a perfect evening.»",
+        client: "Daria & Nikita",
         images: [
-          "/images/portfolio/portfolio-tbilisi-hero.webp",
-          "/images/portfolio/portfolio-tbilisi-card.webp",
+          "/images/portfolio/portfolio-beach-dinner-hero.webp",
+          "/images/portfolio/portfolio-beach-dinner-card.webp",
         ],
       },
       {
-        id: "barcelona-corp",
-        title: "Business Conference",
-        category: "Corporate",
-        location: "Barcelona, Spain",
-        guests: "300 guests",
-        budget: "$220k",
+        id: "bamboo-bar",
+        title: "Courtyard Bar Setup",
+        category: "Catering & Bar",
+        location: "Urban Estate",
+        guests: "120+ guests",
+        budget: "$130k",
+        span: "col-span-1 row-span-1",
         description:
-          "A large-scale business event in a historic estate. Interactive zones, simultaneous translation, space branding, and an evening show.",
+          "A handcrafted bar counter set against a brick wall and tall bamboo — part of the event's catering programme, where the drinks zone was designed as its own space rather than a side table.",
         review:
-          "«Clear logistics, flawless timing, and the highest level of organization for top management.»",
-        client: "TechCorp Company",
+          "«The bar looked like it had stood there for years, not been delivered for one evening.»",
+        client: "Event committee",
         images: [
-          "/images/portfolio/portfolio-barcelona-hero.webp",
-          "/images/portfolio/portfolio-barcelona-card.webp",
-        ],
-      },
-      {
-        id: "phuket-party",
-        title: "Oceanfront Event",
-        category: "Anniversary",
-        location: "Phuket, Thailand",
-        guests: "80 guests",
-        budget: "$95k",
-        description:
-          "Anniversary celebration on a secluded beach with tropical decor, a pyrotechnic show, and headliner performances.",
-        review:
-          "«Everything was thought out to the smallest detail. The holiday went by in one breath!»",
-        client: "Mikhail V.",
-        images: [
-          "/images/portfolio/portfolio-phuket-hero.webp",
-          "/images/portfolio/portfolio-phuket-card.webp",
+          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
+          "/images/portfolio/portfolio-bamboo-bar-card.webp",
         ],
       },
     ],
@@ -184,71 +265,111 @@ const t = {
     modalBtnText: "Reservar un proyecto similar",
     items: [
       {
-        id: "bali-wedding",
-        title: "Villa Privada en Bali",
-        category: "Boda",
-        location: "Bali, Indonesia",
-        guests: "120 invitados",
-        budget: "$150k+",
+        id: "pool-gala",
+        title: "Gala junto a la piscina bajo una carpa transparente",
+        category: "Celebración privada",
+        location: "Residencia privada",
+        guests: "150+ invitados",
+        budget: "desde $140k",
+        span: "col-span-2 row-span-2",
         description:
-          "Celebración de tres días en un acantilado con vista al océano. Montaje técnico completo que incluye pista de baile de cristal personalizada sobre la piscina, iluminación 360° y cena gourmet.",
+          "Una carpa de techo transparente se instaló justo sobre la piscina de la residencia: los invitados cenaron y bailaron mirando el cielo nocturno, con las guirnaldas y la iluminación de color reflejadas en el agua. Montaje completo: estructura calculada para la geometría irregular del terreno, pista elevada, zonas de barra y lounge, iluminación arquitectónica.",
         review:
-          "«El equipo superó todas las expectativas. ¡Los invitados aún recuerdan la magnitud y el servicio impecable en la isla tropical!»",
-        client: "Artem y Sofía",
+          "«No imaginábamos que una carpa pudiera verse tan ligera. Toda la noche los invitados hablaron del espacio, no solo de la fiesta.»",
+        client: "La familia anfitriona",
         images: [
-          "/images/portfolio/portfolio-bali-hero.webp",
-          "/images/portfolio/portfolio-bali-card.webp",
+          "/images/portfolio/portfolio-pool-gala-hero.webp",
+          "/images/portfolio/portfolio-pool-gala-card.webp",
         ],
       },
       {
-        id: "tbilisi-dinner",
-        title: "Cena Gastronómica Privada",
+        id: "garden-ceremony",
+        title: "Ceremonia en un jardín florido junto al mar",
+        category: "Ceremonia",
+        location: "Resort frente al mar",
+        guests: "60 invitados",
+        budget: "$110k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Filas de sillas al aire libre entre parterres en plena floración y palmeras: la disposición y la floristería se pensaron para que la ceremonia se leyera como una extensión del jardín, no como una decoración colocada dentro de él.",
+        review:
+          "«No tuvimos que elegir entre el jardín del resort y nuestra propia decoración: el equipo los combinó a la perfección.»",
+        client: "Anna y Karen",
+        images: [
+          "/images/portfolio/portfolio-garden-ceremony-hero.webp",
+          "/images/portfolio/portfolio-garden-ceremony-card.webp",
+        ],
+      },
+      {
+        id: "allium-cake",
+        title: "Una boda entre aliums",
+        category: "Decoración y floristería",
+        location: "Finca de campo",
+        guests: "100+ invitados",
+        budget: "$90k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Un pastel de cinco pisos sobre un pedestal rodeado de flores de allium: el punto focal que marcó la paleta de toda la carpa, con cortinas lilas, un seto vivo de flores púrpuras y luz cálida filtrándose por el techo transparente.",
+        review:
+          "«El pastel fue lo segundo más fotografiado de la boda, justo después de nosotros. Exactamente lo que queríamos.»",
+        client: "Maria K.",
+        images: [
+          "/images/portfolio/portfolio-allium-cake-hero.webp",
+          "/images/portfolio/portfolio-allium-cake-card.webp",
+        ],
+      },
+      {
+        id: "oak-reception",
+        title: "Cena bajo robles centenarios",
+        category: "Boda integral",
+        location: "Finca histórica",
+        guests: "120+ invitados",
+        budget: "desde $200k",
+        span: "col-span-2 row-span-1",
+        description:
+          "La carpa de techo transparente se ubicó de modo que la copa de robles centenarios cubiertos de musgo español formara parte del interior, no un telón de fondo fuera de él. Los invitados cenaron en mesas largas bajo las ramas, con la luz de la carpa filtrándose entre el follaje de una forma que ningún decorado artificial podría replicar.",
+        review:
+          "«Elegimos el lugar por estos árboles, y el equipo no los escondió detrás de una carpa: construyó la velada alrededor de ellos.»",
+        client: "Emily y Jackson",
+        images: [
+          "/images/portfolio/portfolio-oak-reception-hero.webp",
+          "/images/portfolio/portfolio-oak-reception-card.webp",
+        ],
+      },
+      {
+        id: "beach-dinner",
+        title: "Cena privada en la orilla del océano",
         category: "Velada privada",
-        location: "Tiflis, Georgia",
-        guests: "35 invitados",
-        budget: "$45k",
+        location: "Isla tropical",
+        guests: "16 invitados",
+        budget: "$60k",
+        span: "col-span-1 row-span-1",
         description:
-          "Una velada atmosférica en una terraza panorámica del casco antiguo con música acústica en vivo, cata de vinos y una instalación lumínica.",
+          "Una cena íntima instalada directamente en la arena: carpas tipo pagoda con luces, mantelería burdeos, alfombras y música en vivo. Un formato para quienes valoran la cercanía entre invitados por encima de la escala.",
         review:
-          "«Un ambiente íntimo increíble y absoluta tranquilidad para nosotros durante todo el evento.»",
-        client: "Daniil M.",
+          "«Quince personas que amamos, música en vivo y el océano a tres metros de la mesa: una velada perfecta.»",
+        client: "Daria y Nikita",
         images: [
-          "/images/portfolio/portfolio-tbilisi-hero.webp",
-          "/images/portfolio/portfolio-tbilisi-card.webp",
+          "/images/portfolio/portfolio-beach-dinner-hero.webp",
+          "/images/portfolio/portfolio-beach-dinner-card.webp",
         ],
       },
       {
-        id: "barcelona-corp",
-        title: "Conferencia de Negocios",
-        category: "Corporativo",
-        location: "Barcelona, España",
-        guests: "300 invitados",
-        budget: "$220k",
+        id: "bamboo-bar",
+        title: "Barra en el patio interior",
+        category: "Catering y barra",
+        location: "Residencia urbana",
+        guests: "120+ invitados",
+        budget: "$130k",
+        span: "col-span-1 row-span-1",
         description:
-          "Evento empresarial a gran escala en una finca histórica. Zonas interactivas, traducción simultánea, branding del espacio y espectáculo nocturno.",
+          "Una barra artesanal contra un muro de ladrillo y bambú alto: parte del programa de catering del evento, donde la zona de bebidas se diseñó como un espacio propio y no como una mesa auxiliar.",
         review:
-          "«Logística clara, tiempos impecables y el más alto nivel de organización para la alta dirección.»",
-        client: "Empresa TechCorp",
+          "«La barra parecía llevar años ahí, no haber llegado para una sola noche.»",
+        client: "Comité organizador",
         images: [
-          "/images/portfolio/portfolio-barcelona-hero.webp",
-          "/images/portfolio/portfolio-barcelona-card.webp",
-        ],
-      },
-      {
-        id: "phuket-party",
-        title: "Evento junto al Océano",
-        category: "Aniversario",
-        location: "Phuket, Tailandia",
-        guests: "80 invitados",
-        budget: "$95k",
-        description:
-          "Celebración de aniversario en una playa privada con decoración tropical, espectáculo pirotécnico y artistas invitados.",
-        review:
-          "«Todo fue pensado hasta el más mínimo detalle. ¡La fiesta pasó en un suspiro!»",
-        client: "Mikhail V.",
-        images: [
-          "/images/portfolio/portfolio-phuket-hero.webp",
-          "/images/portfolio/portfolio-phuket-card.webp",
+          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
+          "/images/portfolio/portfolio-bamboo-bar-card.webp",
         ],
       },
     ],
@@ -265,71 +386,111 @@ const t = {
     modalBtnText: "Ամրագրել նմանատիպ նախագիծ",
     items: [
       {
-        id: "bali-wedding",
-        title: "Մասնավոր վիլլա Բալիում",
-        category: "Հարսանեկան արարողություն",
-        location: "Բալի, Ինդոնեզիա",
-        guests: "120 հյուր",
-        budget: "$150k+",
+        id: "pool-gala",
+        title: "Գալա-երեկո թափանցիկ վրանի տակ՝ լողավազանի վրա",
+        category: "Մասնավոր տոնակատարություն",
+        location: "Մասնավոր առանձնատուն",
+        guests: "150+ հյուր",
+        budget: "$140k-ից",
+        span: "col-span-2 row-span-2",
         description:
-          "Եռօրյա տոնակատարություն ժայռի եզրին՝ օվկիանոսի տեսարանով: Ամբողջական տեխնիկական կառուցվածք, ներառյալ հարմարեցված ապակյա պարահրապարակ լողավազանի վրա, 360° լույս և հեղինակային գաստրոնոմիկ ընթրիք:",
+          "Թափանցիկ տանիքով վրանը կառուցվեց ուղիղ առանձնատան լողավազանի վրա. հյուրերը ընթրում և պարում էին՝ նայելով դեպի գիշերային երկինք, իսկ գիրլյանդների ու գունավոր լուսավորության արտացոլանքն ընկնում էր ջրի վրա։",
         review:
-          "«Թիմը գերազանցեց բոլոր սպասելիքները: Հյուրերը մինչ այժմ հիշում են այս մասշտաբն ու անթերի սպասարկումը արևադարձային կղզում!»",
-        client: "Արտյոմ և Սոֆիա",
+          "«Չէինք պատկերացնում, որ վրանը կարող է այսքան անկշիռ երևալ։ Ամբողջ երեկո հյուրերը քննարկում էին հենց տարածքը, ոչ թե միայն միջոցառումը։»",
+        client: "Հյուրընկալող ընտանիքը",
         images: [
-          "/images/portfolio/portfolio-bali-hero.webp",
-          "/images/portfolio/portfolio-bali-card.webp",
+          "/images/portfolio/portfolio-pool-gala-hero.webp",
+          "/images/portfolio/portfolio-pool-gala-card.webp",
         ],
       },
       {
-        id: "tbilisi-dinner",
-        title: "Փակ գաստրո-ընթրիք",
+        id: "garden-ceremony",
+        title: "Արարողություն ծաղկած այգում՝ ծովի ափին",
+        category: "Արարողություն",
+        location: "Առափնյա հանգստավայր",
+        guests: "60 հյուր",
+        budget: "$110k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Արտագնա աթոռների շարքեր՝ շքեղ ծաղկած ծաղկանոցների և արմավենիների մեջ. նստատեղերն ու ֆլորիստիկան մտածված են այնպես, որ արարողությունը ընկալվի որպես այգու շարունակություն։",
+        review:
+          "«Մեզ պետք չեղավ ընտրել հանգստավայրի այգու և մեր դեկորի միջև՝ թիմը դրանք միահյուսեց անթերի։»",
+        client: "Աննա և Կարեն",
+        images: [
+          "/images/portfolio/portfolio-garden-ceremony-hero.webp",
+          "/images/portfolio/portfolio-garden-ceremony-card.webp",
+        ],
+      },
+      {
+        id: "allium-cake",
+        title: "Հարսանիք՝ ալիումների մեջ",
+        category: "Դեկոր և ֆլորիստիկա",
+        location: "Գյուղական կալվածք",
+        guests: "100+ հյուր",
+        budget: "$90k",
+        span: "col-span-1 row-span-1",
+        description:
+          "Հինգհարկանի տորթը՝ ալիումի ծաղիկներով շրջապատված պատվանդանի վրա, դարձավ ամբողջ վրանի գունային ուղղորդիչը՝ մանուշակագույն վարագույրներ, մանուշակագույն ծաղիկների կենդանի ցանկապատ։",
+        review:
+          "«Տորթը դարձավ հարսանիքի երկրորդ ամենալուսանկարված օբյեկտը՝ մեզանից հետո։ Ճիշտ այն, ինչ ուզում էինք։»",
+        client: "Մարիա Կ.",
+        images: [
+          "/images/portfolio/portfolio-allium-cake-hero.webp",
+          "/images/portfolio/portfolio-allium-cake-card.webp",
+        ],
+      },
+      {
+        id: "oak-reception",
+        title: "Ընթրիք դարավոր կաղնիների տակ",
+        category: "Հարսանիք բանալի ձեռքին",
+        location: "Պատմական կալվածք",
+        guests: "120+ հյուր",
+        budget: "$200k-ից",
+        span: "col-span-2 row-span-1",
+        description:
+          "Թափանցիկ վրանը տեղադրվեց այնպես, որ իսպանական մամուռով ծածկված դարավոր կաղնիների պսակը դառնա ինտերիերի մաս, ոչ թե ֆոն։ Հյուրերն ընթրում էին երկար սեղանների շուրջ՝ ուղիղ ճյուղերի տակ։",
+        review:
+          "«Հենց այս ծառերի համար ընտրեցինք հարթակը, և թիմը դրանք չծածկեց վրանով, այլ կառուցեց երեկոն դրանց շուրջ։»",
+        client: "Էմիլի և Ջեքսոն",
+        images: [
+          "/images/portfolio/portfolio-oak-reception-hero.webp",
+          "/images/portfolio/portfolio-oak-reception-card.webp",
+        ],
+      },
+      {
+        id: "beach-dinner",
+        title: "Մասնավոր ընթրիք օվկիանոսի ափին",
         category: "Մասնավոր երեկո",
-        location: "Թբիլիսի, Վրաստան",
-        guests: "35 հյուր",
-        budget: "$45k",
+        location: "Արևադարձային կղզի",
+        guests: "16 հյուր",
+        budget: "$60k",
+        span: "col-span-1 row-span-1",
         description:
-          "Մթնոլորտային երեկո հին քաղաքի համայնապատկերային տեռասում՝ կենդանի ակուստիկ երաժշտությամբ, հեղինակային գինիներով և լուսային ինստալյացիայով:",
+          "Ինտիմ ընթրիք ուղիղ ավազի վրա՝ պագոդա-վրաններ լույսերով, բորդո տեքստիլ, գորգեր և կենդանի երաժշտություն։ Ձևաչափ նրանց համար, ովքեր կարևորում են հյուրերի մերձեցումը, ոչ թե մասշտաբը։",
         review:
-          "«Անհավանական ջերմ մթնոլորտ և բացարձակ հանգստություն մեզ համար հենց միջոցառման ընթացքում։»",
-        client: "Դանիիլ Մ.",
+          "«Տասնհինգ մարդ, ում սիրում ենք, կենդանի երաժշտություն և օվկիանոսը՝ երեք մետր հեռավորության վրա։ Կատարյալ երեկո։»",
+        client: "Դարիա և Նիկիտա",
         images: [
-          "/images/portfolio/portfolio-tbilisi-hero.webp",
-          "/images/portfolio/portfolio-tbilisi-card.webp",
+          "/images/portfolio/portfolio-beach-dinner-hero.webp",
+          "/images/portfolio/portfolio-beach-dinner-card.webp",
         ],
       },
       {
-        id: "barcelona-corp",
-        title: "Բիզնես կոնֆերանս",
-        category: "Կորպորատիվ",
-        location: "Բարսելոնա, Իսպանիա",
-        guests: "300 հյուր",
-        budget: "$220k",
+        id: "bamboo-bar",
+        title: "Բարային գոտի ներքին բակում",
+        category: "Քեյթերինգ և բար",
+        location: "Քաղաքային առանձնատուն",
+        guests: "120+ հյուր",
+        budget: "$130k",
+        span: "col-span-1 row-span-1",
         description:
-          "Լայնածավալ բիզնես իրադարձություն պատմական կալվածքում: Ինտերակտիվ գոտիներ, համաժամանակյա թարգմանություն, տարածքի բրենդավորում և երեկոյան շոու:",
+          "Ձեռագործ բարի պահարան՝ աղյուսե պատի և բարձր բամբուկի ֆոնին. խմիչքների գոտին նախագծված է որպես առանձին տարածք, ոչ թե կողային սեղան։",
         review:
-          "«Հստակ լոգիստիկա, անթերի ժամանակացույց և կազմակերպման ամենաբարձր մակարդակ թոփ-մենեջմենթի համար:»",
-        client: "TechCorp ընկերություն",
+          "«Բարը կարծես տարիներ շարունակ այնտեղ էր կանգնած, ոչ թե բերված մեկ երեկոյի համար։»",
+        client: "Կազմակերպչական խումբ",
         images: [
-          "/images/portfolio/portfolio-barcelona-hero.webp",
-          "/images/portfolio/portfolio-barcelona-card.webp",
-        ],
-      },
-      {
-        id: "phuket-party",
-        title: "Միջոցառում օվկիանոսի ափին",
-        category: "Հոբելյան",
-        location: "Պհուկետ, Թաիլանդ",
-        guests: "80 հյուր",
-        budget: "$95k",
-        description:
-          "Հոբելյանի նշում առանձնացված լողափում՝ արևադարձային ձևավորումներով, պիրոտեխնիկական շոույով և հեդլայներների մասնակցությամբ:",
-        review:
-          "«Ամեն ինչ մտածված էր մինչև մանրամասները: Տոնն անցավ մեկ շնչով!»",
-        client: "Միխայիլ Վ.",
-        images: [
-          "/images/portfolio/portfolio-phuket-hero.webp",
-          "/images/portfolio/portfolio-phuket-card.webp",
+          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
+          "/images/portfolio/portfolio-bamboo-bar-card.webp",
         ],
       },
     ],
@@ -412,6 +573,7 @@ const bookingHref = `/${lang}/booking`;
                   class="case-card"
                   role="button"
                   tabindex="0"
+                  aria-label={item.title}
                   data-title={item.title}
                   data-category={item.category}
                   data-location={item.location}
@@ -441,7 +603,10 @@ const bookingHref = `/${lang}/booking`;
                   <div class="case-info">
                     <div class="case-top">
                       <span class="card-category">{item.category}</span>
-                      <span class="card-location">📍 {item.location}</span>
+                      <span class="card-location">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                      {item.location}
+                    </span>
                     </div>
 
                     <h3 class="font-serif">{item.title}</h3>
@@ -449,8 +614,14 @@ const bookingHref = `/${lang}/booking`;
                     <p class="case-description">{item.description}</p>
 
                     <div class="case-meta">
-                      <span>👥 {item.guests}</span>
-                      <span>💎 {item.budget}</span>
+                      <span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        {item.guests}
+                      </span>
+                      <span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        {item.budget}
+                      </span>
                     </div>
 
                     <div class="case-cta">
@@ -518,7 +689,10 @@ const bookingHref = `/${lang}/booking`;
 
     <div class="modal-body">
       <h2 id="modal-title" class="font-serif">Название проекта</h2>
-      <p class="modal-location" id="modal-location">Локация</p>
+      <p class="modal-location">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="modal-location">Локация</span>
+      </p>
 
       <div class="modal-info-grid">
         <div>
@@ -548,6 +722,30 @@ const bookingHref = `/${lang}/booking`;
     </div>
   </div>
 </div>
+
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: t.heading,
+    itemListElement: t.items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "CreativeWork",
+        name: item.title,
+        description: item.description,
+        about: item.category,
+        locationCreated: {
+          "@type": "Place",
+          name: item.location,
+        },
+        image: `${SITE_URL}${item.images[0]}`,
+      },
+    })),
+  })}
+/>
 
 <script is:inline>
   /* ==== Модалка с галереей ==== */
@@ -648,7 +846,7 @@ const bookingHref = `/${lang}/booking`;
     function openFromCard(card) {
       mTitle.textContent = card.dataset.title || "";
       mCategory.textContent = card.dataset.category || "";
-      mLocation.textContent = "📍 " + (card.dataset.location || "");
+      mLocation.textContent = card.dataset.location || "";
       mGuests.textContent = card.dataset.guests || "";
       mBudget.textContent = card.dataset.budget || "";
       mDescription.textContent = card.dataset.description || "";
@@ -1597,4 +1795,17 @@ const bookingHref = `/${lang}/booking`;
     }
     .portfolio-modal-content .modal-gallery::after { display: none !important; }
   }
+
+.card-location,
+.case-meta span,
+.modal-location {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+.card-location svg,
+.case-meta svg,
+.modal-location svg {
+  flex-shrink: 0;
+}
 </style>

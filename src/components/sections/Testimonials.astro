@@ -57,29 +57,34 @@ const t = {
     subtitle:
       "Истории живых эмоций, доверия и безупречно реализованных проектов.",
     emptyText: "Отзывы пока не добавлены.",
+    swipeHint: "Листайте карточки влево-вправо или используйте стрелки",
   },
   eng: {
     title: "What Our Clients Say",
     subtitle:
       "Stories of genuine emotions, trust, and flawlessly executed projects.",
     emptyText: "No reviews added yet.",
+    swipeHint: "Swipe left or right, or use the arrows",
   },
   esp: {
     title: "Lo que dicen nuestros clientes",
     subtitle:
       "Historias de emociones reales, confianza y proyectos ejecutados.",
     emptyText: "Aún no hay reseñas agregadas.",
+    swipeHint: "Desliza a los lados o usa las flechas",
   },
   arm: {
     title: "Ինչ են ասում մեր հաճախորդները",
     subtitle: "Իրական էմոցիաների, վստահության և կատարյալ իրականացված ծրագրերի:",
     emptyText: "Կարծիքներ դեռ ավելացված չեն:",
+    swipeHint: "Սահեցրեք ձախ-աջ կամ օգտագործեք սլաքները",
   },
 }[lang as "ru" | "eng" | "esp" | "arm"] || {
   title: "Что говорят наши клиенты",
   subtitle:
     "Истории живых эмоций, доверия и безупречно реализованных проектов.",
   emptyText: "Отзывы пока не добавлены.",
+  swipeHint: "Листайте карточки влево-вправо или используйте стрелки",
 };
 ---
 
@@ -101,15 +106,28 @@ const t = {
         <p class="text-sm md:text-base text-zinc-400 font-light max-w-xl">
           {t.subtitle}
         </p>
+        {
+          testimonialsList.length > 1 && (
+            <p class="swipe-hint">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7M4 12h15" /></svg>
+              {t.swipeHint}
+            </p>
+          )
+        }
       </div>
 
-      <!-- Кнопки управления (на десктопе всегда flex, на мобилках скрыты) -->
+      <!-- Счётчик + стрелки: видны на всех размерах экрана -->
       {
         testimonialsList.length > 0 && (
-          <div class="desktop-arrows-wrapper">
+          <div class="arrows-wrapper">
+            <span class="testimonial-counter">
+              <span id="testimonialCurrent">1</span>
+              <span class="counter-sep">/</span>
+              <span>{testimonialsList.length}</span>
+            </span>
             <button
               id="prevTestimonial"
-              class="w-12 h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+              class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
               aria-label="Previous"
             >
               <svg
@@ -125,7 +143,7 @@ const t = {
             </button>
             <button
               id="nextTestimonial"
-              class="w-12 h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+              class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
               aria-label="Next"
             >
               <svg
@@ -181,6 +199,14 @@ const t = {
         </div>
       )
     }
+
+    {
+      testimonialsList.length > 1 && (
+        <div class="testimonial-progress" aria-hidden="true">
+          <div id="testimonialProgressBar" class="testimonial-progress-bar" />
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -194,17 +220,52 @@ const t = {
   const nextBtn = document.getElementById(
     "nextTestimonial",
   ) as HTMLButtonElement | null;
+  const progressBar = document.getElementById(
+    "testimonialProgressBar",
+  ) as HTMLDivElement | null;
+  const counterEl = document.getElementById(
+    "testimonialCurrent",
+  ) as HTMLSpanElement | null;
 
-  if (track && prevBtn && nextBtn) {
-    prevBtn.addEventListener("click", () => {
-      const cardWidth =
-        track.querySelector(".testimonial-card")?.clientWidth || 350;
+  if (track) {
+    const cards = Array.from(
+      track.querySelectorAll<HTMLDivElement>(".testimonial-card"),
+    );
+    const total = cards.length;
+
+    // Определяем, какая карточка сейчас ближе всего к левому краю
+    // видимой области — по ней считаем номер и прогресс.
+    function updateProgress() {
+      if (!track || total === 0) return;
+      const trackLeft = track.scrollLeft;
+      let current = 0;
+      let minDist = Infinity;
+      cards.forEach((card, i) => {
+        const dist = Math.abs(card.offsetLeft - trackLeft);
+        if (dist < minDist) {
+          minDist = dist;
+          current = i;
+        }
+      });
+      if (counterEl) counterEl.textContent = String(current + 1);
+      if (progressBar) {
+        const pct = total > 1 ? (current / (total - 1)) * 100 : 100;
+        progressBar.style.width = `${Math.max(8, pct)}%`;
+      }
+    }
+
+    track.addEventListener("scroll", () => {
+      window.requestAnimationFrame(updateProgress);
+    });
+    updateProgress();
+
+    prevBtn?.addEventListener("click", () => {
+      const cardWidth = cards[0]?.clientWidth || 350;
       track.scrollBy({ left: -(cardWidth + 24), behavior: "smooth" });
     });
 
-    nextBtn.addEventListener("click", () => {
-      const cardWidth =
-        track.querySelector(".testimonial-card")?.clientWidth || 350;
+    nextBtn?.addEventListener("click", () => {
+      const cardWidth = cards[0]?.clientWidth || 350;
       track.scrollBy({ left: cardWidth + 24, behavior: "smooth" });
     });
   }
@@ -239,9 +300,67 @@ const t = {
     position: relative;
   }
 
-  /* Управление видимостью стрелок */
-  .desktop-arrows-wrapper {
-    display: none; /* По умолчанию скрыты (на мобилках) */
+  /* Подсказка «листайте» — видна, пока не начали скроллить сами */
+  .swipe-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+    color: #71717a;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .swipe-hint {
+      justify-content: flex-start;
+    }
+  }
+
+  /* Обёртка счётчика + стрелок — видна на всех экранах */
+  .arrows-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .arrows-wrapper {
+      justify-content: flex-end;
+    }
+  }
+
+  .testimonial-counter {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+    color: #a1a1aa;
+    font-variant-numeric: tabular-nums;
+    margin-right: 0.25rem;
+    min-width: 2.5rem;
+  }
+
+  .testimonial-counter .counter-sep {
+    opacity: 0.5;
+  }
+
+  /* Тонкий прогресс-бар под лентой — показывает, сколько отзывов позади */
+  .testimonial-progress {
+    margin-top: 1.25rem;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .testimonial-progress-bar {
+    height: 100%;
+    width: 8%;
+    border-radius: 999px;
+    background: #0d9488;
+    transition: width 0.25s ease;
   }
 
   /* Планшеты и десктоп (от 768px и выше) */
@@ -250,12 +369,6 @@ const t = {
       flex: 0 0 380px; /* На десктопе фиксированная ширина карточки */
       padding: 2rem;
       border-radius: 1.5rem;
-    }
-
-    .desktop-arrows-wrapper {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
     }
   }
 </style>
