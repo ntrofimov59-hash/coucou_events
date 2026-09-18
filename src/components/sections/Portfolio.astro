@@ -567,25 +567,42 @@ const bookingHref = `/${lang}/booking`;
     const mClient = document.getElementById("modal-client");
 
     const track = modal.querySelector("[data-modal-track]");
-    const prevBtn = modal.querySelector("[data-modal-prev]");
-    const nextBtn = modal.querySelector("[data-modal-next]");
-    const dotsWrap = modal.querySelector("[data-modal-dots]");
-    const currentEl = modal.querySelector("[data-modal-current]");
-    const totalEl = modal.querySelector("[data-modal-total]");
+    let autoTimer = null;
 
-    let slideCount = 0;
-    let currentIndex = 0;
-    let dots = [];
+    function stopAuto() {
+      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+      if (track) track.style.transform = "translateY(0)";
+    }
+
+    function startAuto() {
+      stopAuto();
+      if (!track) return;
+      if (window.innerWidth > 900) return; // только на мобильном
+      const slides = track.querySelectorAll(".modal-gallery-slide");
+      if (slides.length < 2) return;
+
+      const h = slides[0].offsetHeight || 400;
+      let idx = 0;
+      track.style.transition = "transform 1.1s cubic-bezier(0.4, 0, 0.2, 1)";
+
+      autoTimer = setInterval(() => {
+        idx = (idx + 1) % slides.length;
+        track.style.transform = "translateY(-" + (idx * h) + "px)";
+      }, 3800);
+    }
 
     function buildGallery(images) {
       if (!track) return;
       track.innerHTML = "";
-      if (dotsWrap) dotsWrap.innerHTML = "";
-      dots = [];
-      slideCount = images.length;
-      currentIndex = 0;
+      track.style.transition = "";
+      track.style.transform = "translateY(0)";
+      stopAuto();
+      if (!images || !images.length) return;
 
-      images.forEach((src, i) => {
+      const isMobile = window.innerWidth <= 900;
+      const list = isMobile ? images : [images[0]];
+
+      list.forEach((src, i) => {
         const slide = document.createElement("div");
         slide.className = "modal-gallery-slide";
         const img = document.createElement("img");
@@ -594,53 +611,8 @@ const bookingHref = `/${lang}/booking`;
         img.loading = i === 0 ? "eager" : "lazy";
         slide.appendChild(img);
         track.appendChild(slide);
-
-        if (dotsWrap) {
-          const dot = document.createElement("button");
-          dot.type = "button";
-          dot.className = "modal-gallery-dot" + (i === 0 ? " is-active" : "");
-          dot.setAttribute("aria-label", `Фото ${i + 1}`);
-          dot.addEventListener("click", () => scrollToSlide(i));
-          dotsWrap.appendChild(dot);
-          dots.push(dot);
-        }
       });
-
-      track.dataset.count = String(slideCount);
-      if (currentEl) currentEl.textContent = "1";
-      if (totalEl) totalEl.textContent = slideCount;
-      track.scrollLeft = 0;
-      updateArrows();
     }
-
-    function scrollToSlide(i) {
-      if (i < 0 || i >= slideCount) return;
-      const slide = track.children[i];
-      if (slide) {
-        track.scrollTo({ left: slide.offsetLeft, behavior: "smooth" });
-      }
-    }
-
-    function updateArrows() {
-      if (prevBtn) prevBtn.disabled = currentIndex <= 0;
-      if (nextBtn) nextBtn.disabled = currentIndex >= slideCount - 1;
-    }
-
-    function onScroll() {
-      if (!slideCount || !track) return;
-      const w = track.clientWidth;
-      const idx = Math.round(track.scrollLeft / w);
-      if (idx !== currentIndex) {
-        currentIndex = idx;
-        if (currentEl) currentEl.textContent = idx + 1;
-        dots.forEach((d, i) => d.classList.toggle("is-active", i === idx));
-        updateArrows();
-      }
-    }
-
-    if (prevBtn) prevBtn.addEventListener("click", () => scrollToSlide(currentIndex - 1));
-    if (nextBtn) nextBtn.addEventListener("click", () => scrollToSlide(currentIndex + 1));
-    if (track) track.addEventListener("scroll", onScroll, { passive: true });
 
     function openFromCard(card) {
       mTitle.textContent = card.dataset.title || "";
@@ -653,20 +625,19 @@ const bookingHref = `/${lang}/booking`;
       mClient.textContent = card.dataset.client || "";
 
       let images = [];
-      try {
-        images = JSON.parse(card.dataset.images || "[]");
-      } catch (e) {
-        images = [];
-      }
+      try { images = JSON.parse(card.dataset.images || "[]"); } catch (e) { images = []; }
       if (!images.length && card.dataset.image) images = [card.dataset.image];
       buildGallery(images);
 
       modal.classList.add("active");
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
+
+      setTimeout(startAuto, 80);
     }
 
     function closeModal() {
+      stopAuto();
       modal.classList.remove("active");
       modal.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
@@ -675,42 +646,25 @@ const bookingHref = `/${lang}/booking`;
     cards.forEach((card) => {
       if (card.dataset.modalInit === "1") return;
       card.dataset.modalInit = "1";
-      let startX = 0;
-      let startY = 0;
-      let moved = false;
-      card.addEventListener("pointerdown", (e) => {
-        startX = e.clientX;
-        startY = e.clientY;
-        moved = false;
-      });
+      let startX = 0, startY = 0, moved = false;
+      card.addEventListener("pointerdown", (e) => { startX = e.clientX; startY = e.clientY; moved = false; });
       card.addEventListener("pointermove", (e) => {
-        if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) {
-          moved = true;
-        }
+        if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) moved = true;
       });
-      card.addEventListener("click", () => {
-        if (moved) return;
-        openFromCard(card);
-      });
+      card.addEventListener("click", () => { if (!moved) openFromCard(card); });
       card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openFromCard(card);
-        }
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFromCard(card); }
       });
     });
 
     closeBtn.addEventListener("click", closeModal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeModal();
-    });
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
   }
 
   function bootPortfolio() {
     initPortfolioModal();
+    initGalleryAutoScroll();
   }
 
   document.addEventListener("DOMContentLoaded", bootPortfolio);
@@ -1134,7 +1088,7 @@ const bookingHref = `/${lang}/booking`;
     background: #161619;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
-    max-width: 540px;
+    max-width: 620px;
     width: 100%;
     position: relative;
     color: #f4f4f5;
@@ -1466,14 +1420,15 @@ const bookingHref = `/${lang}/booking`;
       gap: 0;
       overflow: hidden;
       min-height: 0;
+      transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .case-gallery > .case-image {
-      display: none !important;
+      display: block !important;
       grid-row: auto !important;
       grid-column: auto !important;
       border-radius: 0;
-      height: 100%;
+      height: 300px !important;
       width: 100%;
     }
 
@@ -1507,83 +1462,85 @@ const bookingHref = `/${lang}/booking`;
     .modal-gallery-arrow { width: 34px; height: 34px; }
   }
 
-  /* ==== Модалка на мобильном — bento-сетка без стрелок ==== */
+  /* ==== Модалка: только основное (первое) фото ==== */
+  .modal-gallery {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    background: #0f0f12;
+  }
+  .modal-gallery-track {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+  }
+  .modal-gallery-slide {
+    height: 100%;
+  }
+  .modal-gallery-slide:not(:first-child) {
+    display: none !important;
+  }
+  .modal-gallery-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .modal-gallery-arrow,
+  .modal-gallery-indicator,
+  .modal-gallery::after {
+    display: none !important;
+  }
+  .modal-gallery .modal-tag {
+    top: 0.9rem;
+    left: 0.9rem;
+  }
+  
+  /* ==== Модалка: большое фото ==== */
+  .portfolio-modal-content .modal-gallery {
+    height: 340px !important;
+    background: #0f0f12;
+    overflow: hidden;
+    position: relative;
+  }
+  .portfolio-modal-content .modal-gallery-track {
+    display: block !important;
+    will-change: transform;
+  }
+  .portfolio-modal-content .modal-gallery-slide {
+    display: block !important;
+    width: 100% !important;
+    height: 340px !important;
+    overflow: hidden;
+    flex: initial !important;
+    scroll-snap-align: none !important;
+  }
+  .portfolio-modal-content .modal-gallery-slide img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+  .portfolio-modal-content .modal-gallery-arrow,
+  .portfolio-modal-content .modal-gallery-indicator,
+  .portfolio-modal-content .modal-gallery::after {
+    display: none !important;
+  }
+  .portfolio-modal-content .modal-gallery .modal-tag {
+    top: 1rem;
+    left: 1rem;
+  }
   @media (max-width: 900px) {
-    .modal-gallery {
-      height: auto;
-      max-height: 60vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-      background: #eef4f2;
+    .portfolio-modal-content .modal-gallery,
+    .portfolio-modal-content .modal-gallery-slide { height: 400px !important; }
+    .portfolio-modal-content .modal-gallery-slide img {
+      object-fit: contain !important;
+      background: #0f0f12;
     }
-
-    .modal-gallery-track {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr;
-      grid-auto-rows: 130px;
-      grid-template-rows: none;
-      overflow: visible !important;
-      scroll-snap-type: none !important;
-      height: auto;
-      gap: 6px;
-      padding: 6px;
-      box-sizing: border-box;
-    }
-
-    .modal-gallery-track[data-count="1"] {
-      grid-template-columns: 1fr;
-      grid-auto-rows: 220px;
-    }
-    .modal-gallery-track[data-count="3"],
-    .modal-gallery-track[data-count="4"] {
-      grid-template-columns: 1.3fr 1fr;
-      grid-auto-rows: 130px;
-    }
-    .modal-gallery-track[data-count="5"],
-    .modal-gallery-track[data-count="6"],
-    .modal-gallery-track[data-count="7"],
-    .modal-gallery-track[data-count="8"] {
-      grid-template-columns: 1.3fr 1fr 1fr;
-      grid-auto-rows: 130px;
-    }
-    .modal-gallery-track[data-count="3"] > .modal-gallery-slide:nth-child(1),
-    .modal-gallery-track[data-count="5"] > .modal-gallery-slide:nth-child(1),
-    .modal-gallery-track[data-count="6"] > .modal-gallery-slide:nth-child(1),
-    .modal-gallery-track[data-count="7"] > .modal-gallery-slide:nth-child(1),
-    .modal-gallery-track[data-count="8"] > .modal-gallery-slide:nth-child(1) {
-      grid-row: span 2;
-    }
-    .modal-gallery-track[data-count="7"] > .modal-gallery-slide:nth-child(n+7),
-    .modal-gallery-track[data-count="8"] > .modal-gallery-slide:nth-child(n+7) {
-      display: none;
-    }
-
-    .modal-gallery-slide {
-      flex: initial !important;
-      height: 100% !important;
-      min-height: 0;
-      scroll-snap-align: none !important;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .modal-gallery-slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 12px;
-    }
-
-    /* Скрываем стрелки, точки, счётчик и градиент */
-    .modal-gallery-arrow,
-    .modal-gallery-indicator,
-    .modal-gallery::after {
-      display: none !important;
-    }
-
-    .modal-gallery .modal-tag {
-      top: 0.9rem;
-      left: 0.9rem;
-    }
+  }
+  @media (max-width: 480px) {
+    .portfolio-modal-content .modal-gallery,
+    .portfolio-modal-content .modal-gallery-slide { height: 340px !important; }
   }
 </style>
