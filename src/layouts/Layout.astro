@@ -4,6 +4,7 @@ import Header from "@/components/Header/Header.astro";
 import { Footer } from "@/components/Footer";
 import FloatingActions from "@/components/ui/FloatingActions.astro";
 import Analytics from "@/components/ui/Analytics.astro";
+import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT } from "@/config/site";
 import "../styles/global.css";
 
 interface Props {
@@ -35,6 +36,58 @@ const {
 
 const currentLocale = lang || locale;
 const pagePath = currentPath || Astro.url.pathname;
+
+// Organization JSON-LD — на каждой странице сайта.
+// Это то, за что в первую очередь цепляются ИИ-поисковики (ChatGPT,
+// Perplexity, Google AI Overviews) и Knowledge Graph при заходе на домен:
+// кто это, где физически находится, как связаться, какие есть
+// официальные профили. Дублируется на всех страницах намеренно —
+// расход ничтожный, а гарантия, что боты увидят это с любого входа,
+// того стоит.
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": `${SITE_URL}/#organization`,
+  name: SITE_NAME,
+  legalName: `${SITE_NAME} Events`,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  telephone: CONTACT.phone,
+  email: CONTACT.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "24 Vagharsh Vagharshyan St",
+    addressLocality: "Yerevan",
+    postalCode: "0012",
+    addressCountry: "AM",
+  },
+  areaServed: {
+    "@type": "Country",
+    name: "Worldwide",
+  },
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ],
+    opens: "09:00",
+    closes: "21:00",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: CONTACT.phone,
+    contactType: "customer service",
+    email: CONTACT.email,
+    availableLanguage: ["Russian", "English", "Spanish", "Armenian"],
+  },
+  sameAs: [CONTACT.instagram, CONTACT.telegram].filter(Boolean),
+};
 ---
 <!doctype html>
 <html lang={currentLocale}>
@@ -48,6 +101,10 @@ const pagePath = currentPath || Astro.url.pathname;
       image={image} 
       locale={currentLocale}
       service={service}
+    />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(organizationJsonLd)}
     />
     <slot name="head" />
   </head>
