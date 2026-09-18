@@ -20,7 +20,10 @@ export default defineConfig({
     solidJs(),
     mdx(),
     tailwind(),
-    sitemap({
+    // ОТКЛЮЧЕНО: конфликтует с собственным src/pages/sitemap.xml.ts —
+    // генерирует те же URL без hreflang-alternates на каждом <url>
+    // и без trailing slash, из-за чего расходится с canonical.
+    /* sitemap({
       // Не индексируем служебные URL
       filter: (page) =>
         !page.includes("/api/") &&
@@ -35,7 +38,7 @@ export default defineConfig({
           arm: "hy",
         },
       },
-    }),
+    }), */
   ],
   vite: {
     resolve: {
