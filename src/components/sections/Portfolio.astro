@@ -1,4 +1,9 @@
 ---
+import { Swiper, SwiperWrapper, SwiperSlide } from "astro-swiper";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
 interface Props {
   lang?: string;
 }
@@ -10,7 +15,7 @@ const t = {
     sectionTag: "Избранные кейсы",
     heading: "Реализованные проекты",
     subtitle:
-      "Нажмите на любую карточку, чтобы посмотреть детали проекта и отзыв клиента.",
+      "Листайте карточки, чтобы посмотреть детали проектов и отзывы клиентов.",
     modalGuests: "Масштаб:",
     modalBudget: "Бюджет:",
     modalAbout: "О проекте:",
@@ -24,14 +29,15 @@ const t = {
         location: "Бали, Индонезия",
         guests: "120 гостей",
         budget: "$150k+",
-        span: "col-span-2 row-span-2",
         description:
           "Трехдневное торжество на обрыве скалы с видом на океан. Полная техническая застройка, включая кастомный стеклянный танцпол над бассейном, свет 360° и авторский гастрономический ужин.",
         review:
           "«Команда превзошла все ожидания. Гости до сих пор вспоминают этот масштаб и безупречный сервис на тропическом острове!»",
         client: "Артем и София",
-        image:
+        images: [
+          "/images/portfolio/portfolio-bali-hero.webp",
           "/images/portfolio/portfolio-bali-card.webp",
+        ],
       },
       {
         id: "tbilisi-dinner",
@@ -40,14 +46,15 @@ const t = {
         location: "Тбилиси, Грузия",
         guests: "35 гостей",
         budget: "$45k",
-        span: "col-span-1 row-span-1",
         description:
           "Атмосферный вечер на панорамной террасе старого города с живой акустической музыкой, авторской подачей вин и световой инсталляцией.",
         review:
           "«Невероятная камерная атмосфера и абсолютное спокойствие для нас во время самого события.»",
         client: "Даниил М.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-tbilisi-hero.webp",
           "/images/portfolio/portfolio-tbilisi-card.webp",
+        ],
       },
       {
         id: "barcelona-corp",
@@ -56,14 +63,15 @@ const t = {
         location: "Барселона, Испания",
         guests: "300 гостей",
         budget: "$220k",
-        span: "col-span-1 row-span-1",
         description:
           "Масштабный бизнес-ивент в исторической усадьбе. Интерактивные зоны, синхронный перевод, брендирование пространства и вечернее шоу.",
         review:
           "«Четкая логистика, безупречный тайминг и высочайший уровень организации для топ-менеджмента.»",
         client: "Компания TechCorp",
-        image:
+        images: [
+          "/images/portfolio/portfolio-barcelona-hero.webp",
           "/images/portfolio/portfolio-barcelona-card.webp",
+        ],
       },
       {
         id: "phuket-party",
@@ -72,21 +80,22 @@ const t = {
         location: "Пхукет, Таиланд",
         guests: "80 гостей",
         budget: "$95k",
-        span: "col-span-2 row-span-1",
         description:
           "Празднование юбилея на уединенном пляже с тропическими декорациями, пиротехническим шоу и выступлением хедлайнеров.",
         review:
           "«Все было продумано до мелочей. Праздник прошел на одном дыхании!»",
         client: "Михаил В.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-phuket-hero.webp",
           "/images/portfolio/portfolio-phuket-card.webp",
+        ],
       },
     ],
   },
   eng: {
     sectionTag: "Featured Cases",
     heading: "Completed Projects",
-    subtitle: "Click on any card to view project details and client review.",
+    subtitle: "Swipe through the cards to view project details and client reviews.",
     modalGuests: "Scale:",
     modalBudget: "Budget:",
     modalAbout: "About the project:",
@@ -100,14 +109,15 @@ const t = {
         location: "Bali, Indonesia",
         guests: "120 guests",
         budget: "$150k+",
-        span: "col-span-2 row-span-2",
         description:
           "A three-day cliffside celebration overlooking the ocean. Complete technical setup including a custom glass dance floor over the pool, 360° lighting, and an author's gourmet dinner.",
         review:
           "«The team exceeded all expectations. Guests are still talking about the scale and flawless service on the tropical island!»",
         client: "Artem & Sofia",
-        image:
+        images: [
+          "/images/portfolio/portfolio-bali-hero.webp",
           "/images/portfolio/portfolio-bali-card.webp",
+        ],
       },
       {
         id: "tbilisi-dinner",
@@ -116,14 +126,15 @@ const t = {
         location: "Tbilisi, Georgia",
         guests: "35 guests",
         budget: "$45k",
-        span: "col-span-1 row-span-1",
         description:
           "An atmospheric evening on a panoramic old town terrace featuring live acoustic music, curated wine pairings, and a light installation.",
         review:
           "«An incredible intimate atmosphere and absolute peace of mind for us during the event itself.»",
         client: "Daniil M.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-tbilisi-hero.webp",
           "/images/portfolio/portfolio-tbilisi-card.webp",
+        ],
       },
       {
         id: "barcelona-corp",
@@ -132,14 +143,15 @@ const t = {
         location: "Barcelona, Spain",
         guests: "300 guests",
         budget: "$220k",
-        span: "col-span-1 row-span-1",
         description:
           "A large-scale business event in a historic estate. Interactive zones, simultaneous translation, space branding, and an evening show.",
         review:
           "«Clear logistics, flawless timing, and the highest level of organization for top management.»",
         client: "TechCorp Company",
-        image:
+        images: [
+          "/images/portfolio/portfolio-barcelona-hero.webp",
           "/images/portfolio/portfolio-barcelona-card.webp",
+        ],
       },
       {
         id: "phuket-party",
@@ -148,14 +160,15 @@ const t = {
         location: "Phuket, Thailand",
         guests: "80 guests",
         budget: "$95k",
-        span: "col-span-2 row-span-1",
         description:
           "Anniversary celebration on a secluded beach with tropical decor, a pyrotechnic show, and headliner performances.",
         review:
           "«Everything was thought out to the smallest detail. The holiday went by in one breath!»",
         client: "Mikhail V.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-phuket-hero.webp",
           "/images/portfolio/portfolio-phuket-card.webp",
+        ],
       },
     ],
   },
@@ -163,7 +176,7 @@ const t = {
     sectionTag: "Casos destacados",
     heading: "Proyectos Realizados",
     subtitle:
-      "Haz clic en cualquier tarjeta para ver los detalles del proyecto y la reseña del cliente.",
+      "Desliza las tarjetas para ver los detalles del proyecto y la reseña del cliente.",
     modalGuests: "Escala:",
     modalBudget: "Presupuesto:",
     modalAbout: "Sobre el proyecto:",
@@ -177,14 +190,15 @@ const t = {
         location: "Bali, Indonesia",
         guests: "120 invitados",
         budget: "$150k+",
-        span: "col-span-2 row-span-2",
         description:
           "Celebración de tres días en un acantilado con vista al océano. Montaje técnico completo que incluye pista de baile de cristal personalizada sobre la piscina, iluminación 360° y cena gourmet.",
         review:
           "«El equipo superó todas las expectativas. ¡Los invitados aún recuerdan la magnitud y el servicio impecable en la isla tropical!»",
         client: "Artem y Sofía",
-        image:
+        images: [
+          "/images/portfolio/portfolio-bali-hero.webp",
           "/images/portfolio/portfolio-bali-card.webp",
+        ],
       },
       {
         id: "tbilisi-dinner",
@@ -193,14 +207,15 @@ const t = {
         location: "Tiflis, Georgia",
         guests: "35 invitados",
         budget: "$45k",
-        span: "col-span-1 row-span-1",
         description:
           "Una velada atmosférica en una terraza panorámica del casco antiguo con música acústica en vivo, cata de vinos y una instalación lumínica.",
         review:
           "«Un ambiente íntimo increíble y absoluta tranquilidad para nosotros durante todo el evento.»",
         client: "Daniil M.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-tbilisi-hero.webp",
           "/images/portfolio/portfolio-tbilisi-card.webp",
+        ],
       },
       {
         id: "barcelona-corp",
@@ -209,14 +224,15 @@ const t = {
         location: "Barcelona, España",
         guests: "300 invitados",
         budget: "$220k",
-        span: "col-span-1 row-span-1",
         description:
           "Evento empresarial a gran escala en una finca histórica. Zonas interactivas, traducción simultánea, branding del espacio y espectáculo nocturno.",
         review:
           "«Logística clara, tiempos impecables y el más alto nivel de organización para la alta dirección.»",
         client: "Empresa TechCorp",
-        image:
+        images: [
+          "/images/portfolio/portfolio-barcelona-hero.webp",
           "/images/portfolio/portfolio-barcelona-card.webp",
+        ],
       },
       {
         id: "phuket-party",
@@ -225,14 +241,15 @@ const t = {
         location: "Phuket, Tailandia",
         guests: "80 invitados",
         budget: "$95k",
-        span: "col-span-2 row-span-1",
         description:
           "Celebración de aniversario en una playa privada con decoración tropical, espectáculo pirotécnico y artistas invitados.",
         review:
           "«Todo fue pensado hasta el más mínimo detalle. ¡La fiesta pasó en un suspiro!»",
         client: "Mikhail V.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-phuket-hero.webp",
           "/images/portfolio/portfolio-phuket-card.webp",
+        ],
       },
     ],
   },
@@ -240,7 +257,7 @@ const t = {
     sectionTag: "Ընտրված գործեր",
     heading: "Իրականացված նախագծեր",
     subtitle:
-      "Սեղմեք ցանկացած քարտի վրա՝ նախագծի մանրամասները և հաճախորդի կարծիքը տեսնելու համար:",
+      "Սահեցրեք քարտերը՝ նախագծի մանրամասները և հաճախորդի կարծիքը տեսնելու համար:",
     modalGuests: "Մասշտաբ՝",
     modalBudget: "Բյուջե՝",
     modalAbout: "Նախագծի մասին՝",
@@ -254,14 +271,15 @@ const t = {
         location: "Բալի, Ինդոնեզիա",
         guests: "120 հյուր",
         budget: "$150k+",
-        span: "col-span-2 row-span-2",
         description:
           "Եռօրյա տոնակատարություն ժայռի եզրին՝ օվկիանոսի տեսարանով: Ամբողջական տեխնիկական կառուցվածք, ներառյալ հարմարեցված ապակյա պարահրապարակ լողավազանի վրա, 360° լույս և հեղինակային գաստրոնոմիկ ընթրիք:",
         review:
           "«Թիմը գերազանցեց բոլոր սպասելիքները: Հյուրերը մինչ այժմ հիշում են այս մասշտաբն ու անթերի սպասարկումը արևադարձային կղզում!»",
         client: "Արտյոմ և Սոֆիա",
-        image:
+        images: [
+          "/images/portfolio/portfolio-bali-hero.webp",
           "/images/portfolio/portfolio-bali-card.webp",
+        ],
       },
       {
         id: "tbilisi-dinner",
@@ -270,14 +288,15 @@ const t = {
         location: "Թբիլիսի, Վրաստան",
         guests: "35 հյուր",
         budget: "$45k",
-        span: "col-span-1 row-span-1",
         description:
           "Մթնոլորտային երեկո հին քաղաքի համայնապատկերային տեռասում՝ կենդանի ակուստիկ երաժշտությամբ, հեղինակային գինիներով և լուսային ինստալյացիայով:",
         review:
           "«Անհավանական ջերմ մթնոլորտ և բացարձակ հանգստություն մեզ համար հենց միջոցառման ընթացքում։»",
         client: "Դանիիլ Մ.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-tbilisi-hero.webp",
           "/images/portfolio/portfolio-tbilisi-card.webp",
+        ],
       },
       {
         id: "barcelona-corp",
@@ -286,14 +305,15 @@ const t = {
         location: "Բարսելոնա, Իսպանիա",
         guests: "300 հյուր",
         budget: "$220k",
-        span: "col-span-1 row-span-1",
         description:
           "Լայնածավալ բիզնես իրադարձություն պատմական կալվածքում: Ինտերակտիվ գոտիներ, համաժամանակյա թարգմանություն, տարածքի բրենդավորում և երեկոյան շոու:",
         review:
           "«Հստակ լոգիստիկա, անթերի ժամանակացույց և կազմակերպման ամենաբարձր մակարդակ թոփ-մենեջմենթի համար:»",
         client: "TechCorp ընկերություն",
-        image:
+        images: [
+          "/images/portfolio/portfolio-barcelona-hero.webp",
           "/images/portfolio/portfolio-barcelona-card.webp",
+        ],
       },
       {
         id: "phuket-party",
@@ -302,14 +322,15 @@ const t = {
         location: "Պհուկետ, Թաիլանդ",
         guests: "80 հյուր",
         budget: "$95k",
-        span: "col-span-2 row-span-1",
         description:
           "Հոբելյանի նշում առանձնացված լողափում՝ արևադարձային ձևավորումներով, պիրոտեխնիկական շոույով և հեդլայներների մասնակցությամբ:",
         review:
           "«Ամեն ինչ մտածված էր մինչև մանրամասները: Տոնն անցավ մեկ շնչով!»",
         client: "Միխայիլ Վ.",
-        image:
+        images: [
+          "/images/portfolio/portfolio-phuket-hero.webp",
           "/images/portfolio/portfolio-phuket-card.webp",
+        ],
       },
     ],
   },
@@ -317,7 +338,7 @@ const t = {
   sectionTag: "Избранные кейсы",
   heading: "Реализованные проекты",
   subtitle:
-    "Нажмите на любую карточку, чтобы посмотреть детали проекта и отзыв клиента.",
+    "Листайте карточки, чтобы посмотреть детали проектов и отзывы клиентов.",
   modalGuests: "Масштаб:",
   modalBudget: "Бюджет:",
   modalAbout: "О проекте:",
@@ -329,7 +350,7 @@ const t = {
 const bookingHref = `/${lang}/booking`;
 ---
 
-<section id="portfolio" class="bento-section" lang={lang}>
+<section id="portfolio" class="portfolio-section" lang={lang}>
   <div class="container">
     <div class="section-header">
       <span class="section-tag">{t.sectionTag}</span>
@@ -337,46 +358,112 @@ const bookingHref = `/${lang}/booking`;
       <p class="subtitle font-light">{t.subtitle}</p>
     </div>
 
-    <div class="bento-grid">
-      {
-        t.items.map((item) => (
-          <div
-            class={`bento-card ${item.span}`}
-            role="button"
-            tabindex="0"
-            data-title={item.title}
-            data-category={item.category}
-            data-location={item.location}
-            data-guests={item.guests}
-            data-budget={item.budget}
-            data-description={item.description}
-            data-review={item.review}
-            data-client={item.client}
-            data-image={item.image}
-            style={`background-image: url(${item.image});`}
-          >
-            <div class="card-overlay" />
-            <div class="card-content">
-              <div class="card-top">
-                <span class="card-category">{item.category}</span>
-                <span class="card-location">📍 {item.location}</span>
-              </div>
-              <div class="card-middle">
-                <h3>{item.title}</h3>
-              </div>
-              <div class="card-bottom">
-                <div class="card-meta">
-                  <span>👥 {item.guests}</span>
-                  <span>💎 {item.budget}</span>
-                </div>
-                <div class="card-arrow">
-                  <span>→</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))
-      }
+    <div class="portfolio-swiper-wrap">
+      <!-- Навигация над кейсами, по центру: стрелка • точки • стрелка -->
+      <div class="portfolio-nav">
+        <button
+          class="portfolio-nav-btn portfolio-nav-prev"
+          type="button"
+          aria-label="Предыдущий кейс"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="portfolio-pagination"></div>
+
+        <button
+          class="portfolio-nav-btn portfolio-nav-next"
+          type="button"
+          aria-label="Следующий кейс"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <Swiper
+        options={{
+          slidesPerView: 1,
+          spaceBetween: 24,
+          allowTouchMove: true,
+          navigation: {
+            prevEl: '.portfolio-nav-prev',
+            nextEl: '.portfolio-nav-next',
+          },
+          pagination: {
+            el: '.portfolio-pagination',
+            clickable: true,
+          },
+          loop: false,
+          grabCursor: false,
+          breakpoints: {
+            0: { allowTouchMove: true },
+            901: { allowTouchMove: false },
+          },
+        }}
+      >
+        <SwiperWrapper>
+          {
+            t.items.map((item) => (
+              <SwiperSlide>
+                <article
+                  class="case-card"
+                  role="button"
+                  tabindex="0"
+                  data-title={item.title}
+                  data-category={item.category}
+                  data-location={item.location}
+                  data-guests={item.guests}
+                  data-budget={item.budget}
+                  data-description={item.description}
+                  data-review={item.review}
+                  data-client={item.client}
+                  data-image={item.images[0]}
+                >
+                  <div class="case-gallery" data-count={item.images.length}>
+                    {item.images.map((img, idx) => (
+                      <div class="case-image">
+                        <img
+                          src={img}
+                          alt={`${item.title} — фото ${idx + 1}`}
+                          loading="lazy"
+                        />
+                        <span class="photo-counter">
+                          {idx + 1} / {item.images.length}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div class="case-info">
+                    <div class="case-top">
+                      <span class="card-category">{item.category}</span>
+                      <span class="card-location">📍 {item.location}</span>
+                    </div>
+
+                    <h3 class="font-serif">{item.title}</h3>
+
+                    <p class="case-description">{item.description}</p>
+
+                    <div class="case-meta">
+                      <span>👥 {item.guests}</span>
+                      <span>💎 {item.budget}</span>
+                    </div>
+
+                    <div class="case-cta">
+                      <span>Подробнее</span>
+                      <span class="case-arrow">→</span>
+                    </div>
+                  </div>
+                </article>
+              </SwiperSlide>
+            ))
+          }
+        </SwiperWrapper>
+      </Swiper>
     </div>
   </div>
 </section>
@@ -431,8 +518,9 @@ const bookingHref = `/${lang}/booking`;
 </div>
 
 <script is:inline>
+  /* ==== Модалка ==== */
   function initPortfolioModal() {
-    const cards = document.querySelectorAll(".bento-card");
+    const cards = document.querySelectorAll(".case-card");
     const modal = document.getElementById("portfolio-modal");
     const closeBtn = document.getElementById("close-portfolio-modal");
     if (!modal || !closeBtn) return;
@@ -458,7 +546,6 @@ const bookingHref = `/${lang}/booking`;
       mClient.textContent = card.dataset.client || "";
       mImage.src = card.dataset.image || "";
       mImage.alt = card.dataset.title || "";
-
       modal.classList.add("active");
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -471,7 +558,27 @@ const bookingHref = `/${lang}/booking`;
     }
 
     cards.forEach((card) => {
-      card.addEventListener("click", () => openFromCard(card));
+      if (card.dataset.modalInit === "1") return;
+      card.dataset.modalInit = "1";
+      let startX = 0;
+      let startY = 0;
+      let moved = false;
+      card.addEventListener("pointerdown", (e) => {
+        startX = e.clientX;
+        startY = e.clientY;
+        moved = false;
+      });
+      card.addEventListener("pointermove", (e) => {
+        if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) {
+          moved = true;
+        }
+      });
+      card.addEventListener("click", (e) => {
+        if (moved) return;
+        const g = e.target.closest(".case-gallery");
+        if (g && g.dataset.dragged === "1") return;
+        openFromCard(card);
+      });
       card.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -489,15 +596,43 @@ const bookingHref = `/${lang}/booking`;
     });
   }
 
-  document.addEventListener("DOMContentLoaded", initPortfolioModal);
-  document.addEventListener("astro:page-load", initPortfolioModal);
-  initPortfolioModal();
+  /* ==== Флаг drag для фото-галереи ==== */
+  function initGalleryDragFlag() {
+    document.querySelectorAll(".case-gallery").forEach((gallery) => {
+      if (gallery.dataset.dragInit === "1") return;
+      gallery.dataset.dragInit = "1";
+
+      let startX = 0, startY = 0;
+      gallery.addEventListener("touchstart", (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        gallery.dataset.dragged = "0";
+      }, { passive: true });
+      gallery.addEventListener("touchmove", (e) => {
+        const dx = Math.abs(e.touches[0].clientX - startX);
+        const dy = Math.abs(e.touches[0].clientY - startY);
+        if (dx > 8 && dx > dy) gallery.dataset.dragged = "1";
+      }, { passive: true });
+      gallery.addEventListener("touchend", () => {
+        setTimeout(() => { gallery.dataset.dragged = "0"; }, 60);
+      }, { passive: true });
+    });
+  }
+
+  function bootPortfolio() {
+    initPortfolioModal();
+    initGalleryDragFlag();
+  }
+
+  document.addEventListener("DOMContentLoaded", bootPortfolio);
+  document.addEventListener("astro:page-load", bootPortfolio);
+  bootPortfolio();
 </script>
 
 <style>
-  .bento-section {
+  .portfolio-section {
     padding: 6rem 0;
-    background: #f7faf9; /* светлый, в тон сайту */
+    background: #f7faf9;
     color: var(--fg, #04100d);
   }
 
@@ -541,153 +676,369 @@ const bookingHref = `/${lang}/booking`;
     line-height: 1.6;
   }
 
-  .bento-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 260px;
-    gap: 1.5rem;
-  }
-
-  .bento-card {
+  /* ============================================================
+     НАВИГАЦИЯ НАД КЕЙСАМИ — центрированная, объёмная
+     ============================================================ */
+  .portfolio-swiper-wrap {
+    width: 100%;
     position: relative;
-    border-radius: 24px;
-    overflow: hidden;
-    background-size: cover;
-    background-position: center;
-    border: 1px solid rgba(4, 16, 13, 0.08);
+  }
+
+  .portfolio-nav {
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    margin: 0 auto 2rem;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* Объёмная круглая кнопка */
+  .portfolio-nav-btn {
+    flex: 0 0 auto;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: 1px solid rgba(13, 148, 136, 0.22);
+    background:
+      linear-gradient(180deg, #ffffff 0%, #eaf2f0 100%);
+    color: #0d9488;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 28px rgba(10, 40, 34, 0.06);
+    position: relative;
+    margin: 0 !important;
+    /* top: auto !important; */ /* убираем возможные правки Swiper */
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    /* Объём: три тени — внутренняя светлая сверху, внутренняя цветная снизу, внешняя мягкая */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -3px 6px rgba(13, 148, 136, 0.10),
+      0 10px 22px -10px rgba(13, 148, 136, 0.55),
+      0 4px 10px -3px rgba(10, 40, 34, 0.12);
+    transition:
+      transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+      background 0.28s ease,
+      color 0.28s ease;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
   }
 
-  .card-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.15) 0%,
-      rgba(10, 10, 12, 0.82) 100%
-    );
-    z-index: 1;
-    transition: background 0.3s ease;
+  .portfolio-nav-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    stroke: currentColor;
+    transition: transform 0.28s ease;
   }
 
-  .bento-card:hover .card-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.08) 0%,
-      rgba(10, 10, 12, 0.72) 100%
-    );
+  .portfolio-nav-btn:hover:not(.swiper-button-disabled) {
+    transform: translateY(-4px) scale(1.04);
+    color: #0f766e;
+    background: linear-gradient(180deg, #ffffff 0%, #e0ebe8 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -3px 6px rgba(13, 148, 136, 0.14),
+      0 18px 36px -12px rgba(13, 148, 136, 0.65),
+      0 8px 16px -5px rgba(10, 40, 34, 0.16);
   }
 
-  .bento-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(13, 148, 136, 0.45);
-    box-shadow: 0 20px 40px -15px rgba(13, 148, 136, 0.2);
+  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-prev svg {
+    transform: translateX(-2px);
+  }
+  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-next svg {
+    transform: translateX(2px);
   }
 
-  .bento-card:focus-visible {
+  .portfolio-nav-btn:active:not(.swiper-button-disabled) {
+    transform: translateY(-1px) scale(0.97);
+    box-shadow:
+      inset 0 2px 6px rgba(13, 148, 136, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 4px 10px -4px rgba(13, 148, 136, 0.35);
+  }
+
+  .portfolio-nav-btn:focus-visible {
     outline: 2px solid #0d9488;
     outline-offset: 3px;
   }
 
-  .col-span-2 {
-    grid-column: span 2;
-  }
-  .row-span-2 {
-    grid-row: span 2;
+  /* Заблокированное состояние — от Swiper */
+  .portfolio-nav-btn.swiper-button-disabled,
+  .portfolio-nav-btn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+    color: rgba(4, 16, 13, 0.45);
+    background: linear-gradient(180deg, #f4f7f6 0%, #e8eeec 100%);
+    border-color: rgba(4, 16, 13, 0.1);
+    transform: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -2px 4px rgba(4, 16, 13, 0.05),
+      0 3px 8px -4px rgba(10, 40, 34, 0.15);
   }
 
-  .card-content {
+  /* Пагинация — точки (рисует сам Swiper) */
+  .portfolio-pagination {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    width: auto !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 0.25rem;
+    bottom: auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+  }
+
+  .portfolio-pagination :global(.swiper-pagination-bullet) {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background: rgba(4, 16, 13, 0.22) !important;
+    opacity: 1 !important;
+    margin: 0 5px !important;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.6);
+    vertical-align: middle;
+  }
+
+  .portfolio-pagination :global(.swiper-pagination-bullet:hover) {
+    background: rgba(13, 148, 136, 0.55) !important;
+    transform: scale(1.25);
+  }
+
+  .portfolio-pagination :global(.swiper-pagination-bullet-active) {
+    background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%) !important;
+    width: 34px !important;
+    border-radius: 6px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 6px 14px -4px rgba(13, 148, 136, 0.65),
+      0 2px 4px -1px rgba(10, 40, 34, 0.15);
+  }
+
+  /* ============================================================
+     Swiper
+     ============================================================ */
+  .portfolio-swiper-wrap :global(.swiper) {
+    width: 100%;
+    overflow: hidden;
     position: relative;
-    z-index: 2;
-    padding: 2rem;
+    z-index: 1;
+  }
+
+  .portfolio-swiper-wrap :global(.swiper-wrapper) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+    transition-property: transform;
+    width: 100%;
+    box-sizing: content-box;
+  }
+
+  .portfolio-swiper-wrap :global(.swiper-slide) {
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    height: auto;
+    display: flex;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  /* Карточка кейса */
+  .case-card {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(4, 16, 13, 0.06);
+    box-shadow: 0 20px 40px -25px rgba(10, 40, 34, 0.18);
+    min-height: 520px;
+    width: 100%;
+    cursor: pointer;
+    transition:
+      transform 0.35s ease,
+      box-shadow 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  .case-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(13, 148, 136, 0.35);
+    box-shadow: 0 30px 60px -30px rgba(13, 148, 136, 0.25);
+  }
+
+  .case-card:focus-visible {
+    outline: 2px solid #0d9488;
+    outline-offset: 3px;
+  }
+
+  /* Bento-галерея */
+  .case-gallery {
+    display: grid;
+    gap: 8px;
+    padding: 8px;
+    background: #eef4f2;
+    min-height: 520px;
+    box-sizing: border-box;
+  }
+
+  .case-gallery[data-count="1"] { grid-template-columns: 1fr; }
+  .case-gallery[data-count="2"] { grid-template-columns: 1fr 1fr; }
+  .case-gallery[data-count="3"] {
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .case-gallery[data-count="3"] > .case-image:nth-child(1) { grid-row: span 2; }
+  .case-gallery[data-count="4"] {
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .case-gallery[data-count="5"],
+  .case-gallery[data-count="6"] {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .case-gallery[data-count="5"] > .case-image:nth-child(1),
+  .case-gallery[data-count="6"] > .case-image:nth-child(1) { grid-row: span 2; }
+  .case-gallery[data-count="7"],
+  .case-gallery[data-count="8"] {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .case-gallery[data-count="7"] > .case-image:nth-child(n + 7),
+  .case-gallery[data-count="8"] > .case-image:nth-child(n + 7) { display: none; }
+
+  .case-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #dbe5e2;
+  }
+
+  .case-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .case-card:hover .case-image img { transform: scale(1.05); }
+
+  .photo-counter { display: none; }
+
+  /* Инфо */
+  .case-info {
+    padding: 2.5rem 2.25rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
+    justify-content: center;
+    gap: 0.9rem;
   }
 
-  .card-top {
+  .case-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .card-category {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #0d9488;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.92);
-    padding: 0.25rem 0.65rem;
-    border-radius: 6px;
-    backdrop-filter: blur(4px);
+    background: rgba(13, 148, 136, 0.1);
+    padding: 0.3rem 0.7rem;
+    border-radius: 30px;
+    border: 1px solid rgba(13, 148, 136, 0.2);
   }
 
   .card-location {
-    font-size: 0.85rem;
-    color: #f4f4f5;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    font-size: 0.82rem;
+    color: rgba(4, 16, 13, 0.62);
+    font-weight: 500;
   }
 
-  .card-middle h3 {
-    font-size: 1.65rem;
-    color: #fff;
-    font-family: "Playfair Display", Georgia, serif;
+  .case-info h3 {
+    font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+    color: #04100d;
     font-weight: 500;
     line-height: 1.2;
-    margin-top: 0.75rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+    margin: 0;
   }
 
-  .bento-card:not(.col-span-2) .card-middle h3 {
-    font-size: 1.25rem;
+  .case-description {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(4, 16, 13, 0.72);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .card-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    padding-top: 1rem;
-    margin-top: auto;
-  }
-
-  .card-meta {
+  .case-meta {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
     font-size: 0.85rem;
-    color: #f4f4f5;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    color: rgba(4, 16, 13, 0.72);
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(4, 16, 13, 0.08);
   }
 
-  /* Стрелка — цвет Hero (teal) */
-  .card-arrow {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba(13, 148, 136, 0.2);
-    border: 1px solid rgba(13, 148, 136, 0.45);
-    display: flex;
+  .case-cta {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #0d9488;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: gap 0.3s ease;
+  }
+
+  .case-arrow {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(13, 148, 136, 0.12);
+    border: 1px solid rgba(13, 148, 136, 0.3);
     transition: all 0.3s ease;
-    backdrop-filter: blur(4px);
   }
 
-  .bento-card:hover .card-arrow {
+  .case-card:hover .case-cta { gap: 0.9rem; }
+  .case-card:hover .case-arrow {
     background: #0d9488;
+    color: #fff;
     border-color: #0d9488;
     transform: translateX(3px);
   }
 
-  /* Modal */
+  /* ==== Modal ==== */
   .portfolio-modal-overlay {
     position: fixed;
     inset: 0;
@@ -703,10 +1054,7 @@ const bookingHref = `/${lang}/booking`;
     transition: opacity 0.3s ease;
   }
 
-  .portfolio-modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
+  .portfolio-modal-overlay.active { opacity: 1; pointer-events: auto; }
 
   .portfolio-modal-content {
     background: #161619;
@@ -724,31 +1072,16 @@ const bookingHref = `/${lang}/booking`;
     overflow-y: auto;
   }
 
-  .portfolio-modal-overlay.active .portfolio-modal-content {
-    transform: translateY(0);
-  }
+  .portfolio-modal-overlay.active .portfolio-modal-content { transform: translateY(0); }
 
-  .modal-image-wrapper {
-    position: relative;
-    height: 200px;
-    width: 100%;
-  }
-
-  .modal-image-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .modal-image-wrapper { position: relative; height: 220px; width: 100%; }
+  .modal-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
   .modal-image-wrapper::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(22, 22, 25, 0) 50%,
-      rgba(22, 22, 25, 1) 100%
-    );
+    background: linear-gradient(180deg, rgba(22, 22, 25, 0) 50%, rgba(22, 22, 25, 1) 100%);
   }
 
   .modal-image-wrapper .modal-tag {
@@ -788,13 +1121,9 @@ const bookingHref = `/${lang}/booking`;
     backdrop-filter: blur(4px);
   }
 
-  .modal-close:hover {
-    background: rgba(0, 0, 0, 0.8);
-  }
+  .modal-close:hover { background: rgba(0, 0, 0, 0.8); }
 
-  .modal-body {
-    padding: 0 1.75rem 1.75rem;
-  }
+  .modal-body { padding: 0 1.75rem 1.75rem; }
 
   .portfolio-modal-content h2 {
     font-size: 1.65rem;
@@ -803,11 +1132,7 @@ const bookingHref = `/${lang}/booking`;
     font-weight: 400;
   }
 
-  .modal-location {
-    color: #a1a1aa;
-    font-size: 0.85rem;
-    margin-bottom: 1.25rem;
-  }
+  .modal-location { color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.25rem; }
 
   .modal-info-grid {
     display: flex;
@@ -820,7 +1145,6 @@ const bookingHref = `/${lang}/booking`;
     font-size: 0.85rem;
   }
 
-  /* Подписи «Масштаб / Бюджет» — белые */
   .modal-info-grid span {
     color: #ffffff;
     display: block;
@@ -829,14 +1153,9 @@ const bookingHref = `/${lang}/booking`;
     opacity: 0.9;
   }
 
-  .modal-info-grid strong {
-    color: #ffffff;
-    font-weight: 600;
-  }
+  .modal-info-grid strong { color: #ffffff; font-weight: 600; }
 
-  .modal-section {
-    margin-bottom: 1.25rem;
-  }
+  .modal-section { margin-bottom: 1.25rem; }
 
   .modal-section h4,
   .modal-review-box h4 {
@@ -847,11 +1166,7 @@ const bookingHref = `/${lang}/booking`;
     margin-bottom: 0.35rem;
   }
 
-  .modal-section p {
-    color: #d4d4d8;
-    line-height: 1.5;
-    font-size: 0.9rem;
-  }
+  .modal-section p { color: #d4d4d8; line-height: 1.5; font-size: 0.9rem; }
 
   .modal-review-box {
     background: rgba(13, 148, 136, 0.08);
@@ -869,13 +1184,8 @@ const bookingHref = `/${lang}/booking`;
     line-height: 1.4;
   }
 
-  .modal-client {
-    font-size: 0.8rem;
-    color: #5eead4;
-    font-weight: 500;
-  }
+  .modal-client { font-size: 0.8rem; color: #5eead4; font-weight: 500; }
 
-  /* Кнопка CTA — как primary в Hero */
   .modal-book-btn {
     display: block;
     width: 100%;
@@ -888,9 +1198,7 @@ const bookingHref = `/${lang}/booking`;
     text-decoration: none;
     font-size: 0.95rem;
     box-shadow: 0 8px 24px rgba(13, 148, 136, 0.3);
-    transition:
-      background 0.2s,
-      box-shadow 0.2s;
+    transition: background 0.2s, box-shadow 0.2s;
   }
 
   .modal-book-btn:hover {
@@ -898,15 +1206,101 @@ const bookingHref = `/${lang}/booking`;
     box-shadow: 0 10px 28px rgba(13, 148, 136, 0.35);
   }
 
+  /* ==== Адаптив ==== */
   @media (max-width: 900px) {
-    .bento-grid {
-      grid-template-columns: 1fr;
-      grid-auto-rows: 220px;
+    .portfolio-section { padding: 4rem 0; }
+
+    .portfolio-nav {
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
     }
-    .col-span-2,
-    .row-span-2 {
-      grid-column: span 1;
-      grid-row: span 1;
+    .portfolio-nav-btn { width: 50px; height: 50px; }
+    .portfolio-nav-btn svg { width: 18px; height: 18px; }
+    .portfolio-pagination :global(.swiper-pagination-bullet) {
+      width: 9px !important;
+      height: 9px !important;
+      margin: 0 4px !important;
+    }
+    .portfolio-pagination :global(.swiper-pagination-bullet-active) {
+      width: 28px !important;
+    }
+
+    .case-card { grid-template-columns: 1fr; min-height: auto; }
+
+    .case-gallery,
+    .case-gallery[data-count="1"],
+    .case-gallery[data-count="2"],
+    .case-gallery[data-count="3"],
+    .case-gallery[data-count="4"],
+    .case-gallery[data-count="5"],
+    .case-gallery[data-count="6"],
+    .case-gallery[data-count="7"],
+    .case-gallery[data-count="8"] {
+      display: flex !important;
+      grid-template-columns: none !important;
+      grid-template-rows: none !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      gap: 10px;
+      padding: 10px;
+      min-height: 0;
+      height: 300px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+
+    .case-gallery::-webkit-scrollbar { display: none; }
+
+    .case-gallery > .case-image,
+    .case-gallery[data-count="3"] > .case-image:nth-child(1),
+    .case-gallery[data-count="5"] > .case-image:nth-child(1),
+    .case-gallery[data-count="6"] > .case-image:nth-child(1),
+    .case-gallery[data-count="7"] > .case-image:nth-child(1),
+    .case-gallery[data-count="8"] > .case-image:nth-child(1) {
+      grid-row: auto !important;
+      grid-column: auto !important;
+      flex: 0 0 84%;
+      scroll-snap-align: center;
+      border-radius: 16px;
+      display: block !important;
+    }
+
+    .photo-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      z-index: 3;
+    }
+
+    .case-info { padding: 1.5rem 1.25rem 2rem; }
+    .case-info h3 { font-size: 1.4rem; }
+    .case-description { -webkit-line-clamp: 3; font-size: 0.88rem; }
+  }
+
+  @media (max-width: 480px) {
+    .case-gallery { height: 260px; }
+    .portfolio-nav-btn { width: 44px; height: 44px; }
+    .portfolio-nav-btn svg { width: 16px; height: 16px; }
+    .portfolio-pagination :global(.swiper-pagination-bullet) {
+      width: 8px !important;
+      height: 8px !important;
+      margin: 0 3px !important;
+    }
+    .portfolio-pagination :global(.swiper-pagination-bullet-active) {
+      width: 22px !important;
     }
   }
 </style>
