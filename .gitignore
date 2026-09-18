@@ -39,3 +39,8 @@ styled-system-studio
 gcp-key.json
 *.bak-*
 *.patch
+
+# backups
+*.bak
+*.bak[0-9]*
+*.bak[0-9][0-9]*
