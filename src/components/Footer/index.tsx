@@ -7,6 +7,9 @@ interface Props {
 }
 
 export const Footer: Component<Props> = (props) => {
+    const currentLang = props.lang || "ru";
+  const isYandex = currentLang === "ru" || currentLang === "arm";
+  const mapUrl = isYandex ? "https://yandex.ru/maps/?text=24+Vagharsh+Vagharshyan+St,+Yerevan+0012" : "https://maps.app.goo.gl/yzCxJjStiCgzBAk67";
   const lang = props.lang || "ru";
   const prefix = `/${lang}`;
   const currentYear = new Date().getFullYear();
@@ -305,9 +308,14 @@ export const Footer: Component<Props> = (props) => {
               <span class="block text-[11px] uppercase tracking-wider text-zinc-600 font-semibold mb-1">
                 {t.officeLabel}
               </span>
-              <span class="text-base font-medium text-zinc-800">
+              <a 
+                href={mapUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="text-base font-medium text-zinc-800 hover:text-primary transition-colors inline-block"
+              >
                 {t.officeAddress}
-              </span>
+              </a>
             </div>
           </div>
 
