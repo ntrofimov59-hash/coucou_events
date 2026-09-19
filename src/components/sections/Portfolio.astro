@@ -806,6 +806,8 @@ const bookingHref = `/${lang}/booking`;
     const modal = document.getElementById("portfolio-modal");
     const closeBtn = document.getElementById("close-portfolio-modal");
     if (!modal || !closeBtn) return;
+    if (modal.dataset.portfolioBound === "1") return;
+    modal.dataset.portfolioBound = "1";
 
     const mTitle = document.getElementById("modal-title");
     const mCategory = document.getElementById("modal-category");
@@ -817,73 +819,69 @@ const bookingHref = `/${lang}/booking`;
     const mClient = document.getElementById("modal-client");
 
     const track = modal.querySelector("[data-modal-track]");
-    let autoTimer = null;
+    const prevBtn = modal.querySelector("[data-modal-prev]");
+    const nextBtn = modal.querySelector("[data-modal-next]");
+    const dotsWrap = modal.querySelector("[data-modal-dots]");
+    const curEl = modal.querySelector("[data-modal-current]");
+    const totalEl = modal.querySelector("[data-modal-total]");
+    const indicator = modal.querySelector(".modal-gallery-indicator");
 
-    function stopAuto() {
-      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-      if (track) {
-        track.style.transform = "";
-        const container = track.closest(".modal-gallery");
-        if (container) container.scrollTop = 0;
-      }
+    function slideCount() {
+      return track ? track.querySelectorAll(".modal-gallery-slide").length : 0;
     }
-
-    function animateScrollTo(container, targetTop) {
-      const startTop = container.scrollTop;
-      const distance = targetTop - startTop;
-      if (Math.abs(distance) < 2) return;
-      const speed = 500; // px/s — единая скорость
-      const duration = Math.max(400, Math.abs(distance) / speed * 1000);
-      const startTime = performance.now();
-      function step(now) {
-        const t = Math.min((now - startTime) / duration, 1);
-        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        container.scrollTop = startTop + distance * eased;
-        if (t < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
+    function currentIndex() {
+      const total = slideCount();
+      if (!total || !track) return 0;
+      const w = track.clientWidth || 1;
+      return Math.min(total - 1, Math.max(0, Math.round(track.scrollLeft / w)));
     }
+    function setActive(i) {
+      const total = slideCount();
+      if (curEl) curEl.textContent = String(total ? i + 1 : 0);
+      if (totalEl) totalEl.textContent = String(total);
+      if (dotsWrap) {
+        Array.from(dotsWrap.children).forEach((d, k) => d.classList.toggle("is-active", k === i));
+      }
+      if (prevBtn) prevBtn.disabled = i <= 0;
+      if (nextBtn) nextBtn.disabled = i >= total - 1;
+    }
+    function goTo(i) {
+      const total = slideCount();
+      if (!total || !track) return;
+      i = Math.max(0, Math.min(total - 1, i));
+      track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
+      setActive(i);
+    }
+    function next() { goTo(currentIndex() + 1); }
+    function prev() { goTo(currentIndex() - 1); }
 
-    function startAuto() {
-      stopAuto();
-      if (!track) return;
-      if (window.innerWidth > 900) return; // только на мобильном
-      const container = track.closest(".modal-gallery");
-      if (!container) return;
-      const slides = track.querySelectorAll(".modal-gallery-slide");
-      if (slides.length < 2) return;
-
-      const firstImg = slides[0].querySelector("img");
-      const setH = () => {
-        if (!firstImg || !firstImg.naturalWidth) return;
-        const w = container.clientWidth;
-        const natural = Math.round(w * (firstImg.naturalHeight / firstImg.naturalWidth));
-        const maxH = Math.round(window.innerHeight * 0.65);
-        container.style.height = Math.min(natural, maxH) + "px";
-      };
-      if (firstImg && firstImg.complete && firstImg.naturalWidth) setH();
-      else if (firstImg) firstImg.addEventListener("load", setH, { once: true });
-
-      let idx = 0;
-      autoTimer = setInterval(() => {
-        idx = (idx + 1) % slides.length;
-        const target = slides[idx];
-        animateScrollTo(container, target.offsetTop);
-      }, 3800);
+    function refreshNav(total) {
+      const single = total <= 1;
+      if (prevBtn) prevBtn.style.display = single ? "none" : "";
+      if (nextBtn) nextBtn.style.display = single ? "none" : "";
+      if (indicator) indicator.style.display = single ? "none" : "";
+      if (totalEl) totalEl.textContent = String(total);
+      if (curEl) curEl.textContent = total ? "1" : "0";
+      if (dotsWrap) {
+        dotsWrap.innerHTML = "";
+        for (let k = 0; k < total; k++) {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "modal-gallery-dot" + (k === 0 ? " is-active" : "");
+          dot.setAttribute("aria-label", "Photo " + (k + 1));
+          dot.addEventListener("click", () => goTo(k));
+          dotsWrap.appendChild(dot);
+        }
+      }
+      if (track) track.scrollLeft = 0;
+      setActive(0);
     }
 
     function buildGallery(images) {
       if (!track) return;
       track.innerHTML = "";
-      track.style.transition = "";
-      track.style.transform = "";
-      stopAuto();
       if (!images || !images.length) return;
-
-      const isMobile = window.innerWidth <= 900;
-      const list = isMobile ? images : [images[0]];
-
-      list.forEach((src, i) => {
+      images.forEach((src, i) => {
         const slide = document.createElement("div");
         slide.className = "modal-gallery-slide";
         const img = document.createElement("img");
@@ -893,6 +891,7 @@ const bookingHref = `/${lang}/booking`;
         slide.appendChild(img);
         track.appendChild(slide);
       });
+      refreshNav(images.length);
     }
 
     function openFromCard(card) {
@@ -913,15 +912,37 @@ const bookingHref = `/${lang}/booking`;
       modal.classList.add("active");
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
-
-      setTimeout(startAuto, 80);
     }
 
     function closeModal() {
-      stopAuto();
       modal.classList.remove("active");
       modal.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prev(); });
+    if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); next(); });
+
+    if (track) {
+      let scrollT = null;
+      track.addEventListener("scroll", () => {
+        if (scrollT) clearTimeout(scrollT);
+        scrollT = setTimeout(() => setActive(currentIndex()), 80);
+      }, { passive: true });
+
+      let downX = 0, downY = 0, dragging = false;
+      track.addEventListener("pointerdown", (e) => {
+        downX = e.clientX; downY = e.clientY; dragging = false;
+      });
+      track.addEventListener("pointermove", (e) => {
+        if (Math.abs(e.clientX - downX) > 8 || Math.abs(e.clientY - downY) > 8) dragging = true;
+      });
+      track.addEventListener("click", (e) => {
+        if (dragging) return;
+        if (!e.target.closest("img")) return;
+        if (slideCount() <= 1) return;
+        next();
+      });
     }
 
     cards.forEach((card) => {
@@ -1743,107 +1764,42 @@ const bookingHref = `/${lang}/booking`;
     .modal-gallery-arrow { width: 34px; height: 34px; }
   }
 
-  /* ==== Модалка: только основное (первое) фото ==== */
-  .modal-gallery {
-    position: relative;
-    width: 100%;
-    height: 260px;
-    overflow: hidden;
-    background: #0f0f12;
-  }
-  .modal-gallery-track {
-    display: block;
-    height: 100%;
-    overflow: hidden;
-  }
-  .modal-gallery-slide {
-    height: 100%;
-  }
-  .modal-gallery-slide:not(:first-child) {
-    display: none !important;
-  }
-  .modal-gallery-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .modal-gallery-arrow,
-  .modal-gallery-indicator,
-  .modal-gallery::after {
-    display: none !important;
-  }
-  .modal-gallery .modal-tag {
-    top: 0.9rem;
-    left: 0.9rem;
-  }
-  
-  /* ==== Модалка: большое фото ==== */
+  /* ==== Модалка: большое фото (галерея) ==== */
   .portfolio-modal-content .modal-gallery {
     height: 340px;
-    background: #0f0f12;
-    overflow: hidden;
-    position: relative;
   }
-  .portfolio-modal-content .modal-gallery-track {
-    display: block !important;
-    will-change: transform;
-  }
-  .portfolio-modal-content .modal-gallery-slide {
-    display: block !important;
-    width: 100% !important;
-    height: 340px;
-    overflow: hidden;
-    flex: initial !important;
-    scroll-snap-align: none !important;
-  }
-  .portfolio-modal-content .modal-gallery-slide img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-  }
-  .portfolio-modal-content .modal-gallery-arrow,
-  .portfolio-modal-content .modal-gallery-indicator,
-  .portfolio-modal-content .modal-gallery::after {
-    display: none !important;
-  }
-  .portfolio-modal-content .modal-gallery .modal-tag {
-    top: 1rem;
-    left: 1rem;
-  }
+
   @media (max-width: 900px) {
     .portfolio-modal-content .modal-gallery {
-      height: auto;
-      min-height: 200px;
-      max-height: 65vh;
-      overflow-y: auto;
-      overflow-x: hidden;
+      height: 220px;
+      overflow: hidden;
       background: #0f0f12;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      scrollbar-width: none;
     }
-    .portfolio-modal-content .modal-gallery::-webkit-scrollbar { display: none; }
     .portfolio-modal-content .modal-gallery-track {
-      display: block !important;
+      display: flex !important;
+      flex-direction: row !important;
       transform: none !important;
       transition: none !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      scroll-snap-type: x mandatory !important;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
+    .portfolio-modal-content .modal-gallery-track::-webkit-scrollbar { display: none; }
     .portfolio-modal-content .modal-gallery-slide {
-      display: block !important;
+      flex: 0 0 100% !important;
       width: 100% !important;
-      height: auto !important;
-      flex: initial !important;
+      height: 100% !important;
       overflow: hidden;
-      scroll-snap-align: unset !important;
+      scroll-snap-align: start !important;
     }
     .portfolio-modal-content .modal-gallery-slide img {
       width: 100% !important;
-      height: auto !important;
-      object-fit: initial !important;
+      height: 100% !important;
+      object-fit: cover !important;
       display: block !important;
-      background: #0f0f12;
     }
     .portfolio-modal-content .modal-gallery::after { display: none !important; }
   }
@@ -1860,4 +1816,77 @@ const bookingHref = `/${lang}/booking`;
 .modal-location svg {
   flex-shrink: 0;
 }
+
+  /* ==== FINAL modal gallery override ==== */
+  .portfolio-modal-content .modal-gallery {
+    height: 340px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    background: #0f0f12 !important;
+  }
+  .portfolio-modal-content .modal-gallery-track {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: smooth !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  .portfolio-modal-content .modal-gallery-track::-webkit-scrollbar { display: none !important; }
+  .portfolio-modal-content .modal-gallery-slide {
+    display: block !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    scroll-snap-align: start !important;
+    position: relative !important;
+  }
+  .portfolio-modal-content .modal-gallery-slide img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+  .portfolio-modal-content .modal-gallery-arrow {
+    display: inline-flex !important;
+  }
+  .portfolio-modal-content .modal-gallery-indicator {
+    display: flex !important;
+  }
+
+  @media (max-width: 900px) {
+    .portfolio-modal-content .modal-gallery {
+      height: 220px !important;
+      overflow: hidden !important;
+      max-height: none !important;
+    }
+    .portfolio-modal-content .modal-gallery-track {
+      display: flex !important;
+      flex-direction: row !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      height: 100% !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .portfolio-modal-content .modal-gallery-slide {
+      display: block !important;
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      height: 100% !important;
+      scroll-snap-align: start !important;
+    }
+    .portfolio-modal-content .modal-gallery-slide img {
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+  }
 </style>
