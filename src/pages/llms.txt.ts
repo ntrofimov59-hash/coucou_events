@@ -32,8 +32,17 @@ export const GET: APIRoute = async () => {
   lines.push(`- Телефон / WhatsApp: ${CONTACT.phone}`);
   lines.push(`- Email: ${CONTACT.email}`);
   lines.push(`- Telegram: ${CONTACT.telegram}`);
+  lines.push(`- Instagram: ${CONTACT.instagram}`);
+  lines.push(`- Facebook: ${CONTACT.facebook}`);
   lines.push(`- Адрес: ${CONTACT.address}`);
   lines.push(`- Часы работы: ${CONTACT.workingHours}`);
+  lines.push("");
+
+  lines.push("## Реализованные проекты");
+  lines.push("");
+  lines.push(
+    `Кейсы с фотографиями и деталями (бюджет, число гостей, отзыв клиента) доступны на странице портфолио: ${SITE_URL}/ru/#portfolio`,
+  );
   lines.push("");
 
   lines.push("## Услуги");

@@ -39,6 +39,7 @@ export const CONTACT = {
   emailHref: "mailto:info@coucou-events.com",
   workingHours: "Ежедневно, 9:00–21:00",
   instagram: "https://instagram.com/coucou_events",
+  facebook: "https://facebook.com/coucouevents",
   address: "24 Vagharsh Vagharshyan St, Yerevan 0012",
   addressLocal: {
     ru: "ул. Вагарша Вагаршяна 24, Ереван 0012, Армения",

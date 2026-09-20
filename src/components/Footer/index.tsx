@@ -337,12 +337,20 @@ export const Footer: Component<Props> = (props) => {
               WhatsApp
             </a>
             <a
-              href="https://instagram.com/"
+              href={CONTACT.instagram || "https://instagram.com/"}
               target="_blank"
               rel="noopener noreferrer"
               class="text-xs font-semibold text-zinc-700 border border-zinc-300 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-700 rounded-lg px-3 py-2 transition-colors duration-200"
             >
               Instagram
+            </a>
+            <a
+              href={CONTACT.facebook || "https://facebook.com/"}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs font-semibold text-zinc-700 border border-zinc-300 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 rounded-lg px-3 py-2 transition-colors duration-200"
+            >
+              Facebook
             </a>
           </div>
         </div>

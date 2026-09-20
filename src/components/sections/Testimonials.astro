@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { SITE_URL, SITE_NAME } from "@/config/site";
 
 interface Props {
   lang?: string;
@@ -45,11 +46,54 @@ const testimonialsList = sorted.map((entry, idx) => {
     name: currentAuthor,
     role: currentEvent || defaultRoleMap[lang] || "Клиент",
     content: currentText,
-    avatar: `https://i.pravatar.cc/150?u=${entry.id}`,
+    initials: String(currentAuthor)
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase(),
     rating: data.rating,
     platform: data.platform,
   };
 });
+
+// AggregateRating/Review — звёзды в поисковой выдаче и данные для ИИ-агрегаторов.
+// Считаем средний рейтинг из тех же .mdx-файлов, что рендерятся на странице,
+// чтобы разметка не могла разойтись с реальными карточками.
+const ratedItems = sorted.filter((e) => typeof e.data.rating === "number");
+const avgRating = ratedItems.length
+  ? ratedItems.reduce((sum, e) => sum + e.data.rating, 0) / ratedItems.length
+  : null;
+
+const reviewJsonLd =
+  avgRating && testimonialsList.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "@id": `${SITE_URL}/#organization`,
+        name: SITE_NAME,
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: Number(avgRating.toFixed(1)),
+          reviewCount: testimonialsList.length,
+          bestRating: 5,
+        },
+        review: sorted.slice(0, 10).map((e) => ({
+          "@type": "Review",
+          author: { "@type": "Person", name: e.data.author },
+          reviewRating: {
+            "@type": "Rating",
+            ratingValue: e.data.rating,
+            bestRating: 5,
+          },
+          reviewBody: e.data.text,
+          datePublished: e.data.date
+            ? e.data.date.toISOString().slice(0, 10)
+            : undefined,
+        })),
+      }
+    : null;
 
 const t = {
   ru: {
@@ -180,11 +224,12 @@ const t = {
               </p>
 
               <div class="flex items-center space-x-3 md:space-x-4 border-t border-zinc-800/60 pt-4 md:pt-5">
-                <img
-                  src={item.avatar}
-                  alt={item.name}
-                  class="w-9 h-9 md:w-12 md:h-12 rounded-full object-cover border border-zinc-700 bg-zinc-800"
-                />
+                <div
+                  class="w-9 h-9 md:w-12 md:h-12 rounded-full border border-zinc-700 bg-gradient-to-br from-teal-700 to-zinc-800 flex items-center justify-center text-[11px] md:text-sm font-medium text-teal-100 shrink-0"
+                  aria-hidden="true"
+                >
+                  {item.initials}
+                </div>
                 <div>
                   <h4 class="text-white font-medium text-xs md:text-sm tracking-wide">
                     {item.name}
@@ -209,6 +254,15 @@ const t = {
     }
   </div>
 </section>
+
+{
+  reviewJsonLd && (
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(reviewJsonLd)}
+    />
+  )
+}
 
 <script>
   const track = document.getElementById(

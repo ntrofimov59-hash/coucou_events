@@ -86,7 +86,12 @@ const organizationJsonLd = {
     email: CONTACT.email,
     availableLanguage: ["Russian", "English", "Spanish", "Armenian"],
   },
-  sameAs: [CONTACT.instagram, CONTACT.telegram].filter(Boolean),
+  sameAs: [
+    CONTACT.instagram,
+    CONTACT.facebook,
+    CONTACT.telegram,
+    CONTACT.whatsappHref,
+  ].filter(Boolean),
 };
 ---
 <!doctype html>
