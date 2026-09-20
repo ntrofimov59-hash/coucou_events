@@ -964,6 +964,64 @@ const bookingHref = `/${lang}/booking`;
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
   }
 
+  /**
+   * На мобилке в карточке видно только первое фото (grid схлопнут в block + overflow:hidden).
+   * Циклически показываем следующие кадры внутри .case-gallery.
+   */
+  function initGalleryAutoScroll() {
+    const galleries = document.querySelectorAll(".case-gallery");
+    if (!galleries.length) return;
+
+    const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
+
+    galleries.forEach((gallery) => {
+      if (gallery.dataset.autoInit === "1") return;
+      gallery.dataset.autoInit = "1";
+
+      const images = Array.from(gallery.querySelectorAll(".case-image"));
+      if (images.length <= 1) return;
+
+      let idx = 0;
+      let timer = null;
+
+      const show = (i) => {
+        images.forEach((el, n) => {
+          el.style.display = n === i ? "block" : "none";
+        });
+        const counter = images[i]?.querySelector(".photo-counter");
+        // counters hidden on mobile by CSS; no-op
+      };
+
+      const start = () => {
+        if (!isMobile()) {
+          images.forEach((el) => { el.style.display = ""; });
+          if (timer) { clearInterval(timer); timer = null; }
+          return;
+        }
+        show(0);
+        if (timer) clearInterval(timer);
+        timer = setInterval(() => {
+          if (!isMobile()) return;
+          idx = (idx + 1) % images.length;
+          show(idx);
+        }, 3200);
+      };
+
+      // Pause when card not visible / tab hidden
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && timer) { clearInterval(timer); timer = null; }
+        else start();
+      });
+
+      start();
+      window.addEventListener("resize", () => {
+        // debounce lightly
+        clearTimeout(gallery._resizeT);
+        gallery._resizeT = setTimeout(start, 150);
+      });
+    });
+  }
+
   function bootPortfolio() {
     initPortfolioModal();
     initGalleryAutoScroll();

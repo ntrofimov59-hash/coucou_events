@@ -26,7 +26,7 @@ const translations = {
     about: "О нас",
     price: "Прайс",
     services: "Услуги",
-    cities: "Города",
+    cities: "Локации",
     solutions: "Наши решения",
     discuss: "Обсудить событие",
     subtitle:
@@ -38,13 +38,14 @@ const translations = {
     closeMenu: "Закрыть меню",
     toMain: "На главную",
     selectLang: "Выбрать язык",
+    company: "Компания",
   },
   eng: {
     contacts: "Contacts",
     about: "About",
     price: "Price",
     services: "Services",
-    cities: "Cities",
+    cities: "Locations",
     solutions: "Our Solutions",
     discuss: "Discuss Event",
     subtitle:
@@ -56,13 +57,14 @@ const translations = {
     closeMenu: "Close menu",
     toMain: "To home",
     selectLang: "Select language",
+    company: "Company",
   },
   esp: {
     contacts: "Contactos",
     about: "Nosotros",
     price: "Precio",
     services: "Servicios",
-    cities: "Ciudades",
+    cities: "Ubicaciones",
     solutions: "Nuestras Soluciones",
     discuss: "Discutir Evento",
     subtitle:
@@ -74,13 +76,14 @@ const translations = {
     closeMenu: "Cerrar menú",
     toMain: "A inicio",
     selectLang: "Seleccionar idioma",
+    company: "Empresa",
   },
   arm: {
     contacts: "Կապ",
     about: "Մեր մասին",
-    price: "Գնացուցակ",
+    price: "Գներ",
     services: "Ծառայություններ",
-    cities: "Քաղաքներ",
+    cities: "Վայրեր",
     solutions: "Մեր լուծումները",
     discuss: "Քննարկել միջոցառումը",
     subtitle:
@@ -92,6 +95,7 @@ const translations = {
     closeMenu: "Փակել մենյու",
     toMain: "Գլխավոր",
     selectLang: "Ընտրել լեզուն",
+    company: "Ընկերություն",
   },
 };
 
@@ -135,10 +139,10 @@ const bentoTiles = [
   {
     href: `${prefix}/cities`,
     title: {
-      ru: "Города",
-      eng: "Cities",
-      esp: "Ciudades",
-      arm: "Քաղաքներ",
+      ru: "Локации",
+      eng: "Locations",
+      esp: "Ubicaciones",
+      arm: "Վայրեր",
     },
     subtitle: {
       ru: "15 городов мира.",
@@ -312,6 +316,11 @@ const isHome =
               ))
             }
           </div>
+        </div>
+
+        <div class="mega-company-links" aria-label={t.company || "Company"}>
+          <a class="mega-company-btn" href={`${prefix}/about`}>{t.about}</a>
+          <a class="mega-company-btn mega-company-btn--outline" href={`${prefix}/contacts`}>{t.contacts}</a>
         </div>
 
         <div class="lead-section">
@@ -604,6 +613,44 @@ const isHome =
   .burger-btn[aria-expanded="true"] .burger-line:last-child {
     transform: translateY(-3.5px) rotate(-45deg);
   }
+  .mega-company-links {
+    display: none;
+    gap: 10px;
+    margin: 8px 0 4px;
+  }
+  .mega-company-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1rem;
+    border-radius: 999px;
+    font-weight: 550;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    background: rgba(13, 148, 136, 0.9);
+    color: #fff;
+    border: 1px solid transparent;
+  }
+  .mega-company-btn:hover { background: #0f766e; }
+  .mega-company-btn--outline {
+    background: transparent;
+    color: #e4e4e7;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .mega-company-btn--outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+  }
+  @media (max-width: 899px) {
+    .mega-company-links { display: flex; }
+  }
+  @media (min-width: 900px) {
+    .mega-company-links { display: none !important; }
+  }
+
   .mega-menu {
     position: fixed;
     inset: 0;

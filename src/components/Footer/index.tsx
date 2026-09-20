@@ -18,7 +18,7 @@ export const Footer: Component<Props> = (props) => {
     ru: {
       about: "О нас",
       services: "Услуги",
-      cities: "Города",
+      cities: "Локации",
       portfolio: "Галерея проектов",
       contacts: "Контакты",
       booking: "Оставить заявку",
@@ -47,7 +47,7 @@ export const Footer: Component<Props> = (props) => {
     eng: {
       about: "About",
       services: "Services",
-      cities: "Cities",
+      cities: "Locations",
       portfolio: "Project Gallery",
       contacts: "Contacts",
       booking: "Submit request",
@@ -76,7 +76,7 @@ export const Footer: Component<Props> = (props) => {
     esp: {
       about: "Nosotros",
       services: "Servicios",
-      cities: "Ciudades",
+      cities: "Ubicaciones",
       portfolio: "Galería de proyectos",
       contacts: "Contactos",
       booking: "Enviar solicitud",
@@ -105,7 +105,7 @@ export const Footer: Component<Props> = (props) => {
     arm: {
       about: "Մեր մասին",
       services: "Ծառայություններ",
-      cities: "Քաղաքներ",
+      cities: "Վայրեր",
       portfolio: "Նախագծերի պատկերասրահ",
       contacts: "Կապ",
       booking: "Թողնել հայտ",
@@ -134,7 +134,7 @@ export const Footer: Component<Props> = (props) => {
   }[lang as "ru" | "eng" | "esp" | "arm"] || {
     about: "О нас",
     services: "Услуги",
-    cities: "Города",
+    cities: "Локации",
     portfolio: "Галерея проектов",
     contacts: "Контакты",
     booking: "Оставить заявку",
@@ -336,14 +336,16 @@ export const Footer: Component<Props> = (props) => {
             >
               WhatsApp
             </a>
-            <a
-              href={CONTACT.instagram || "https://instagram.com/"}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-xs font-semibold text-zinc-700 border border-zinc-300 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-700 rounded-lg px-3 py-2 transition-colors duration-200"
-            >
-              Instagram
-            </a>
+            {CONTACT.instagram ? (
+              <a
+                href={CONTACT.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-xs font-semibold text-zinc-700 border border-zinc-300 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-700 rounded-lg px-3 py-2 transition-colors duration-200"
+              >
+                Instagram
+              </a>
+            ) : null}
             <a
               href={CONTACT.facebook || "https://facebook.com/"}
               target="_blank"

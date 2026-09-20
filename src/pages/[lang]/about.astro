@@ -211,8 +211,8 @@ const t = translations[lang as keyof typeof translations] || translations.ru;
   .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-    margin-bottom: 4rem;
+    gap: 1.25rem 1.5rem;
+    margin-bottom: 3.5rem;
     text-align: center;
   }
   .stat-value {
@@ -231,25 +231,31 @@ const t = translations[lang as keyof typeof translations] || translations.ru;
   .values {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem;
     margin-bottom: 3.5rem;
   }
   .value-item {
-    padding: 2rem;
+    padding: 1.5rem 1.35rem;
     border-radius: 20px;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
   }
   .value-item h3 {
-    margin: 0 0 0.6rem;
-    font-size: 1.2rem;
+    margin: 0 0 0.55rem;
+    font-size: 1.15rem;
     color: var(--fg);
+    line-height: 1.3;
   }
   .value-item p {
     color: var(--fg-soft);
-    line-height: 1.6;
+    line-height: 1.55;
     margin: 0;
+    font-size: 0.95rem;
   }
   .cta {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
   }
   .btn {
@@ -261,6 +267,7 @@ const t = translations[lang as keyof typeof translations] || translations.ru;
     text-decoration: none;
     font-weight: 600;
     transition: background 0.2s;
+    text-align: center;
   }
   .btn:hover {
     background: #0f766e;
@@ -273,13 +280,48 @@ const t = translations[lang as keyof typeof translations] || translations.ru;
   .btn-outline:hover {
     background: var(--input-bg);
   }
-  @media (max-width: 768px) {
-    .stats,
+  /* Планшет: 2 колонки для stats, values — по 1 в ряд (3 карточки) */
+  @media (max-width: 900px) {
+    .stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem 1rem;
+    }
     .values {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .value-item {
+      padding: 1.35rem 1.25rem;
+    }
+  }
+  @media (max-width: 768px) {
+    .about-page {
+      padding: 4.5rem 0 6.5rem;
+    }
+    .container {
+      padding: 0 1.15rem;
+    }
+    .lead {
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat-value {
+      font-size: 2rem;
+    }
+    .stat-label {
+      font-size: 0.8rem;
     }
     .cta {
       flex-direction: column;
+    }
+    .btn {
+      width: 100%;
+    }
+  }
+  @media (max-width: 420px) {
+    .stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 0.75rem;
     }
   }
 </style>

@@ -1,7 +1,18 @@
 ---
 import HreflangLinks from "@/components/HreflangLinks.astro";
 import Layout from "@/layouts/Layout.astro";
-export const prerender = false;
+// Статическая сборка: SSR (prerender=false) на проде отдавал страницу без CSS хедера
+// и со старым бандлом («Города» вместо «Локации»). Конфигуратор полностью
+// клиентский по данным — серверный рендер не нужен.
+export const prerender = true;
+export function getStaticPaths() {
+  return [
+    { params: { lang: "ru" } },
+    { params: { lang: "eng" } },
+    { params: { lang: "esp" } },
+    { params: { lang: "arm" } },
+  ];
+}
 import {
   CITIES_DATA,
   SERVICES_PRICING,
@@ -1340,7 +1351,7 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
     }
   }
 
-  /* Город + гости всегда 1+1 (бок о бок) */
+  /* Город + гости: бок о бок на широких, стол на узких */
   .city-guests-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1353,13 +1364,22 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
   .city-guests-item h2 {
     font-size: 0.8rem;
     margin-bottom: 0.5rem;
+    line-height: 1.3;
   }
 
-  /* Сетка опций всегда 2 колонки, компактная */
+  /* Сетка опций: 2 колонки, на очень узких — 1 */
   .swatches {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
+  }
+  @media (max-width: 420px) {
+    .city-guests-row {
+      grid-template-columns: 1fr;
+    }
+    .swatches {
+      grid-template-columns: 1fr;
+    }
   }
   .option-group h2 {
     font-size: 0.8rem !important;
@@ -1443,7 +1463,9 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
     z-index: 20;
   }
 
-  /* Плавающая панель внизу (мобильные, где grid превращается в колонку) */
+  /* Плавающая панель внизу.
+     На мобилке scrolled-хедер тоже внизу (bottom: 16px) — поднимаем панель
+     выше него, чтобы не наезжали друг на друга. */
   .floating-summary {
     position: fixed;
     bottom: 0;
@@ -1457,6 +1479,22 @@ const lightingPriceUsd = CALC_OPTIONS.sound ? 150 : 150;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
     padding: 0.75rem 1rem;
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  @media (max-width: 899px) {
+    .floating-summary {
+      /* высота pill-хедера ~64px + отступ 16px */
+      bottom: calc(64px + 16px + 8px);
+      left: 12px;
+      right: 12px;
+      border-radius: 16px;
+      border: 1px solid #e4e4e7;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+    }
+    .configurator-page {
+      /* место под floating-summary + нижний хедер */
+      padding-bottom: calc(5.5rem + 64px + 24px) !important;
+      padding-top: 5rem;
+    }
   }
   .floating-summary__inner {
     max-width: 72rem;
