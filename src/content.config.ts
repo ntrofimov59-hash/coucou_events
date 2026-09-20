@@ -19,24 +19,6 @@ const services = defineCollection({
   }),
 });
 
-// Коллекция портфолио
-const portfolio = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/portfolio' }),
-  schema: z.object({
-    title: z.string(),
-    category: z.string(),
-    location: z.string(),
-    guests: z.string(),
-    budget: z.string(),
-    span: z.string().default('col-span-1 row-span-1'),
-    description: z.string(),
-    review: z.string(),
-    client: z.string(),
-    image: z.string(),
-    order: z.number().default(0),
-  }),
-});
-
 // Коллекция отзывов
 const testimonials = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/testimonials' }),
@@ -77,4 +59,4 @@ const previews = defineCollection({
   }),
 });
 
-export const collections = { services, portfolio, testimonials, previews };
+export const collections = { services, testimonials, previews };
