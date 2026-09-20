@@ -5,8 +5,8 @@ export const GET: APIRoute = async () => {
   const robotsTxt = `
 User-agent: *
 Allow: /
-Disallow: */thank-you
-Disallow: */api/
+Disallow: /*/thank-you
+Disallow: /*/api/
 
 # ИИ-краулеры для ответов и поиска — разрешены явно,
 # чтобы не зависеть от общего правила и WAF-исключений
