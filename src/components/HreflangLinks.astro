@@ -1,0 +1,33 @@
+---
+import {
+  SITE_URL,
+  SUPPORTED_LANGS,
+  HREFLANG_MAP,
+  type SiteLang,
+} from "@/config/site";
+
+interface Props {
+  /** Путь без языкового префикса и без слэшей: "" | "about" | "cities/yerevan" */
+  path?: string;
+  /** Язык для x-default (по умолчанию ru) */
+  xDefaultLang?: SiteLang;
+}
+
+const { path = "", xDefaultLang = "ru" } = Astro.props;
+const clean = path.replace(/^\/+|\/+$/g, "");
+
+const buildUrl = (lang: SiteLang): string =>
+  clean ? `${SITE_URL}/${lang}/${clean}/` : `${SITE_URL}/${lang}/`;
+---
+{SUPPORTED_LANGS.map((lang) => (
+  <link
+    rel="alternate"
+    hreflang={HREFLANG_MAP[lang]}
+    href={buildUrl(lang)}
+  />
+))}
+<link
+  rel="alternate"
+  hreflang="x-default"
+  href={buildUrl(xDefaultLang)}
+/>

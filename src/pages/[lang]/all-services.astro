@@ -1,4 +1,5 @@
 ---
+import HreflangLinks from "@/components/HreflangLinks.astro";
 export const prerender = true;
 
 import { getCollection } from "astro:content";
@@ -180,13 +181,7 @@ const sortedServices = entries
 ---
 
 <Layout title={t.seoTitle} description={t.seoDescription} lang={lang}>
-  <Fragment slot="head">
-    <link rel="alternate" hreflang="ru" href="/ru/all-services" />
-    <link rel="alternate" hreflang="en" href="/eng/all-services" />
-    <link rel="alternate" hreflang="es" href="/esp/all-services" />
-    <link rel="alternate" hreflang="hy" href="/arm/all-services" />
-    <link rel="alternate" hreflang="x-default" href="/ru/all-services" />
-  </Fragment>
+    <HreflangLinks slot="head" path="all-services" />
 
   <main class="services-page pt-32 pb-24 min-h-screen bg-[#fcfcfc]">
     <div class="max-w-7xl mx-auto px-6">
