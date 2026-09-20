@@ -4,7 +4,7 @@ export const prerender = true;
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import { CITIES_PAGES } from "@/data/cities";
-import { CONTACT, SITE_URL } from "@/config/site";
+import { CONTACT, SITE_URL, CITY_INSTAGRAM } from "@/config/site";
 import { SERVICE_SLUGS, SERVICE_NAMES } from "@/data/services-map";
 import { cityIn } from "@/data/city-grammar";
 
@@ -22,6 +22,7 @@ const { lang = "ru" } = Astro.params;
 const { city } = Astro.props;
 const L = lang as "ru" | "eng" | "esp" | "arm";
 const prefix = `/${lang}`;
+const cityIg = CITY_INSTAGRAM[city.slug] || "";
 
 const name = city.name[L] || city.name.ru;
 const country = city.country[L] || city.country.ru;
@@ -29,7 +30,7 @@ const country = city.country[L] || city.country.ru;
 const ui = {
   ru: {
     breadcrumbHome: "Главная",
-    breadcrumbCities: "Города",
+    breadcrumbCities: "Локации",
     eventsLabel: "Форматы",
     whyLabel: "Почему Coucou",
     seasonLabel: "Сезон",
@@ -42,10 +43,11 @@ const ui = {
     ctaBtn: "Оставить заявку",
     configurator: "Открыть конфигуратор",
     whatsapp: "WhatsApp",
+    instagram: "Instagram",
   },
   eng: {
     breadcrumbHome: "Home",
-    breadcrumbCities: "Cities",
+    breadcrumbCities: "Locations",
     eventsLabel: "Formats",
     whyLabel: "Why Coucou",
     seasonLabel: "Best season",
@@ -59,10 +61,11 @@ const ui = {
     ctaBtn: "Submit request",
     configurator: "Open configurator",
     whatsapp: "WhatsApp",
+    instagram: "Instagram",
   },
   esp: {
     breadcrumbHome: "Inicio",
-    breadcrumbCities: "Ciudades",
+    breadcrumbCities: "Ubicaciones",
     eventsLabel: "Formatos",
     whyLabel: "Por qué Coucou",
     seasonLabel: "Mejor temporada",
@@ -75,10 +78,11 @@ const ui = {
     ctaBtn: "Enviar solicitud",
     configurator: "Abrir configurador",
     whatsapp: "WhatsApp",
+    instagram: "Instagram",
   },
   arm: {
     breadcrumbHome: "Գլխավոր",
-    breadcrumbCities: "Քաղաքներ",
+    breadcrumbCities: "Վայրեր",
     eventsLabel: "Ձևաչափեր",
     whyLabel: "Ինչու Coucou",
     seasonLabel: "Լավագույն սեզոն",
@@ -91,10 +95,11 @@ const ui = {
     ctaBtn: "Թողնել հայտ",
     configurator: "Բացել կոնֆիգուրատորը",
     whatsapp: "WhatsApp",
+    instagram: "Instagram",
   },
 }[L] || {
   breadcrumbHome: "Главная",
-  breadcrumbCities: "Города",
+  breadcrumbCities: "Локации",
   eventsLabel: "Форматы",
   whyLabel: "Почему Coucou",
   seasonLabel: "Сезон",
@@ -107,6 +112,7 @@ const ui = {
   ctaBtn: "Оставить заявку",
   configurator: "Открыть конфигуратор",
   whatsapp: "WhatsApp",
+  instagram: "Instagram",
 };
 
 const breadcrumbItems = [
@@ -332,6 +338,9 @@ const faqJsonLd =
         <div class="cta-actions">
           <a href={`${prefix}/booking`} class="btn btn-primary">{ui.ctaBtn}</a>
           <a href={waHref} class="btn btn-whatsapp" target="_blank" rel="noopener noreferrer">{ui.whatsapp}</a>
+          {cityIg && (
+            <a href={cityIg} class="btn btn-instagram" target="_blank" rel="noopener noreferrer">{ui.instagram}</a>
+          )}
         </div>
       </div>
     </div>
@@ -548,6 +557,13 @@ const faqJsonLd =
   .cta-block .btn-outline {
     color: #fff;
     border-color: #3f3f46;
+  }
+  .btn-instagram {
+    background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+    color: #fff;
+  }
+  .btn-instagram:hover {
+    filter: brightness(1.05);
   }
   .btn-whatsapp {
     background: #25d366;

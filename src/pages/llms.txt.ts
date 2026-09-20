@@ -32,8 +32,8 @@ export const GET: APIRoute = async () => {
   lines.push(`- Телефон / WhatsApp: ${CONTACT.phone}`);
   lines.push(`- Email: ${CONTACT.email}`);
   lines.push(`- Telegram: ${CONTACT.telegram}`);
-  lines.push(`- Instagram: ${CONTACT.instagram}`);
-  lines.push(`- Facebook: ${CONTACT.facebook}`);
+  if (CONTACT.instagram) lines.push(`- Instagram: ${CONTACT.instagram}`);
+  if (CONTACT.facebook) lines.push(`- Facebook: ${CONTACT.facebook}`);
   lines.push(`- Адрес: ${CONTACT.address}`);
   lines.push(`- Часы работы: ${CONTACT.workingHours}`);
   lines.push("");
@@ -53,7 +53,7 @@ export const GET: APIRoute = async () => {
   }
   lines.push("");
 
-  lines.push("## Города");
+  lines.push("## Локации");
   lines.push("");
   for (const city of CITIES_PAGES) {
     const name = city.name.ru;

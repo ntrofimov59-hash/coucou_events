@@ -28,18 +28,40 @@ export const CITIES = [
   "Шри-Ланка",
 ] as const;
 
+/**
+ * Instagram по городам (slug → URL).
+ * Кнопка на странице локации — только если URL не пустой.
+ */
+export const CITY_INSTAGRAM: Record<string, string> = {
+  yerevan: "https://instagram.com/events.erevan",
+  bali: "https://instagram.com/events.bali_coucou",
+  tbilisi: "https://instagram.com/events.tbilisi_coucou",
+  phuket: "https://instagram.com/events.phuket_coucou",
+  barcelona: "https://instagram.com/events.barcelona",
+  prague: "https://instagram.com/events.prague_coucou",
+  marrakech: "https://instagram.com/events.marrakech",
+  casablanca: "https://instagram.com/events.casablanca_coucou",
+  danang: "https://instagram.com/events.danang_coucou",
+  nhatrang: "https://instagram.com/events.nanchang",
+  antalya: "",
+  belgrade: "",
+  budapest: "",
+  goa: "",
+  srilanka: "",
+};
+
 export const CONTACT = {
   phone: "+374 55 385943",
   phoneHref: "tel:+37455385943",
-  // Для API/отображения можно с +; для wa.me — только цифры в whatsappHref
   whatsapp: "37455385943",
   whatsappHref: "https://wa.me/37455385943",
   telegram: "https://t.me/coucou_events",
   email: "info@coucou-events.com",
   emailHref: "mailto:info@coucou-events.com",
   workingHours: "Ежедневно, 9:00–21:00",
-  instagram: "https://instagram.com/coucou_events",
-  facebook: "https://facebook.com/coucouevents",
+  // Глобальный IG не используем — см. CITY_INSTAGRAM
+  instagram: "",
+  facebook: "https://www.facebook.com/profile.php?id=61594503876222",
   address: "24 Vagharsh Vagharshyan St, Yerevan 0012",
   addressLocal: {
     ru: "ул. Вагарша Вагаршяна 24, Ереван 0012, Армения",
@@ -80,6 +102,6 @@ export const STATIC_PATHS = [
 
 /** ID аналитики — после регистрации в GA4 / Метрике */
 export const ANALYTICS = {
-  ga4Id: "G-T1B2J8TT6R", // например "G-XXXXXXXXXX"
-  metrikaId: "111282708", // например "12345678"
+  ga4Id: "G-T1B2J8TT6R",
+  metrikaId: "111282708",
 };

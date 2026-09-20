@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { SITE_URL, SITE_NAME, CONTACT } from "@/config/site";
 
 interface Props {
   lang?: string;
@@ -25,22 +25,18 @@ const defaultRoleMap: Record<string, string> = {
 
 const testimonialsList = sorted.map((entry, idx) => {
   const data = entry.data;
-
   let currentAuthor = data.author;
   if (lang === "eng" && data.authorEn) currentAuthor = data.authorEn;
   if (lang === "esp" && data.authorEsp) currentAuthor = data.authorEsp;
   if (lang === "arm" && data.authorArm) currentAuthor = data.authorArm;
-
   let currentText = data.text;
   if (lang === "eng" && data.textEn) currentText = data.textEn;
   if (lang === "esp" && data.textEsp) currentText = data.textEsp;
   if (lang === "arm" && data.textArm) currentText = data.textArm;
-
   let currentEvent = data.event;
   if (lang === "eng" && data.eventEn) currentEvent = data.eventEn;
   if (lang === "esp" && data.eventEsp) currentEvent = data.eventEsp;
   if (lang === "arm" && data.eventArm) currentEvent = data.eventArm;
-
   return {
     id: idx,
     name: currentAuthor,
@@ -58,9 +54,6 @@ const testimonialsList = sorted.map((entry, idx) => {
   };
 });
 
-// AggregateRating/Review — звёзды в поисковой выдаче и данные для ИИ-агрегаторов.
-// Считаем средний рейтинг из тех же .mdx-файлов, что рендерятся на странице,
-// чтобы разметка не могла разойтись с реальными карточками.
 const ratedItems = sorted.filter((e) => typeof e.data.rating === "number");
 const avgRating = ratedItems.length
   ? ratedItems.reduce((sum, e) => sum + e.data.rating, 0) / ratedItems.length
@@ -97,39 +90,89 @@ const reviewJsonLd =
 
 const t = {
   ru: {
-    title: "Что говорят наши клиенты",
+    title: "Почему нам можно доверять",
     subtitle:
-      "Истории живых эмоций, доверия и безупречно реализованных проектов.",
-    emptyText: "Отзывы пока не добавлены.",
-    swipeHint: "Листайте карточки влево-вправо или используйте стрелки",
+      "Мы молодая команда с базой в Ереване. Вместо выдуманных отзывов — прозрачные правила работы, которые можно проверить с первого звонка.",
+    emptyText: "Отзывы появятся здесь по мере реализованных проектов.",
+    cta: "Обсудить ваше мероприятие",
+    promises: [
+      {
+        title: "Честная смета",
+        text: "Фиксируем состав и цены до старта. Без скрытых наценок и «сюрпризов» в день события.",
+      },
+      {
+        title: "Личное сопровождение",
+        text: "Один ответственный менеджер от первого звонка до демонтажа. Не передаём вас между отделами.",
+      },
+      {
+        title: "Сеть подрядчиков",
+        text: "Работаем с проверенными поставщиками в 15 городах. Вы получаете единую точку контакта.",
+      },
+      {
+        title: "Договор и сроки",
+        text: "Работаем по договору. Сроки монтажа и сдачи фиксируем письменно.",
+      },
+    ],
   },
   eng: {
-    title: "What Our Clients Say",
+    title: "Why you can trust us",
     subtitle:
-      "Stories of genuine emotions, trust, and flawlessly executed projects.",
-    emptyText: "No reviews added yet.",
-    swipeHint: "Swipe left or right, or use the arrows",
+      "We're a new team based in Yerevan. Instead of invented reviews — clear working rules you can verify from the first call.",
+    emptyText: "Reviews will appear here as projects are completed.",
+    cta: "Discuss your event",
+    promises: [
+      {
+        title: "Honest quote",
+        text: "Scope and prices locked before we start. No hidden markups or day-of surprises.",
+      },
+      {
+        title: "Personal care",
+        text: "One dedicated manager from first call to teardown.",
+      },
+      {
+        title: "Partner network",
+        text: "Vetted suppliers in 15 cities. You get a single point of contact.",
+      },
+      {
+        title: "Contract & deadlines",
+        text: "We work under contract. Dates are fixed in writing.",
+      },
+    ],
   },
   esp: {
-    title: "Lo que dicen nuestros clientes",
+    title: "Por qué puedes confiar en nosotros",
     subtitle:
-      "Historias de emociones reales, confianza y proyectos ejecutados.",
-    emptyText: "Aún no hay reseñas agregadas.",
-    swipeHint: "Desliza a los lados o usa las flechas",
+      "Somos un equipo nuevo con base en Ereván. En lugar de reseñas inventadas — reglas claras.",
+    emptyText: "Las reseñas aparecerán aquí a medida que se completen proyectos.",
+    cta: "Hablar de tu evento",
+    promises: [
+      { title: "Presupuesto honesto", text: "Alcance y precios fijados antes de empezar." },
+      { title: "Acompañamiento personal", text: "Un gestor dedicado de principio a fin." },
+      { title: "Red de proveedores", text: "Socios verificados en 15 ciudades." },
+      { title: "Contrato y plazos", text: "Trabajamos con contrato y fechas por escrito." },
+    ],
   },
   arm: {
-    title: "Ինչ են ասում մեր հաճախորդները",
-    subtitle: "Իրական էմոցիաների, վստահության և կատարյալ իրականացված ծրագրերի:",
-    emptyText: "Կարծիքներ դեռ ավելացված չեն:",
-    swipeHint: "Սահեցրեք ձախ-աջ կամ օգտագործեք սլաքները",
+    title: "Ինչու կարելի է վստահել մեզ",
+    subtitle: "Մենք նոր թիմ ենք՝ բազայով Երևանում։ Հորինված կարծիքների փոխարեն՝ թափանցիկ կանոններ։",
+    emptyText: "Կարծիքները կհայտնվեն այստեղ՝ նախագծերի իրականացմանը զուգահեռ։",
+    cta: "Քննարկել ձեր միջոցառումը",
+    promises: [
+      { title: "Ազնիվ նախահաշիվ", text: "Ծավալն ու գները ֆիքսում ենք մինչև մեկնարկը։" },
+      { title: "Անհատական ուղեկցում", text: "Մեկ պատասխանատու մենեջեր՝ սկզբից մինչև վերջ։" },
+      { title: "Գործընկերների ցանց", text: "Ստուգված մատակարարներ 15 քաղաքում։" },
+      { title: "Պայմանագիր և ժամկետներ", text: "Աշխատում ենք պայմանագրով։" },
+    ],
   },
 }[lang as "ru" | "eng" | "esp" | "arm"] || {
-  title: "Что говорят наши клиенты",
-  subtitle:
-    "Истории живых эмоций, доверия и безупречно реализованных проектов.",
-  emptyText: "Отзывы пока не добавлены.",
-  swipeHint: "Листайте карточки влево-вправо или используйте стрелки",
+  title: "Почему нам можно доверять",
+  subtitle: "Мы молодая команда с базой в Ереване.",
+  emptyText: "Отзывы появятся здесь по мере реализованных проектов.",
+  cta: "Обсудить ваше мероприятие",
+  promises: [],
 };
+
+const whatsappHref = CONTACT?.whatsappHref || "https://wa.me/37455385943";
 ---
 
 <section
@@ -138,105 +181,43 @@ const t = {
   lang={lang}
 >
   <div class="max-w-6xl mx-auto px-6">
-    <div
-      class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
-    >
-      <div class="text-center md:text-left">
-        <h2
-          class="text-3xl md:text-4xl font-serif tracking-tight text-white mb-3"
-        >
-          {t.title}
-        </h2>
-        <p class="text-sm md:text-base text-zinc-400 font-light max-w-xl">
-          {t.subtitle}
-        </p>
-        {
-          testimonialsList.length > 1 && (
-            <p class="swipe-hint">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7M4 12h15" /></svg>
-              {t.swipeHint}
-            </p>
-          )
-        }
-      </div>
-
-      <!-- Счётчик + стрелки: видны на всех размерах экрана -->
-      {
-        testimonialsList.length > 0 && (
-          <div class="arrows-wrapper">
-            <span class="testimonial-counter">
-              <span id="testimonialCurrent">1</span>
-              <span class="counter-sep">/</span>
-              <span>{testimonialsList.length}</span>
-            </span>
-            <button
-              id="prevTestimonial"
-              class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
-              aria-label="Previous"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              id="nextTestimonial"
-              class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
-              aria-label="Next"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-        )
-      }
+    <div class="text-center md:text-left mb-12 max-w-2xl">
+      <h2 class="text-3xl md:text-4xl font-serif tracking-tight text-white mb-3">
+        {t.title}
+      </h2>
+      <p class="text-sm md:text-base text-zinc-400 font-light">{t.subtitle}</p>
     </div>
 
     {
       testimonialsList.length === 0 ? (
-        <div class="text-center py-12 text-zinc-400">
-          <p>{t.emptyText}</p>
+        <div class="trust-grid">
+          {t.promises.map((p) => (
+            <div class="trust-card">
+              <h3 class="trust-card__title">{p.title}</h3>
+              <p class="trust-card__text">{p.text}</p>
+            </div>
+          ))}
+          <div class="trust-cta">
+            <a href={whatsappHref} class="trust-cta__btn" target="_blank" rel="noopener">
+              {t.cta}
+            </a>
+            <p class="trust-cta__note">{t.emptyText}</p>
+          </div>
         </div>
       ) : (
         <div id="testimonialsTrack" class="testimonials-container">
           {testimonialsList.map((item) => (
             <div class="testimonial-card">
-              <span class="absolute top-4 right-5 md:top-5 md:right-6 text-4xl md:text-5xl font-serif text-zinc-800 pointer-events-none">
-                “
-              </span>
-
-              <p class="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-light mb-6 md:mb-8 relative z-10 italic">
-                {item.content}
+              <p class="text-zinc-300 font-light text-sm md:text-base leading-relaxed mb-6">
+                “{item.content}”
               </p>
-
-              <div class="flex items-center space-x-3 md:space-x-4 border-t border-zinc-800/60 pt-4 md:pt-5">
-                <div
-                  class="w-9 h-9 md:w-12 md:h-12 rounded-full border border-zinc-700 bg-gradient-to-br from-teal-700 to-zinc-800 flex items-center justify-center text-[11px] md:text-sm font-medium text-teal-100 shrink-0"
-                  aria-hidden="true"
-                >
+              <div class="flex items-center gap-3 mt-auto">
+                <div class="w-10 h-10 rounded-full bg-teal-900/60 border border-teal-800/50 flex items-center justify-center text-xs font-medium text-teal-100 shrink-0">
                   {item.initials}
                 </div>
                 <div>
-                  <h4 class="text-white font-medium text-xs md:text-sm tracking-wide">
-                    {item.name}
-                  </h4>
-                  <p class="text-[11px] md:text-xs text-zinc-500 font-light mt-0.5">
-                    {item.role}
-                  </p>
+                  <h4 class="text-white font-medium text-xs md:text-sm tracking-wide">{item.name}</h4>
+                  <p class="text-[11px] md:text-xs text-zinc-500 font-light mt-0.5">{item.role}</p>
                 </div>
               </div>
             </div>
@@ -244,185 +225,76 @@ const t = {
         </div>
       )
     }
-
-    {
-      testimonialsList.length > 1 && (
-        <div class="testimonial-progress" aria-hidden="true">
-          <div id="testimonialProgressBar" class="testimonial-progress-bar" />
-        </div>
-      )
-    }
   </div>
 </section>
 
-{
-  reviewJsonLd && (
-    <script
-      type="application/ld+json"
-      set:html={JSON.stringify(reviewJsonLd)}
-    />
-  )
-}
-
-<script>
-  const track = document.getElementById(
-    "testimonialsTrack",
-  ) as HTMLDivElement | null;
-  const prevBtn = document.getElementById(
-    "prevTestimonial",
-  ) as HTMLButtonElement | null;
-  const nextBtn = document.getElementById(
-    "nextTestimonial",
-  ) as HTMLButtonElement | null;
-  const progressBar = document.getElementById(
-    "testimonialProgressBar",
-  ) as HTMLDivElement | null;
-  const counterEl = document.getElementById(
-    "testimonialCurrent",
-  ) as HTMLSpanElement | null;
-
-  if (track) {
-    const cards = Array.from(
-      track.querySelectorAll<HTMLDivElement>(".testimonial-card"),
-    );
-    const total = cards.length;
-
-    // Определяем, какая карточка сейчас ближе всего к левому краю
-    // видимой области — по ней считаем номер и прогресс.
-    function updateProgress() {
-      if (!track || total === 0) return;
-      const trackLeft = track.scrollLeft;
-      let current = 0;
-      let minDist = Infinity;
-      cards.forEach((card, i) => {
-        const dist = Math.abs(card.offsetLeft - trackLeft);
-        if (dist < minDist) {
-          minDist = dist;
-          current = i;
-        }
-      });
-      if (counterEl) counterEl.textContent = String(current + 1);
-      if (progressBar) {
-        const pct = total > 1 ? (current / (total - 1)) * 100 : 100;
-        progressBar.style.width = `${Math.max(8, pct)}%`;
-      }
-    }
-
-    track.addEventListener("scroll", () => {
-      window.requestAnimationFrame(updateProgress);
-    });
-    updateProgress();
-
-    prevBtn?.addEventListener("click", () => {
-      const cardWidth = cards[0]?.clientWidth || 350;
-      track.scrollBy({ left: -(cardWidth + 24), behavior: "smooth" });
-    });
-
-    nextBtn?.addEventListener("click", () => {
-      const cardWidth = cards[0]?.clientWidth || 350;
-      track.scrollBy({ left: cardWidth + 24, behavior: "smooth" });
-    });
-  }
-</script>
+{reviewJsonLd && (
+  <script type="application/ld+json" set:html={JSON.stringify(reviewJsonLd)} />
+)}
 
 <style>
-  /* Контейнер ленты отзывов */
-  .testimonials-container {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory; /* Жесткая привязка */
-    padding-bottom: 1rem;
-    scrollbar-width: none; /* Firefox */
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
-
-  .testimonials-container::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Edge */
+  @media (min-width: 640px) {
+    .trust-grid { grid-template-columns: 1fr 1fr; }
   }
-
-  /* Карточка отзыва */
-  .testimonial-card {
-    flex: 0 0 100%; /* На мобилках карточка занимает ровно 100 ширины экрана */
-    scroll-snap-align: start; /* Резкая фиксация по началу карточки */
-    background: rgba(24, 24, 27, 0.4);
-    border: 1px solid rgba(39, 39, 42, 0.8);
+  .trust-card {
+    padding: 1.5rem;
     border-radius: 1.25rem;
-    padding: 1.25rem;
+    background: rgba(24, 24, 27, 0.6);
+    border: 1px solid rgba(63, 63, 70, 0.5);
+  }
+  .trust-card__title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #5eead4;
+    margin-bottom: 0.5rem;
+  }
+  .trust-card__text {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #a1a1aa;
+    font-weight: 300;
+  }
+  .trust-cta {
+    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-  }
-
-  /* Подсказка «листайте» — видна, пока не начали скроллить сами */
-  .swipe-hint {
-    display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-top: 0.75rem;
-    font-size: 0.78rem;
-    color: #71717a;
-    justify-content: center;
-  }
-
-  @media (min-width: 768px) {
-    .swipe-hint {
-      justify-content: flex-start;
-    }
-  }
-
-  /* Обёртка счётчика + стрелок — видна на всех экранах */
-  .arrows-wrapper {
-    display: flex;
     gap: 0.75rem;
+    padding: 1.5rem 0 0.5rem;
+  }
+  .trust-cta__btn {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-  }
-
-  @media (min-width: 768px) {
-    .arrows-wrapper {
-      justify-content: flex-end;
-    }
-  }
-
-  .testimonial-counter {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.2rem;
-    font-size: 0.85rem;
-    color: #a1a1aa;
-    font-variant-numeric: tabular-nums;
-    margin-right: 0.25rem;
-    min-width: 2.5rem;
-  }
-
-  .testimonial-counter .counter-sep {
-    opacity: 0.5;
-  }
-
-  /* Тонкий прогресс-бар под лентой — показывает, сколько отзывов позади */
-  .testimonial-progress {
-    margin-top: 1.25rem;
-    height: 3px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    overflow: hidden;
-  }
-
-  .testimonial-progress-bar {
-    height: 100%;
-    width: 8%;
+    padding: 0.9rem 1.75rem;
     border-radius: 999px;
     background: #0d9488;
-    transition: width 0.25s ease;
+    color: #fff;
+    font-weight: 550;
+    font-size: 0.95rem;
+    text-decoration: none;
   }
-
-  /* Планшеты и десктоп (от 768px и выше) */
-  @media (min-width: 768px) {
-    .testimonial-card {
-      flex: 0 0 380px; /* На десктопе фиксированная ширина карточки */
-      padding: 2rem;
-      border-radius: 1.5rem;
-    }
+  .trust-cta__btn:hover { background: #0f766e; }
+  .trust-cta__note { font-size: 0.8rem; color: #71717a; text-align: center; }
+  .testimonials-container {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .testimonial-card {
+    flex: 0 0 min(100%, 360px);
+    scroll-snap-align: start;
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+    background: rgba(24, 24, 27, 0.7);
+    border: 1px solid rgba(63, 63, 70, 0.45);
+    display: flex;
+    flex-direction: column;
   }
 </style>

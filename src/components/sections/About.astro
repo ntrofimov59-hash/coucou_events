@@ -1,4 +1,6 @@
 ---
+import { CITIES } from "@/config/site";
+
 interface Props {
   lang?: string;
 }
@@ -11,8 +13,8 @@ const t = {
     heading: "О нас",
     description:
       "Coucou берёт на себя организацию мероприятия от первого звонка до последнего тоста — переговоры с площадками, подрядчиков, декор и логистику. Единственное, что нужно от вас, — выбрать дату и приехать гостем на собственный праздник, будь то Барселона, Бали, Тбилиси или ваш родной город.",
-    stat1Text: "проведённых мероприятий",
-    stat2Text: "лет на рынке",
+    stat1Text: "услуг под ключ",
+    stat2Text: "языка команды",
     stat3Text: "городов мира",
     stat4Text: "поддержка на мероприятии",
     // SEO метаданные для возможного микроформата или заголовков
@@ -23,8 +25,8 @@ const t = {
     heading: "About Us",
     description:
       "Coucou handles event planning from the first call to the final toast — venue negotiations, contractors, decor, and logistics. The only thing you need to do is pick a date and arrive as a guest at your own celebration, whether it's in Barcelona, Bali, Tbilisi, or your hometown.",
-    stat1Text: "events successfully hosted",
-    stat2Text: "years on the market",
+    stat1Text: "turnkey services",
+    stat2Text: "languages spoken",
     stat3Text: "global cities covered",
     stat4Text: "24/7 support during event",
     seoKeywords:
@@ -34,8 +36,8 @@ const t = {
     heading: "Sobre Nosotros",
     description:
       "Coucou se encarga de la organización de eventos desde la primera llamada hasta el último brindis: negociaciones con recintos, proveedores, decoración y logística. Lo único que tienes que hacer es elegir una fecha y llegar como invitado a tu propia celebración, ya sea en Barcelona, Bali, Tbilisi o tu ciudad natal.",
-    stat1Text: "eventos realizados",
-    stat2Text: "años en el mercado",
+    stat1Text: "servicios integrales",
+    stat2Text: "idiomas del equipo",
     stat3Text: "ciudades del mundo",
     stat4Text: "asistencia 24/7 en el evento",
     seoKeywords:
@@ -45,8 +47,8 @@ const t = {
     heading: "Մեր մասին",
     description:
       "Coucou-ն իր վրա է վերցնում միջոցառման կազմակերպումը առաջին զանգից մինչև վերջին կենացը՝ հարթակների հետ բանակցություններ, մատակարարներ, դեկոր և լոգիստիկա: Միակ բանը, որ պահանջվում է ձեզանից՝ ընտրել ամսաթիվը և գալ որպես հյուր ձեր սեփական տոնին՝ լինի դա Բարսելոնայում, Բալիում, Թբիլիսիում, թե ձեր հարազատ քաղաքում:",
-    stat1Text: "անցկացված միջոցառում",
-    stat2Text: "տարի շուկայում",
+    stat1Text: "ծառայություն բանալի ձեռքին",
+    stat2Text: "թիմի լեզու",
     stat3Text: "քաղաք ամբողջ աշխարհում",
     stat4Text: "24/7 աջակցություն միջոցառման ընթացքում",
     seoKeywords:
@@ -56,8 +58,8 @@ const t = {
   heading: "О нас",
   description:
     "Coucou берёт на себя организацию мероприятия от первого звонка до последнего тоста — переговоры с площадками, подрядчиков, декор и логистику. Единственное, что нужно от вас, — выбрать дату и приехать гостем на собственный праздник, будь то Барселона, Бали, Тбилиси или ваш родной город.",
-  stat1Text: "проведённых мероприятий",
-  stat2Text: "лет на рынке",
+  stat1Text: "услуг под ключ",
+  stat2Text: "языка команды",
   stat3Text: "городов мира",
   stat4Text: "поддержка на мероприятии",
   seoKeywords:
@@ -78,19 +80,19 @@ const t = {
       <div
         class="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 backdrop-blur-sm"
       >
-        <div class="text-4xl font-bold text-teal-400 mb-2">150+</div>
+        <div class="text-4xl font-bold text-teal-400 mb-2">9</div>
         <div class="u-fg-soft text-sm">{t.stat1Text}</div>
       </div>
       <div
         class="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 backdrop-blur-sm"
       >
-        <div class="text-4xl font-bold text-teal-400 mb-2">8</div>
+        <div class="text-4xl font-bold text-teal-400 mb-2">4</div>
         <div class="u-fg-soft text-sm">{t.stat2Text}</div>
       </div>
       <div
         class="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 backdrop-blur-sm"
       >
-        <div class="text-4xl font-bold text-teal-400 mb-2">14</div>
+        <div class="text-4xl font-bold text-teal-400 mb-2">{CITIES.length}</div>
         <div class="u-fg-soft text-sm">{t.stat3Text}</div>
       </div>
       <div
