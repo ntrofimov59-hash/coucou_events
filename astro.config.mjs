@@ -13,6 +13,7 @@ const SITE = "https://coucou-events.com";
 export default defineConfig({
   site: SITE,
   output: "server",
+  trailingSlash: "always",
   adapter: node({
     mode: "standalone",
   }),
