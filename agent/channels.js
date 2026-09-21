@@ -21,7 +21,7 @@ const SKIP_CHAT_IDS = new Set(
 );
 // Если в тексте есть наш маркер алерта — точно не отвечаем
 const INTERNAL_MARKER = /^🚨\s*Эскалация:/;
-import { handleIncoming, isRelevantMessage, isSpam, stats, logStat, saveOrUpdateLead, generateReply } from './core.js';
+import { handleIncoming, isRelevantMessage, isSpam, stats, logStat, saveOrUpdateLead, generateReply, mediaRefusal } from './core.js';
 
 // ====================== WHATSAPP ======================
 export function startWhatsApp() {
@@ -49,6 +49,14 @@ export function startWhatsApp() {
     try {
       if (msg.fromMe || msg.isStatus || msg.isGroupMsg) return;
       const key = `wa_${msg.from}`;
+
+      // Медиа без текста (фото, документы)
+      const waHasText = !!(msg.body && msg.body.trim());
+      if (msg.hasMedia && msg.type !== 'ptt' && msg.type !== 'audio' && !waHasText) {
+        console.log(`📎 WA media (type=${msg.type}) from ${msg.from}`);
+        await msg.reply(mediaRefusal(key));
+        return;
+      }
 
       // Голосовые (ptt) и аудио
       if (msg.type === 'ptt' || msg.type === 'audio') {
@@ -202,6 +210,12 @@ export async function startTelegram() {
       if (isVoice) {
         try {
           const media = message.voice || message.audio;
+          const maxSec = Number(process.env.MAX_AUDIO_SECONDS || 120);
+          if (media.duration && media.duration > maxSec) {
+            console.log(`🎤 Voice: слишком длинное (${media.duration}s > ${maxSec}s)`);
+            await client.sendMessage(uid, { message: `Голосовое длиннее ${maxSec} секунд. Опишите, пожалуйста, текстом — отвечу сразу.` });
+            return;
+          }
           const buf = await client.downloadMedia(message, {});
           if (!buf || !buf.length) {
             console.log(`🎤 Voice: пустой буфер от ${senderStr}`);

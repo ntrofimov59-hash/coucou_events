@@ -76,6 +76,10 @@ export async function processVoice({ audioBuffer, mimeType, sessionKey }) {
 
   const { text, language, duration } = await transcribeVoice(audioBuffer, mimeType, langHint);
 
+  if (duration && duration > MAX_AUDIO_SECONDS) {
+    console.warn(`🎤 Voice: post-check, длительность ${duration}s > ${MAX_AUDIO_SECONDS}s`);
+  }
+
   if (!text) {
     console.log(`🎤 Voice: пустая транскрипция (${duration || '?'}s)`);
     return null;
