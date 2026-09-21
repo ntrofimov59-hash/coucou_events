@@ -2,6 +2,7 @@
 import http from 'http';
 import { processInboundEmail } from './email-inbound.js';
 import { stats, logStat } from './core.js';
+import * as usage from './usage.js';
 
 const PORT = Number(process.env.AGENT_HTTP_PORT || 3001);
 const SECRET = process.env.AGENT_HTTP_SECRET || '';
@@ -39,7 +40,12 @@ export function startHttpServer() {
       }
 
       if (req.method === 'GET' && req.url === '/health') {
-        return json(res, 200, { ok: true, stats });
+        return json(res, 200, { ok: true, stats, usage: usage.getUsage() });
+      }
+
+      if (req.method === 'POST' && req.url === '/usage/email') {
+        usage.trackEmail();
+        return json(res, 200, { ok: true });
       }
 
       return json(res, 404, { ok: false, error: 'not_found' });
