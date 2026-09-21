@@ -1,4 +1,7 @@
 import type { APIRoute } from "astro";
+import { saveWebsiteLead } from "../../lib/notion-lead";
+import { sendMail } from "../../lib/mailer";
+import { buildAutoReply } from "../../lib/auto-reply";
 
 export const prerender = false;
 
@@ -107,6 +110,13 @@ export const POST: APIRoute = async ({ request }) => {
       ? await checkWhatsApp(String(phone))
       : "⚪ Не проверялся";
 
+    // Ищем email среди полей формы
+    const emailFromData =
+      (data.email && String(data.email).trim()) ||
+      (data.contact && /@/.test(String(data.contact)) ? String(data.contact).trim() : '') ||
+      (userComment && String(userComment).match(/[\w.+-]+@[\w-]+\.[\w.-]+/)?.[0]) ||
+      '';
+
     let text = `🔥 Новая заявка на бронирование\n\n`;
     if (name) text += `▪️ Имя: ${name}\n`;
     if (phone) text += `▪️ Телефон: ${phone} (${waStatusText})\n`;
@@ -178,6 +188,51 @@ export const POST: APIRoute = async ({ request }) => {
         },
         502,
       );
+    }
+
+    // Параллельно — запись в Notion. Не роняем заявку при сбое Notion.
+    try {
+      const details = [
+        service ? `Услуга: ${service}` : null,
+        location ? `Локация: ${location}` : null,
+        date ? `Дата: ${date}` : null,
+        options ? `Опции: ${options}` : null,
+        `WhatsApp: ${waStatusText}`,
+        userComment ? `Комментарий: ${String(userComment).slice(0, 800)}` : null,
+      ].filter(Boolean).join('\n');
+
+      const r = await saveWebsiteLead({
+        name: name ? String(name).trim() : undefined,
+        phone: phone ? String(phone).trim() : undefined,
+        city: location ? String(location).trim() : undefined,
+        eventDate: date ? String(date) : undefined,
+        guests: guests ? String(guests) : undefined,
+        budget: estimate ? String(estimate) : undefined,
+        service: service ? String(service) : undefined,
+        details,
+        source: 'Website',
+        language: 'Russian',
+        status: 'New Lead',
+      });
+      if (!r.ok) console.warn('Notion lead save failed:', r.error);
+    } catch (e) {
+      console.error('Notion save threw:', (e as Error).message);
+    }
+
+    // Автоответ на email, если он был в форме
+    if (emailFromData) {
+      try {
+        const lang = data.lang || 'ru';
+        const reply = buildAutoReply(lang, name ? String(name).trim() : undefined);
+        const r = await sendMail({
+          to: emailFromData,
+          subject: reply.subject,
+          text: reply.text,
+        });
+        if (!r.ok) console.warn('Auto-reply send failed:', r.error);
+      } catch (e) {
+        console.error('Auto-reply threw:', (e as Error).message);
+      }
     }
 
     return json({ success: true });

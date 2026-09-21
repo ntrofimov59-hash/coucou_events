@@ -44,3 +44,25 @@ gcp-key.json
 *.bak
 *.bak[0-9]*
 *.bak[0-9][0-9]*
+agent/data/
+
+# Agent
+agent/data/
+agent/data/*.json
+.env.bak-*
+.env.*.bak
+
+# Backups of src
+src.bak-*/
+src.bak-*
+
+# Patch files
+*.patch
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store

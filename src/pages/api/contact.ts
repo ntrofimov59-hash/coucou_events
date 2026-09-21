@@ -1,4 +1,7 @@
 import type { APIRoute } from "astro";
+import { saveWebsiteLead } from "../../lib/notion-lead";
+import { sendMail } from "../../lib/mailer";
+import { buildAutoReply } from "../../lib/auto-reply";
 
 export const prerender = false;
 
@@ -139,6 +142,47 @@ export const POST: APIRoute = async ({ request }) => {
         },
         502,
       );
+    }
+
+    // Определяем, email ли это — используется и для Notion, и для автоответа
+    const isEmail = /@/.test(contactStr);
+
+    // Параллельно — запись в Notion. Не роняем заявку, если Notion недоступен.
+    try {
+      const lead = {
+        name: name ? String(name).trim() : undefined,
+        phone: isPhone ? contactStr : undefined,
+        city: undefined,
+        language: 'Russian',
+        service: undefined,
+        details: [
+          isEmail ? `Email: ${contactStr}` : `Контакт: ${contactStr}`,
+          `WhatsApp: ${waStatusText}`,
+          userMessage ? `Сообщение: ${String(userMessage).slice(0, 800)}` : null,
+        ].filter(Boolean).join('\n'),
+        source: 'Website',
+        status: 'New Lead',
+      };
+      const r = await saveWebsiteLead(lead);
+      if (!r.ok) console.warn('Notion lead save failed:', r.error);
+    } catch (e) {
+      console.error('Notion save threw:', (e as Error).message);
+    }
+
+    // Автоответ на email, если контакт — email
+    if (isEmail && contactStr) {
+      try {
+        const lang = data.lang || 'ru';
+        const reply = buildAutoReply(lang, name ? String(name).trim() : undefined);
+        const r = await sendMail({
+          to: contactStr,
+          subject: reply.subject,
+          text: reply.text,
+        });
+        if (!r.ok) console.warn('Auto-reply send failed:', r.error);
+      } catch (e) {
+        console.error('Auto-reply threw:', (e as Error).message);
+      }
     }
 
     return json({ success: true });
