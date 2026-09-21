@@ -6,10 +6,10 @@ import { sendMail } from "../../lib/mailer";
 export const prerender = false;
 
 function envStr(key: string): string {
-  const raw =
-    (import.meta.env as Record<string, string | undefined>)[key] ||
-    (typeof process !== "undefined" ? process.env?.[key] : undefined) ||
-    "";
+  // В SSR process.env — приоритет; import.meta.env хранит значения, зашитые при билде
+  const fromProcess = typeof process !== "undefined" ? process.env?.[key] : undefined;
+  const fromMeta = (import.meta.env as Record<string, string | undefined>)[key];
+  const raw = fromProcess || fromMeta || "";
   return String(raw).trim().replace(/^["']|["']$/g, "");
 }
 
