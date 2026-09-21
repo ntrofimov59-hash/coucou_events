@@ -7,6 +7,7 @@ import * as store from './store.js';
 import * as control from './control.js';
 import { queryDatabase, createPage, updatePage } from './notion-client.js';
 import * as notionQueue from './notion-queue.js';
+import * as usage from './usage.js';
 
 export const stats = { total: 0, relevant: 0, saved: 0, objections: 0, email: 0, spam: 0 };
 export function logStat() {
@@ -252,12 +253,25 @@ export async function saveOrUpdateLeadDirect(args) {
 }
 
 // ====================== LLM ======================
-const FALLBACKS = {
-  ru: 'Уточните, пожалуйста, город и примерную дату мероприятия.',
-  en: 'Could you tell me the city and approximate date of the event?',
-  es: '¿Me puedes decir la ciudad y la fecha aproximada del evento?',
-  hy: 'Խնդրում եմ նշեք քաղաքը և միջոցառման մոտավոր ամսաթիվը։',
+const FALLBACKS_FIRST = {
+  ru: 'Здравствуйте! Прошу прощения за заминку — подскажите, пожалуйста, какой у вас запрос?',
+  en: 'Hello! Sorry for the delay — could you tell me what you are looking for?',
+  es: '¡Hola! Disculpa la demora — ¿podrías decirme qué necesitas?',
+  hy: 'Բարև Ձեզ։ Ներողություն ուշացման համար — խնդրում եմ ասեք ինչի՞ կարիք ունեք։',
 };
+
+const FALLBACKS_MID = {
+  ru: 'Прошу прощения, техническая заминка — вернусь с ответом через минуту.',
+  en: 'Sorry, a brief technical hiccup — back with an answer in a minute.',
+  es: 'Disculpa, un pequeño problema técnico — vuelvo con la respuesta en un minuto.',
+  hy: 'Ներողություն, տեխնիկական դադար — մեկ րոպեից կվերադառնամ պատասխանով։',
+};
+
+// Выбор fallback: первое сообщение или середина диалога
+function pickFallback(lang, hasHistory) {
+  const map = hasHistory ? FALLBACKS_MID : FALLBACKS_FIRST;
+  return map[lang] || map.ru;
+}
 
 const LANG_TO_NOTION = { ru: 'Russian', en: 'English', es: 'Spanish', hy: 'Armenian' };
 
@@ -447,12 +461,37 @@ export async function generateReply(sessionKey, userMessage) {
       reasoning_effort: 'low',
     });
   } catch (err) {
-    console.error('Ошибка модели:', err.message);
-    return FALLBACKS[lang] || FALLBACKS.ru;
+    console.error('Ошибка основной модели:', err.message);
+    // Fallback 1: пробуем более быструю/дешёвую модель
+    try {
+      console.log('🔁 Retry с gpt-oss-20b...');
+      completion = await groq.chat.completions.create({
+        model: 'openai/gpt-oss-20b',
+        messages,
+        temperature: 0.4, max_tokens: 300,
+        reasoning_effort: 'low',
+      });
+      if (completion?.usage) {
+        try {
+          usage.trackTokens(completion.usage.total_tokens, completion.usage.prompt_tokens, completion.usage.completion_tokens);
+        } catch {}
+      }
+      console.log('✅ Retry успешен');
+    } catch (err2) {
+      console.error('Ошибка retry (20b):', err2.message);
+      return pickFallback(lang, (session?.turns?.length || 0) > 0);
+    }
   }
 
   if (completion.usage) {
     console.log(`🧮 tokens: in=${completion.usage.prompt_tokens} out=${completion.usage.completion_tokens} total=${completion.usage.total_tokens}`);
+    try {
+      usage.trackTokens(
+        completion.usage.total_tokens,
+        completion.usage.prompt_tokens,
+        completion.usage.completion_tokens
+      );
+    } catch (e) { console.warn('usage.trackTokens:', e.message); }
   }
 
   const raw = completion.choices[0].message.content || '';
@@ -482,7 +521,7 @@ export async function generateReply(sessionKey, userMessage) {
     });
   }
 
-  if (!finalText) finalText = FALLBACKS[lang] || FALLBACKS.ru;
+  if (!finalText) finalText = pickFallback(lang, (session?.turns?.length || 0) > 0);
   store.pushTurn(sessionKey, userMessage, finalText);
   return finalText;
 }

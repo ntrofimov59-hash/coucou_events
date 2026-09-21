@@ -1,6 +1,7 @@
 // agent/voice.js — скачивание и транскрипция голосовых через Groq Whisper
 import { groq } from './config.js';
 import { resolveLanguage } from './language.js';
+import * as usage from './usage.js';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -86,5 +87,6 @@ export async function processVoice({ audioBuffer, mimeType, sessionKey }) {
   }
 
   console.log(`🎤 Voice [${language || 'auto'}, ${duration || '?'}s]: "${text.slice(0, 80)}..."`);
+  try { usage.trackWhisper(duration || 0); } catch (e) { console.warn('usage.trackWhisper:', e.message); }
   return text;
 }
