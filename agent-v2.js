@@ -6,6 +6,7 @@ import { loadKnowledge } from './agent/knowledge.js';
 import { startWhatsApp, startTelegram, startEmailWatcher } from './agent/channels.js';
 import { logStat } from './agent/core.js';
 import * as control from './agent/control.js';
+import { flushQueue } from './agent/notion-queue.js';
 import { MODEL } from './agent/config.js';
 
 // Флаги включения каналов (можно переопределить в .env)
@@ -58,6 +59,11 @@ async function main() {
   });
 
   // Follow-up: раз в час проверяем сессии, которые замолчали
+  // Notion-queue: раз в минуту
+  cron.schedule('* * * * *', async () => {
+    try { await flushQueue(); } catch (e) { console.error('flushQueue:', e.message); }
+  });
+
   cron.schedule('15 * * * *', async () => {
     console.log('⏰ Follow-up check...');
     try {

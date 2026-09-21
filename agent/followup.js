@@ -82,6 +82,7 @@ export async function runFollowups() {
   for (const [key, s] of Object.entries(sessions)) {
     if (!key.startsWith('tg_')) continue;               // пока только Telegram
     if (control.isPaused(key)) continue;
+    if (s.closedWon) continue; // менеджер уже ведёт — не мешаем
     if (!s.profile?.name || !s.profile?.city || !s.profile?.service) continue;
 
     const elapsed = now - (s.lastActivity || 0);

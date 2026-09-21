@@ -168,3 +168,18 @@ export function markFollowup(key, stage) {
   s.lastActivity = Date.now();
   scheduleFlush();
 }
+
+
+// Пометить сделку как «передана менеджеру» — не дёргать follow-up
+export function setClosedWon(key, value = true) {
+  const s = state.sessions[key];
+  if (!s) return;
+  s.closedWon = !!value;
+  s.lastActivity = Date.now();
+  scheduleFlush();
+}
+
+export function isClosedWon(key) {
+  const s = state.sessions[key];
+  return !!(s && s.closedWon);
+}

@@ -6,6 +6,7 @@ import { searchKnowledge } from './knowledge.js';
 import * as store from './store.js';
 import * as control from './control.js';
 import { queryDatabase, createPage, updatePage } from './notion-client.js';
+import * as notionQueue from './notion-queue.js';
 
 export const stats = { total: 0, relevant: 0, saved: 0, objections: 0, email: 0, spam: 0 };
 export function logStat() {
@@ -170,7 +171,7 @@ async function findLeadInNotion(phone, name, city) {
   }
 }
 
-export async function saveOrUpdateLead(args) {
+export async function saveOrUpdateLeadDirect(args) {
   try {
     const existing = await findLeadInNotion(args.phone, args.clientName, args.city);
     const formattedDate = normalizeDate(args.eventDate);
@@ -210,6 +211,25 @@ const FALLBACKS = {
 };
 
 const LANG_TO_NOTION = { ru: 'Russian', en: 'English', es: 'Spanish', hy: 'Armenian' };
+
+// Retry для Groq: 429 (rate limit), 5xx (server), network
+async function callGroq(params, maxRetries = 3) {
+  let lastErr;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await groq.chat.completions.create(params);
+    } catch (e) {
+      lastErr = e;
+      const status = e?.status || e?.response?.status || e?.statusCode;
+      const isRetryable = status === 429 || (status >= 500 && status < 600) || /timeout|ECONNRESET|ETIMEDOUT/i.test(e?.message || '');
+      if (!isRetryable || i === maxRetries - 1) throw e;
+      const delay = 1000 * Math.pow(2, i); // 1s, 2s, 4s
+      console.warn(`⚠️ Groq ${status || 'error'} (${e.message?.slice(0,60)}), retry через ${delay}ms (попытка ${i+1}/${maxRetries})`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
+}
 
 function sourceFromKey(key) {
   if (key.startsWith('tg_')) return 'Telegram';
@@ -362,7 +382,7 @@ export async function generateReply(sessionKey, userMessage) {
 
   let completion;
   try {
-    completion = await groq.chat.completions.create({
+    completion = await callGroq({
       model: MODEL, messages,
       temperature: 0.4, max_tokens: 400,
       reasoning_effort: 'low',
@@ -460,6 +480,20 @@ const REJECT = {
   hy: `Բարև Ձեզ։ Ես Աննան եմ՝ Coucou Events-ի մենեջեր։\n\nՕգնում եմ միջոցառումների կազմակերպման և վրանների վարձույթի հարցերում։ Եթե այս թեմայով հարց ունեք՝ գրեք, ուրախ կլինեմ օգնել։`,
 };
 
+// Вежливые отказы для медиа без текста
+const MEDIA_REFUSAL = {
+  ru: 'Спасибо, файл получил! Опишите, пожалуйста, словами, что нужно — так я отвечу точнее.',
+  en: 'Thanks, I got the file! Please describe in words what you need — this way I can answer more precisely.',
+  es: '¡Gracias, recibí el archivo! Describe con palabras lo que necesitas para poder ayudarte mejor.',
+  hy: 'Շնորհակալություն, ֆայլը ստացա։ Խնդրում եմ գրավոր նկարագրեք, թե ինչ է պետք, որպեսզի ավելի ճշգրիտ պատասխանեմ։',
+};
+
+export function mediaRefusal(sessionKey) {
+  const s = store.getSession(sessionKey);
+  const lang = s?.lang || 'ru';
+  return MEDIA_REFUSAL[lang] || MEDIA_REFUSAL.ru;
+}
+
 export function humanDelay(text) {
   const delay = Math.min(900 + String(text || '').length * 15, 4000);
   return new Promise(r => setTimeout(r, delay));
@@ -516,6 +550,7 @@ export async function handleIncoming(sessionKey, text, sendFn) {
       profile: sess?.profile || {},
     });
     control.pause(sessionKey, 60 * 60 * 1000); // 1 час
+    store.setClosedWon(sessionKey, true); // менеджер ведёт сам
     // Ack на языке клиента (берём из сессии или ru по умолчанию)
     const sess2 = store.getSession(sessionKey);
     const ackLang = sess2?.lang || 'ru';
@@ -536,4 +571,15 @@ export async function handleIncoming(sessionKey, text, sendFn) {
   await sendFn(reply);
   console.log(`💬 Ответ:\n${reply}\n`);
   logStat();
+}
+
+
+// Обёртка с очередью: если Notion падает — сохраняем локально и ретраим
+export async function saveOrUpdateLead(args) {
+  try {
+    await saveOrUpdateLeadDirect(args);
+  } catch (e) {
+    console.error('saveOrUpdateLead: enqueue due to error:', e.message);
+    notionQueue.enqueue(args);
+  }
 }
