@@ -7,7 +7,7 @@ const { lang: propLang } = Astro.props;
 const { lang: paramLang, locale } = Astro.params;
 const lang = propLang || paramLang || locale || "ru";
 
-const ENDPOINT = "/api/contact";
+const ENDPOINT = "/api/contact/";
 
 const t = {
   ru: {

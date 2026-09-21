@@ -10,7 +10,7 @@ const { preselectedService, lang: propLang } = Astro.props;
 const { lang: paramLang, locale } = Astro.params;
 const lang = propLang || paramLang || locale || "ru";
 
-const ENDPOINT = "/api/booking";
+const ENDPOINT = "/api/booking/";
 
 const entries = await getCollection(
   "services",
@@ -376,7 +376,7 @@ const t = {
           clearTimeout(window.waTimer);
           window.waTimer = setTimeout(async () => {
             try {
-              const res = await fetch(`/api/check-whatsapp?phone=${digits}`);
+              const res = await fetch(`/api/check-whatsapp/?phone=${digits}`);
               const data = await res.json();
 
               if (data.exists) {
