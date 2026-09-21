@@ -9,6 +9,7 @@ import input from 'input';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
+import fs from 'fs';
 import { getChromePath } from './config.js';
 import * as store from './store.js';
 import { processVoice } from './voice.js';
@@ -30,7 +31,7 @@ const SKIP_CHAT_IDS = new Set(
     .filter(Boolean).map(String)
 );
 // Если в тексте есть наш маркер алерта — точно не отвечаем
-const INTERNAL_MARKER = /^🚨\s*Эскалация:/;
+const INTERNAL_MARKER = /^(🚨\s*Эскалация:|✅\s*WhatsApp|⚠️\s*WhatsApp|❌\s*WhatsApp|🔐\s*WhatsApp|🔄\s*WhatsApp)/;
 import { handleIncoming, isRelevantMessage, isSpam, stats, logStat, saveOrUpdateLead, generateReply, mediaRefusal, extractProfileFromText } from './core.js';
 
 // ====================== WHATSAPP ======================
@@ -114,12 +115,35 @@ async function syncTgHistory(client, chatId, sessionKey) {
   }
 }
 
+// Алерт в Telegram-бот менеджера
+async function notifyAdmin(title, body) {
+  try {
+    const token = process.env.BOOKING_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.BOOKING_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+    if (!token || !chatId) return;
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: `${title}\n\n${body}`, parse_mode: 'HTML' }),
+    });
+  } catch (e) {
+    console.error('notifyAdmin failed:', e.message);
+  }
+}
+
 export function startWhatsApp() {
   const chromePath = getChromePath();
   console.log('🌐 WhatsApp Chrome path:', chromePath || '(bundled puppeteer)');
 
+  const WA_SESSION_PATH = process.env.WA_SESSION_PATH || '/root/coucou-data/wa-auth';
+  fs.mkdirSync(WA_SESSION_PATH, { recursive: true });
+  console.log(`📁 WhatsApp session path: ${WA_SESSION_PATH}`);
+
   const waClient = new WhatsAppClient({
-    authStrategy: new LocalAuth({ clientId: 'coucou-anna' }),
+    authStrategy: new LocalAuth({
+      clientId: 'coucou-anna',
+      dataPath: WA_SESSION_PATH,
+    }),
     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     // webVersionCache убран — используем нативную версию WA Web из wwebjs
     // (старый URL 2.3000.1017054665-alpha может быть недоступен)
@@ -134,9 +158,25 @@ export function startWhatsApp() {
     console.log('\n📱 QR-код для WhatsApp:\n');
     qrcode.generate(qr, { small: true });
   });
-  waClient.on('ready', () => console.log('✅ WhatsApp готов'));
-  waClient.on('auth_failure', (m) => console.error('❌ WhatsApp auth_failure:', m));
-  waClient.on('disconnected', (r) => console.error('⚠️ WhatsApp disconnected:', r));
+  waClient.on('ready', () => {
+    console.log('✅ WhatsApp готов');
+    notifyAdmin('✅ WhatsApp подключён', 'Канал WhatsApp активен.');
+  });
+  waClient.on('authenticated', () => console.log('🔐 WhatsApp authenticated'));
+  waClient.on('auth_failure', (m) => {
+    console.error('❌ WhatsApp auth_failure:', m);
+    notifyAdmin('🚨 WhatsApp auth_failure', `Требуется повторный скан QR. Причина: ${m}`);
+  });
+  waClient.on('disconnected', (r) => {
+    console.error('⚠️ WhatsApp disconnected:', r);
+    notifyAdmin('⚠️ WhatsApp disconnected', `Причина: ${r}. Попробует переподключиться.`);
+  });
+  waClient.on('change_state', (state) => {
+    console.log(`🔄 WhatsApp state: ${state}`);
+  });
+  waClient.on('loading_screen', (percent, message) => {
+    console.log(`⏳ WhatsApp loading: ${percent}% ${message}`);
+  });
 
   // Исходящие (менеджер пишет сам из WhatsApp-клиента) → пауза
   waClient.on('message_create', async (msg) => {
@@ -296,11 +336,12 @@ export async function startTelegram() {
       if (!senderId) return;
 
       const senderStr = senderId.toString();
+      const chatStr = message.chatId ? message.chatId.toString() : '';
       const rawText = (message.message || '').trim();
 
-      // Пропускаем системные чаты (BOOKING_CHAT_ID, ANALYTICS_CHAT_ID и т.д.)
-      if (SKIP_CHAT_IDS.has(senderStr)) {
-        console.log(`⏭ skip system chat: ${senderStr}`);
+      // Пропускаем системные чаты — и по senderId, и по chatId
+      if (SKIP_CHAT_IDS.has(senderStr) || SKIP_CHAT_IDS.has(chatStr)) {
+        console.log(`⏭ skip system chat: sender=${senderStr} chat=${chatStr}`);
         return;
       }
       // Пропускаем наш собственный алерт
@@ -318,15 +359,20 @@ export async function startTelegram() {
       }
 
       const cls = entity?.className || '';
-      console.log(`📥 TG ${cls} from ${senderStr}: "${rawText.slice(0,60)}"`);
 
       // Отвечаем только живым пользователям
-      if (cls && cls !== 'User') return;
+      if (cls && cls !== 'User') {
+        console.log(`⏭ skip non-user: ${senderStr} (${cls})`);
+        return;
+      }
       // И не ботам
       if (entity?.bot) {
         console.log(`⏭ skip bot: ${senderStr}`);
         return;
       }
+
+      // Только здесь логируем — после всех фильтров
+      console.log(`📥 TG User from ${senderStr}: "${rawText.slice(0,60)}"`);
 
       const uid = Number(senderId.toString());
       const key = `tg_${uid}`;
