@@ -43,6 +43,32 @@ export function isIrrelevant(text) {
   return IRRELEVANT_PATTERNS.some(re => re.test(t));
 }
 
+// Чистые подтверждения — не требуют ответа, экономят токены
+const ACK_WORDS = new Set([
+  // RU
+  'ок','окей','оке','хорошо','понятно','ясно','понял','поняла','ладно','угу','ух','ага','да','конечно','спасибо','спс','благодарю',
+  // EN
+  'ok','okay','k','kk','sure','yes','yep','yeah','yup','got','it','understood','alright','thanks','thank','thx','ty',
+  // ES
+  'vale','bien','si','sí','claro','gracias','perfecto','okey','entiendo',
+  // HY
+  'այո','լավ','հասկացա','շնորհակալություն','պարզ','իհարկե',
+]);
+
+export function isPureAck(text) {
+  const t = String(text || '').toLowerCase().trim();
+  if (!t) return true;
+  // Только эмодзи / пунктуация
+  const cleaned = t.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+  if (!cleaned) return true;
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  // Длинное сообщение — точно не ack
+  if (words.length > 3) return false;
+  // Все слова — из списка подтверждений
+  return words.every(w => ACK_WORDS.has(w));
+}
+
 export function isRelevantMessage(text) {
   const lower = (text || '').toLowerCase();
   if (!lower.trim()) return false;
@@ -394,7 +420,17 @@ export async function generateReply(sessionKey, userMessage) {
   const objectionHint = objection && OBJECTION_PLAYBOOK[objection]
     ? (OBJECTION_PLAYBOOK[objection][lang] || OBJECTION_PLAYBOOK[objection].ru) : '';
 
+  // Контекст ручных сообщений менеджера
+  let managerContext = '';
+  if (session.managerMessages?.length) {
+    const recent = session.managerMessages.slice(-5);
+    managerContext = '\n\n=== ПОСЛЕДНИЕ СООБЩЕНИЯ МЕНЕДЖЕРА В ЧАТЕ (уже отправлены клиенту) ===\n'
+      + recent.map(m => `• ${m.text}`).join('\n')
+      + '\n\nКлиент видел эти сообщения. Учитывай их в контексте, но НЕ повторяй дословно.';
+  }
+
   const systemPrompt = buildSystemPrompt({ lang, stage, profile: session.profile, knowledge, objectionHint })
+    + managerContext
     + `\n\n=== CRITICAL LANGUAGE RULE ===\nReply ONLY in ${LANG_NAMES[lang] || 'Russian'}. Even if the prior history is in another language, your NEXT reply MUST be in ${LANG_NAMES[lang] || 'Russian'}.`
     + `\n\n=== LENGTH RULE ===\nWrite 2-4 short sentences. No long bullet lists, no headers.`
     + `\n\n=== HIDDEN CRM BLOCK ===\nIf you learned new info about the client (name, city, service, date, guests, budget, phone), append on a NEW LINE at the very END of your reply a single line:\n<!--CRM:{"clientName":"...","city":"...","service":"...","eventDate":"YYYY-MM-DD","guests":"...","budget":"...","phone":"...","details":"..."}-->\nOnly include fields you actually learned. If nothing new — do NOT add the line. This line is stripped before sending to the user.`
@@ -525,7 +561,13 @@ export async function handleIncoming(sessionKey, text, sendFn) {
   stats.total++;
   console.log(`\n📩 [${sessionKey}]: ${text}`);
 
-  // 0. Явный чёрный список — трудоустройство, реклама, спам
+  // 0a. Чистые подтверждения («ок», «спасибо», 👍) — только если сессия уже существует
+  if (store.getSession(sessionKey) && isPureAck(text)) {
+    console.log(`💤 Pure ack, skip LLM`);
+    return;
+  }
+
+  // 0b. Явный чёрный список — трудоустройство, реклама, спам
   if (isIrrelevant(text)) {
     console.log(`🚫 Irrelevant (job/ad/spam), skip LLM`);
     stats.spam++;
@@ -548,10 +590,20 @@ export async function handleIncoming(sessionKey, text, sendFn) {
     return;
   }
 
-  // 2. Клиент в opt-out — молчим
+  // 2. Пауза (менеджер активен) — молчим, но запоминаем
   if (control.isPaused(sessionKey)) {
-    console.log(`⏸ ${sessionKey}: paused, skip LLM`);
+    console.log(`⏸ ${sessionKey}: paused (manager active), remembering`);
+    control.rememberWhilePaused(sessionKey, text);
     return;
+  }
+
+  // 2b. Возобновление после паузы: подтягиваем пропущенные сообщения
+  const pending = control.popPendingWhilePaused(sessionKey);
+  if (pending.length) {
+    console.log(`↩️ ${sessionKey}: возобновление, ${pending.length} сообщений за время паузы`);
+    // Склеиваем пропущенные + текущее в один контекст
+    const merged = pending.map(p => p.text).join('\n---\n');
+    text = merged + '\n---\n' + text;
   }
 
   // 3. Отсев нерелевантного для новых сессий
