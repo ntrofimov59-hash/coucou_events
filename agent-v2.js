@@ -1,6 +1,7 @@
 // agent-v2.js — новая версия агента Coucou Events
 import cron from 'node-cron';
 import * as store from './agent/store.js';
+import { startHttpServer } from './agent/http-server.js';
 import { loadKnowledge } from './agent/knowledge.js';
 import { startWhatsApp, startTelegram, startEmailWatcher } from './agent/channels.js';
 import { logStat } from './agent/core.js';
@@ -17,6 +18,13 @@ async function main() {
 
   store.load();
   loadKnowledge();
+
+  // Локальный HTTP для endpoint сайта
+  try {
+    startHttpServer();
+  } catch (e) {
+    console.error('HTTP server failed:', e.message);
+  }
   console.log(`📂 Загружено сессий: ${store.getStats().sessions}`);
 
   if (ENABLE_WHATSAPP) {

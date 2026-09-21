@@ -13,7 +13,7 @@ const TEMPLATES: Record<AutoReplyLang, (name: string) => { subject: string; text
 
 С уважением,
 Команда Coucou Events
-coucouevents.am`,
+coucou-events.com`,
   }),
   en: (name) => ({
     subject: 'Coucou Events — we received your request',
@@ -26,7 +26,7 @@ We will get back to you within one business day, usually sooner. If it is urgent
 
 Best regards,
 Coucou Events Team
-coucouevents.am`,
+coucou-events.com`,
   }),
   es: (name) => ({
     subject: 'Coucou Events — hemos recibido tu solicitud',
@@ -39,7 +39,7 @@ Te responderemos dentro de un día hábil, normalmente antes. Si es urgente, res
 
 Saludos cordiales,
 Equipo Coucou Events
-coucouevents.am`,
+coucou-events.com`,
   }),
   hy: (name) => ({
     subject: 'Coucou Events — Ձեր հարցումը ստացվել է',
@@ -52,7 +52,7 @@ coucouevents.am`,
 
 Հարգանքով՝
 Coucou Events թիմ
-coucouevents.am`,
+coucou-events.com`,
   }),
 };
 
