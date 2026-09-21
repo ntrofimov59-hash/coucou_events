@@ -1,4 +1,8 @@
 // agent-v2.js — новая версия агента Coucou Events
+// Форсируем .env с override — иначе shell-переменные могут «залипнуть»
+import dotenv from 'dotenv';
+dotenv.config({ path: new URL('./.env', import.meta.url).pathname, override: true });
+
 import cron from 'node-cron';
 import * as store from './agent/store.js';
 import { startHttpServer } from './agent/http-server.js';
