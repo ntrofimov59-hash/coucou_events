@@ -10,6 +10,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
 import { getChromePath } from './config.js';
+import * as store from './store.js';
 import { processVoice } from './voice.js';
 import * as guard from './guard.js';
 import * as control from './control.js';
@@ -21,9 +22,57 @@ const SKIP_CHAT_IDS = new Set(
 );
 // Если в тексте есть наш маркер алерта — точно не отвечаем
 const INTERNAL_MARKER = /^🚨\s*Эскалация:/;
-import { handleIncoming, isRelevantMessage, isSpam, stats, logStat, saveOrUpdateLead, generateReply, mediaRefusal } from './core.js';
+import { handleIncoming, isRelevantMessage, isSpam, stats, logStat, saveOrUpdateLead, generateReply, mediaRefusal, extractProfileFromText } from './core.js';
 
 // ====================== WHATSAPP ======================
+// Подтягиваем последние сообщения из Telegram-чата в сессию
+// (чтобы агент видел контекст ручного диалога менеджера)
+async function hydrateTgHistory(client, chatId, sessionKey) {
+  try {
+    const session = store.getSession(sessionKey);
+    if (!session) return;
+    if (session.turns?.length > 0) return; // уже есть история — не трогаем
+
+    const messages = await client.getMessages(chatId, { limit: 20 });
+    if (!messages?.length) return;
+
+    // Разворачиваем в хронологический порядок
+    const ordered = messages.reverse();
+    const turns = [];
+    let pendingUser = null;
+
+    for (const m of ordered) {
+      const text = (m.message || '').trim();
+      if (!text) continue;
+      if (m.out) {
+        // Сообщение от Cou (менеджер или агент)
+        if (pendingUser) {
+          turns.push({ user: pendingUser, assistant: text, ts: m.date * 1000 });
+          pendingUser = null;
+        }
+      } else {
+        // Сообщение от клиента
+        if (pendingUser) turns.push({ user: pendingUser, assistant: null, ts: m.date * 1000 });
+        pendingUser = text;
+      }
+    }
+    if (pendingUser) turns.push({ user: pendingUser, assistant: null, ts: Date.now() });
+
+    if (turns.length) {
+      session.turns = turns.slice(-10);
+      // Обновим профиль — попробуем вытащить имя/город из истории
+      const combinedText = turns.map(t => t.user || '').join(' ');
+      const extracted = extractProfileFromText(combinedText);
+      Object.assign(session.profile, extracted);
+      session.lastActivity = Date.now();
+      store.saveSession(sessionKey);
+      console.log(`📜 History hydrated for ${sessionKey}: ${turns.length} turns`);
+    }
+  } catch (e) {
+    console.warn('hydrateTgHistory failed:', e.message);
+  }
+}
+
 export function startWhatsApp() {
   const chromePath = getChromePath();
   console.log('🌐 WhatsApp Chrome path:', chromePath || '(bundled puppeteer)');
@@ -31,10 +80,8 @@ export function startWhatsApp() {
   const waClient = new WhatsAppClient({
     authStrategy: new LocalAuth({ clientId: 'coucou-anna' }),
     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    webVersionCache: {
-      type: 'remote',
-      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1017054665-alpha.html',
-    },
+    // webVersionCache убран — используем нативную версию WA Web из wwebjs
+    // (старый URL 2.3000.1017054665-alpha может быть недоступен)
     puppeteer: {
       headless: true,
       ...(chromePath ? { executablePath: chromePath } : {}),
@@ -49,6 +96,21 @@ export function startWhatsApp() {
   waClient.on('ready', () => console.log('✅ WhatsApp готов'));
   waClient.on('auth_failure', (m) => console.error('❌ WhatsApp auth_failure:', m));
   waClient.on('disconnected', (r) => console.error('⚠️ WhatsApp disconnected:', r));
+
+  // Исходящие (менеджер пишет сам из WhatsApp-клиента) → пауза
+  waClient.on('message_create', async (msg) => {
+    try {
+      if (!msg.fromMe) return;
+      const key = `wa_${msg.to}`;
+      const txt = (msg.body || '').trim();
+      if (!txt) return;
+      const cmd = control.parseManagerCommand(txt);
+      if (cmd === 'stop') { control.pause(key, 24 * 60 * 60 * 1000); console.log(`⏸ WA Manager /stop: ${key}`); return; }
+      if (cmd === 'start') { control.resume(key); console.log(`▶️ WA Manager /start: ${key}`); return; }
+      control.pause(key, 24 * 60 * 60 * 1000);
+      console.log(`👤 WA Manager replied → auto-pause 24h: ${key}`);
+    } catch (e) { console.error('WA outgoing handler:', e.message); }
+  });
 
   waClient.on('message', async (msg) => {
     try {

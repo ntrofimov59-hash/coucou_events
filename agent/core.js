@@ -27,6 +27,22 @@ const RELEVANCE_KEYWORDS = [
   'հյուրեր','ամսաթիվ','բյուջե','վայր','հարթակ','քեյթերինգ','հայտ','առաջարկ','երևան','թբիլիսի','պրահա','փհուկետ',
   'անթալիա','դանանգ','նյաչանգ','մարաքեշ','բուդապեշտ','բելգրադ','բալի','գոա',
 ];
+// Явный чёрный список — что точно НЕ является заявкой
+const IRRELEVANT_PATTERNS = [
+  // Трудоустройство
+  /(резюме|ваканси|трудоустро|ищу\s+работ|собеседован|офис-менеджер|зарплат|на\s+должность|hr\b|hiring|job\s+offer|ищем\s+сотрудника|ищу\s+подработ)/i,
+  /(vacancy|resume|cv\b|apply for|job application|interview|looking for a job|соискатель)/i,
+  // Реклама/спам-услуги
+  /(предлагаю\s+услуг|оказываю\s+услуг|мы\s+предлагаем|b2b|оптов|сотрудничеств|партнёрств|партнерств)/i,
+  // Не по теме
+  /(кредит|займ|invest|investitsii|инвестиц|казино|ставки\s+на\s+спорт|crypto|биткоин)/i,
+];
+
+export function isIrrelevant(text) {
+  const t = String(text || '');
+  return IRRELEVANT_PATTERNS.some(re => re.test(t));
+}
+
 export function isRelevantMessage(text) {
   const lower = (text || '').toLowerCase();
   if (!lower.trim()) return false;
@@ -41,9 +57,11 @@ export function isSpam(text) {
 }
 
 // ====================== ЭТАПЫ ======================
-function inferStage(profile) {
+function inferStage(profile, session) {
   const has = (k) => profile?.[k] && String(profile[k]).trim();
-  if (!has('name')) return 'greeting';
+  // Если в сессии уже есть ходы — это НЕ приветствие
+  const hasHistory = session?.turns?.length > 0;
+  if (!has('name')) return hasHistory ? 'qualification' : 'greeting';
   if (!has('service') || !has('city')) return 'qualification';
   if (!has('eventDate') || !has('guests')) return 'qualification';
   if (!has('budget')) return 'proposal';
@@ -63,6 +81,10 @@ const NAME_BLACKLIST = new Set([
   'привет','здравствуйте','добрый','день','вечер','утро','хорошо','спасибо',
   'hello','hi','thanks','please','hola','gracias','բարև','շնորհակալություն',
 ]);
+
+export function extractProfileFromText(text) {
+  return extractProfile(text);
+}
 
 function extractProfile(text) {
   const out = {};
@@ -350,7 +372,7 @@ export async function generateReply(sessionKey, userMessage) {
           phone: p.phone, eventDate: p.eventDate, guests: p.guests, budget: p.budget,
           details: p.details || `Service: ${p.service}. City: ${p.city}.` + (p.guests ? ` Guests: ${p.guests}.` : ''),
           language: LANG_TO_NOTION[lang] || 'Russian',
-          stage: inferStage(p), source,
+          stage: inferStage(p, session), source,
         });
         session.lastSavedSig = sig;
         store.saveSession(sessionKey);
@@ -363,7 +385,7 @@ export async function generateReply(sessionKey, userMessage) {
   // Возражения
   const objection = detectObjection(userMessage);
   if (objection) { stats.objections++; console.log(`🛑 Objection: ${objection}`); logStat(); }
-  const stage = objection ? 'objections' : inferStage(session.profile);
+  const stage = objection ? 'objections' : inferStage(session.profile, session);
   console.log(`🎯 Stage: ${stage} | profile: ${p.name || '—'} | ${p.city || '—'} | ${p.service || '—'}`);
 
   // RAG + objection hint
@@ -502,6 +524,13 @@ export function humanDelay(text) {
 export async function handleIncoming(sessionKey, text, sendFn) {
   stats.total++;
   console.log(`\n📩 [${sessionKey}]: ${text}`);
+
+  // 0. Явный чёрный список — трудоустройство, реклама, спам
+  if (isIrrelevant(text)) {
+    console.log(`🚫 Irrelevant (job/ad/spam), skip LLM`);
+    stats.spam++;
+    return; // молчим
+  }
 
   // 1. Команды клиента: opt-out / opt-in
   const clientCmd = control.parseClientCommand(text);
