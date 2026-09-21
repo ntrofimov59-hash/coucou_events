@@ -211,8 +211,17 @@ export async function startTelegram() {
         try {
           const media = message.voice || message.audio;
           const maxSec = Number(process.env.MAX_AUDIO_SECONDS || 120);
-          if (media.duration && media.duration > maxSec) {
-            console.log(`🎤 Voice: слишком длинное (${media.duration}s > ${maxSec}s)`);
+
+          // gramJS хранит duration в media.attributes[0].duration (DocumentAttributeAudio)
+          let dur = 0;
+          const attrs = media?.attributes || message.media?.document?.attributes || [];
+          for (const attr of attrs) {
+            if (attr && typeof attr.duration === 'number') { dur = attr.duration; break; }
+          }
+          console.log(`🎤 Voice: duration=${dur}s (max=${maxSec}s)`);
+
+          if (dur && dur > maxSec) {
+            console.log(`🎤 Voice: слишком длинное (${dur}s > ${maxSec}s) — отказ без скачивания`);
             await client.sendMessage(uid, { message: `Голосовое длиннее ${maxSec} секунд. Опишите, пожалуйста, текстом — отвечу сразу.` });
             return;
           }
