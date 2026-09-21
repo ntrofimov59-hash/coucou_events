@@ -62,6 +62,16 @@ text
   - пропускает алерты `🚨 Эскалация:`
   - отвечает от имени пользователя Cou
 
+### WhatsApp (whatsapp-web.js + Chromium)
+
+- **Аккаунт:** номер Cou, сессия в `.wwebjs_auth/session-coucou-anna/`
+- **Chromium:** `/snap/bin/chromium` через `CHROME_PATH` в `.env`
+- **UA:** Chrome/131 (WhatsApp Web блокирует старый UA Chrome/101)
+- **Web cache:** `webVersionCache` в `channels.js` — фиксирует версию WA Web
+- **Голосовые:** `msg.type === 'ptt' | 'audio'` → Whisper
+- **Скан QR:** если сессия слетела — `pm2 stop coucou-agent-v2 && node agent-v2.js`, отсканировать, Ctrl+C, `pm2 start`
+- **Переподключение:** при потере сессии — новый скан QR (обычно раз в 2+ недели)
+
 ### Website
 
 - Формы `ContactForm.astro` и `BookingForm.astro` → `POST /api/contact/` / `/api/booking/`
