@@ -105,6 +105,13 @@ async function processInBackground(msg: {
           text: agentResult.reply,
           replyTo: envStr("INBOUND_FROM_EMAIL") || undefined,
         });
+        // счётчик: email отправлен
+        try {
+          await fetch(`http://127.0.0.1:${agentPort}/usage/email`, {
+            method: "POST",
+            headers: { "x-agent-secret": agentSecret },
+          });
+        } catch {}
       } catch (e) {
         console.warn("email-webhook: reply send failed:", (e as Error).message);
       }
