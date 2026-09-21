@@ -104,8 +104,6 @@ function buildProperties(fields: WebsiteLead) {
     Source: { select: { name: source } },
   };
   if (fields.language) props.Language = { select: { name: fields.language } };
-  if (fields.language) props.Language = { select: { name: fields.language } };
-  if (fields.source) props.Source = { select: { name: fields.source } };
 
   const iso = normalizeDate(fields.eventDate);
   if (iso) props.Date = { date: { start: iso } };
