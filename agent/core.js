@@ -233,6 +233,7 @@ export async function saveOrUpdateLeadDirect(args) {
       'Language': { select: { name: args.language || 'Russian' } },
       'Details': { rich_text: [{ text: { content: detailsWithSource } }] },
       'Status': { select: { name: STAGE_TO_NOTION[args.stage] || args.stage || 'New Lead' } },
+      'Source': { select: { name: source } },
     };
     if (formattedDate) properties['Date'] = { date: { start: formattedDate } };
     if (!isNaN(numericBudget) && numericBudget) properties['Budget'] = { number: numericBudget };

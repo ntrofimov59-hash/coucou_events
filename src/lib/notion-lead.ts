@@ -101,7 +101,9 @@ function buildProperties(fields: WebsiteLead) {
     City: { rich_text: [{ text: { content: fields.city || 'Уточняется' } }] },
     Details: { rich_text: [{ text: { content: detailsWithSource } }] },
     Status: { select: { name: fields.status || 'New Lead' } },
+    Source: { select: { name: source } },
   };
+  if (fields.language) props.Language = { select: { name: fields.language } };
   if (fields.language) props.Language = { select: { name: fields.language } };
   if (fields.source) props.Source = { select: { name: fields.source } };
 
@@ -145,10 +147,16 @@ export async function saveWebsiteLead(fields: WebsiteLead): Promise<{ ok: boolea
     const msg = e?.body?.message || e?.message || String(e);
     console.warn('notion-lead: попытка 1 упала:', msg);
 
-    // Попытка 2: убираем select-поля (Source/Language/Status), которые могут отсутствовать в схеме базы
-    delete properties.Source;
-    delete properties.Language;
-    if (properties.Status) delete properties.Status;
+    // Попытка 2: если схема базы не содержит select-полей — убираем их и повторяем
+    // (сработает только при ошибке "is not a property that exists")
+    if (/is not a property that exists/i.test(msg)) {
+      delete properties.Source;
+      delete properties.Language;
+      if (properties.Status) delete properties.Status;
+      console.log('notion-lead: retry без отсутствующих select-полей');
+    } else {
+      return { ok: false, error: msg };
+    }
     try {
       if (existingId) {
         const r: any = await c.pages.update({ page_id: existingId, properties });
