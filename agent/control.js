@@ -1,10 +1,11 @@
 // agent/control.js — управление паузой бота в чате
-// Когда менеджер пишет клиенту сам — бот молчит N часов.
-// Команды менеджера: /stop, /start, /status (только исходящие).
+// Модель: "менеджер активен" → окно 30 мин от последнего исходящего.
+// Если клиент пишет вне окна — агент отвечает.
 
-const DEFAULT_PAUSE_MS = 24 * 60 * 60 * 1000; // 24 часа
-const paused = new Map();  // sessionKey -> timestamp until
-const clientOptOut = new Set(); // sessionKey — клиент сам написал /stop
+const MANAGER_ACTIVE_WINDOW_MS = Number(process.env.MANAGER_ACTIVE_WINDOW_MS || 60 * 60 * 1000); // 60 мин
+const paused = new Map();          // sessionKey -> pauseUntil (ts)
+const clientOptOut = new Set();    // клиент сам написал /stop
+const pendingWhilePaused = new Map(); // sessionKey -> [сообщения клиента во время паузы]
 
 export function isPaused(sessionKey) {
   if (clientOptOut.has(sessionKey)) return true;
@@ -14,13 +15,15 @@ export function isPaused(sessionKey) {
   return true;
 }
 
-export function pause(sessionKey, ms = DEFAULT_PAUSE_MS) {
+// Менеджер написал → продлеваем окно
+export function pause(sessionKey, ms = MANAGER_ACTIVE_WINDOW_MS) {
   paused.set(sessionKey, Date.now() + ms);
 }
 
 export function resume(sessionKey) {
   paused.delete(sessionKey);
   clientOptOut.delete(sessionKey);
+  pendingWhilePaused.delete(sessionKey);
 }
 
 export function setClientOptOut(sessionKey, on = true) {
@@ -28,7 +31,27 @@ export function setClientOptOut(sessionKey, on = true) {
   else clientOptOut.delete(sessionKey);
 }
 
-// Парсим команды менеджера (в исходящих сообщениях)
+// Сохраняем сообщения, пока на паузе — чтобы потом использовать в контексте
+export function rememberWhilePaused(sessionKey, text) {
+  const arr = pendingWhilePaused.get(sessionKey) || [];
+  arr.push({ text, ts: Date.now() });
+  if (arr.length > 10) arr.splice(0, arr.length - 10);
+  pendingWhilePaused.set(sessionKey, arr);
+}
+
+export function popPendingWhilePaused(sessionKey) {
+  const arr = pendingWhilePaused.get(sessionKey) || [];
+  pendingWhilePaused.delete(sessionKey);
+  return arr;
+}
+
+export function getManagerActivity(sessionKey) {
+  const until = paused.get(sessionKey);
+  if (!until) return 0;
+  // paused = now + окно → lastActivity = until - окно
+  return until - MANAGER_ACTIVE_WINDOW_MS;
+}
+
 export function parseManagerCommand(text) {
   const t = String(text || '').trim().toLowerCase();
   if (t === '/stop' || t === '/pause') return 'stop';
@@ -37,7 +60,6 @@ export function parseManagerCommand(text) {
   return null;
 }
 
-// Парсим команды клиента (входящие) — только opt-out
 export function parseClientCommand(text) {
   const t = String(text || '').trim().toLowerCase();
   if (t === '/stop' || t === 'стоп' || t === 'отписаться') return 'optout';
@@ -46,5 +68,5 @@ export function parseClientCommand(text) {
 }
 
 export function status() {
-  return { paused: paused.size, optOut: clientOptOut.size };
+  return { paused: paused.size, optOut: clientOptOut.size, pending: pendingWhilePaused.size };
 }
