@@ -68,6 +68,21 @@ text
 - Endpoint: отправляет в Telegram → пишет в Notion → если email в форме, отправляет автоответ
 - Заявка не падает, если Notion недоступен (fail-safe)
 
+### Голосовые сообщения (Telegram + WhatsApp)
+
+- **Модуль:** `agent/voice.js`
+- **Провайдер:** Groq Whisper (`whisper-large-v3-turbo`) — тот же API-ключ, что LLM
+- **Free tier:** 28 800 аудио-секунд/день (~8 часов), 25 МБ на файл
+- **Лимит на сообщение:** `MAX_AUDIO_SECONDS=120` (отсекаем длинные, чтобы не сжигать квоту)
+- **Поток:**
+  1. Telegram: `message.voice` / `message.audio` → `client.downloadMedia()`
+  2. WhatsApp: `msg.type === 'ptt' | 'audio'` → `msg.downloadMedia()`
+  3. `transcribeVoice()` — скачивает во временный файл, отправляет в Groq
+  4. Whisper возвращает `text` + `language` + `duration`
+  5. Текст идёт в `handleIncoming()` как обычное сообщение
+- **Язык:** Whisper определяет автоматически; агент отвечает на нём же
+- **Стоимость:** $0 на free tier
+
 ### Email (Brevo Inbound)
 
 - **Домен:** `coucou-events.com` (верифицирован в Brevo)
