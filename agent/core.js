@@ -104,6 +104,25 @@ function extractProfile(text) {
   return out;
 }
 
+// Нормализуем название услуги к ключу (tents/wedding/...)
+const SERVICE_ALIASES = [
+  [/(аренд\w*\s*шат|шат[её]р|тент|tents?|marquee|carpa|վրան)/i, 'tents'],
+  [/(свадьб|wedding|boda|հարսանիք)/i, 'wedding'],
+  [/(корпоратив|corporate|corporativo|կորպորատիվ)/i, 'corporate'],
+  [/(кейтер|catering|քեյթ)/i, 'catering'],
+  [/(декор|decor|դեկոր)/i, 'decor'],
+  [/(фото|видео|photo|video|foto)/i, 'photo-video'],
+  [/(музык|dj|артист|шоу|entertainment|music|show)/i, 'entertainment'],
+  [/(трансфер|transfer|traslado)/i, 'transfer'],
+  [/(под ключ|turnkey|мероприятие|бізнес|banquet|event)/i, 'turnkey'],
+];
+function normalizeService(raw) {
+  if (!raw) return raw;
+  const s = String(raw);
+  for (const [re, key] of SERVICE_ALIASES) if (re.test(s)) return key;
+  return s;
+}
+
 // Нормализуем любые даты к ISO YYYY-MM-DD
 function normalizeDate(raw) {
   if (!raw) return null;
