@@ -10,6 +10,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
 import { getChromePath } from './config.js';
+import { processVoice } from './voice.js';
 import * as guard from './guard.js';
 import * as control from './control.js';
 
@@ -47,10 +48,36 @@ export function startWhatsApp() {
   waClient.on('message', async (msg) => {
     try {
       if (msg.fromMe || msg.isStatus || msg.isGroupMsg) return;
+      const key = `wa_${msg.from}`;
+
+      // Голосовые (ptt) и аудио
+      if (msg.type === 'ptt' || msg.type === 'audio') {
+        try {
+          const media = await msg.downloadMedia();
+          if (!media || !media.data) {
+            console.log(`🎤 WA voice: пустые данные от ${msg.from}`);
+            return;
+          }
+          const buf = Buffer.from(media.data, 'base64');
+          const text = await processVoice({ audioBuffer: buf, mimeType: media.mimetype, sessionKey: key });
+          if (!text) {
+            await msg.reply('Не удалось распознать голосовое. Напишите текстом, пожалуйста.');
+            return;
+          }
+          const g = guard.check(key, text);
+          if (!g.ok) { console.log(`🛡 ${key}: ${g.reason}`); return; }
+          await handleIncoming(key, text, async (reply) => { await msg.reply(reply); });
+        } catch (e) {
+          console.error('WA voice error:', e.message);
+          try { await msg.reply('Не удалось обработать голосовое. Напишите текстом, пожалуйста.'); } catch {}
+        }
+        return;
+      }
+
+      // Обычный текст
       const text = msg.body?.trim();
       if (!text) return;
       if (INTERNAL_MARKER.test(text)) return;
-      const key = `wa_${msg.from}`;
       const g = guard.check(key, text);
       if (!g.ok) { console.log(`🛡 ${key}: ${g.reason}`); return; }
       await handleIncoming(key, text, async (reply) => { await msg.reply(reply); });
@@ -123,7 +150,10 @@ export async function startTelegram() {
 
   client.addEventHandler(async (event) => {
     const message = event.message;
-    if (!message?.message || message.out) return;
+    if (!message || message.out) return;
+    const hasText = !!(message.message && message.message.length);
+    const hasVoice = !!(message.voice || message.audio);
+    if (!hasText && !hasVoice) return;
     try {
       // Быстрый отсев групповых/каналов по свойствам сообщения
       if (message.isGroup || message.isChannel) return;
@@ -132,7 +162,7 @@ export async function startTelegram() {
       if (!senderId) return;
 
       const senderStr = senderId.toString();
-      const rawText = message.message.trim();
+      const rawText = (message.message || '').trim();
 
       // Пропускаем системные чаты (BOOKING_CHAT_ID, ANALYTICS_CHAT_ID и т.д.)
       if (SKIP_CHAT_IDS.has(senderStr)) {
@@ -166,6 +196,39 @@ export async function startTelegram() {
 
       const uid = Number(senderId.toString());
       const key = `tg_${uid}`;
+
+      // Голосовые и аудио
+      const isVoice = !!(message.voice || message.audio);
+      if (isVoice) {
+        try {
+          const media = message.voice || message.audio;
+          const buf = await client.downloadMedia(message, {});
+          if (!buf || !buf.length) {
+            console.log(`🎤 Voice: пустой буфер от ${senderStr}`);
+            return;
+          }
+          const mime = media.mimeType || 'audio/ogg';
+          const text = await processVoice({ audioBuffer: buf, mimeType: mime, sessionKey: key });
+          if (!text) {
+            await client.sendMessage(uid, { message: 'Не удалось распознать голосовое. Напишите текстом, пожалуйста.' });
+            return;
+          }
+          const g = guard.check(key, text);
+          if (!g.ok) { console.log(`🛡 ${key}: ${g.reason}`); return; }
+          await handleIncoming(key, text, async (reply) => {
+            await client.sendMessage(uid, { message: reply });
+          });
+        } catch (e) {
+          console.error('Voice processing error:', e.message);
+          try {
+            await client.sendMessage(uid, { message: 'Не удалось обработать голосовое. Напишите текстом, пожалуйста.' });
+          } catch {}
+        }
+        return; // не идём дальше по текстовой ветке
+      }
+
+      // Обычный текст
+      if (!message.message) return;
       const txt = message.message.trim();
       const g = guard.check(key, txt);
       if (!g.ok) { console.log(`🛡 ${key}: ${g.reason}`); return; }
