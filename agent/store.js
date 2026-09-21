@@ -71,6 +71,8 @@ export function createSession(key, { lang, source }) {
       details: null,
     },
     turns: [], // массив ходов: { user, assistant, ts }
+    managerMessages: [], // сообщения, которые менеджер отправлял вручную
+    lastTgSync: 0,       // ts последней синхронизации с Telegram
   };
   scheduleFlush();
   return state.sessions[key];
@@ -182,4 +184,22 @@ export function setClosedWon(key, value = true) {
 export function isClosedWon(key) {
   const s = state.sessions[key];
   return !!(s && s.closedWon);
+}
+
+
+// Сохраняем сообщения менеджера (для контекста)
+export function pushManagerMessage(key, text, ts) {
+  const s = state.sessions[key];
+  if (!s) return;
+  if (!s.managerMessages) s.managerMessages = [];
+  s.managerMessages.push({ text, ts: ts || Date.now() });
+  if (s.managerMessages.length > 20) s.managerMessages = s.managerMessages.slice(-20);
+  scheduleFlush();
+}
+
+export function setLastTgSync(key, ts) {
+  const s = state.sessions[key];
+  if (!s) return;
+  s.lastTgSync = ts;
+  scheduleFlush();
 }

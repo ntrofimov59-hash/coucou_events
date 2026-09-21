@@ -15,6 +15,15 @@ import { processVoice } from './voice.js';
 import * as guard from './guard.js';
 import * as control from './control.js';
 
+// Тексты, которые только что отправил сам бот (чтобы отличить от менеджера)
+const botSentTexts = new Set();
+function markBotSent(text) {
+  const t = String(text || '').trim().slice(0, 200);
+  if (!t) return;
+  botSentTexts.add(t);
+  setTimeout(() => botSentTexts.delete(t), 60000); // забываем через минуту
+}
+
 // Чаты, куда бот сам шлёт алерты — не отвечаем на них
 const SKIP_CHAT_IDS = new Set(
   [process.env.BOOKING_CHAT_ID, process.env.ANALYTICS_CHAT_ID, process.env.TELEGRAM_CHAT_ID]
@@ -73,6 +82,38 @@ async function hydrateTgHistory(client, chatId, sessionKey) {
   }
 }
 
+// Синхронизируем новые исходящие сообщения менеджера из Telegram-чата
+async function syncTgHistory(client, chatId, sessionKey) {
+  try {
+    const session = store.getSession(sessionKey);
+    if (!session) return;
+
+    const since = session.lastTgSync || 0;
+    const messages = await client.getMessages(chatId, { limit: 20 });
+    if (!messages?.length) return;
+
+    let latestTs = since;
+    let synced = 0;
+
+    for (const m of messages) {
+      if (!m.date || m.date <= since) continue;
+      if (m.date > latestTs) latestTs = m.date;
+      const text = (m.message || '').trim();
+      if (!text) continue;
+      if (m.out) {
+        // исходящее: это либо ответ бота (уже в turns), либо сообщение менеджера
+        store.pushManagerMessage(sessionKey, text, m.date * 1000);
+        synced++;
+      }
+    }
+
+    if (latestTs > since) store.setLastTgSync(sessionKey, latestTs);
+    if (synced) console.log(`📥 tg sync: +${synced} manager msgs for ${sessionKey}`);
+  } catch (e) {
+    console.warn('syncTgHistory failed:', e.message);
+  }
+}
+
 export function startWhatsApp() {
   const chromePath = getChromePath();
   console.log('🌐 WhatsApp Chrome path:', chromePath || '(bundled puppeteer)');
@@ -101,14 +142,26 @@ export function startWhatsApp() {
   waClient.on('message_create', async (msg) => {
     try {
       if (!msg.fromMe) return;
-      const key = `wa_${msg.to}`;
       const txt = (msg.body || '').trim();
       if (!txt) return;
+
+      // Игнорируем сообщения, которые отправил сам бот
+      const trimmed = txt.slice(0, 200);
+      if (botSentTexts.has(trimmed)) {
+        botSentTexts.delete(trimmed);
+        console.log(`🤖 WA own message, skip pause`);
+        return;
+      }
+
+      const key = `wa_${msg.to}`;
       const cmd = control.parseManagerCommand(txt);
-      if (cmd === 'stop') { control.pause(key, 24 * 60 * 60 * 1000); console.log(`⏸ WA Manager /stop: ${key}`); return; }
+      if (cmd === 'stop') { control.pause(key); console.log(`⏸ WA Manager /stop: ${key}`); return; }
       if (cmd === 'start') { control.resume(key); console.log(`▶️ WA Manager /start: ${key}`); return; }
-      control.pause(key, 24 * 60 * 60 * 1000);
-      console.log(`👤 WA Manager replied → auto-pause 24h: ${key}`);
+
+      // Пауза на 30 мин + сохраняем сообщение в контекст сессии
+      control.pause(key);
+      store.pushManagerMessage(key, txt, Date.now());
+      console.log(`👤 WA Manager replied → pause 30min, saved to context: ${key}`);
     } catch (e) { console.error('WA outgoing handler:', e.message); }
   });
 
@@ -141,7 +194,10 @@ export function startWhatsApp() {
           }
           const g = guard.check(key, text);
           if (!g.ok) { console.log(`🛡 ${key}: ${g.reason}`); return; }
-          await handleIncoming(key, text, async (reply) => { await msg.reply(reply); });
+          await handleIncoming(key, text, async (reply) => {
+            markBotSent(reply);
+            await msg.reply(reply);
+          });
         } catch (e) {
           console.error('WA voice error:', e.message);
           try { await msg.reply('Не удалось обработать голосовое. Напишите текстом, пожалуйста.'); } catch {}
@@ -155,7 +211,10 @@ export function startWhatsApp() {
       if (INTERNAL_MARKER.test(text)) return;
       const g = guard.check(key, text);
       if (!g.ok) { console.log(`🛡 ${key}: ${g.reason}`); return; }
-      await handleIncoming(key, text, async (reply) => { await msg.reply(reply); });
+      await handleIncoming(key, text, async (reply) => {
+        markBotSent(reply);
+        await msg.reply(reply);
+      });
     } catch (e) {
       console.error('WA handler error:', e.message);
     }
