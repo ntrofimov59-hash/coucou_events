@@ -11,585 +11,330 @@ interface Props {
 
 const { lang = "ru" } = Astro.props;
 
-const t = {
-  ru: {
-    sectionTag: "Избранные кейсы",
-    heading: "Реализованные проекты",
-    subtitle:
-      "Листайте карточки, чтобы посмотреть детали проектов и отзывы клиентов.",
-    modalGuests: "Масштаб:",
-    modalBudget: "Бюджет:",
-    modalAbout: "О проекте:",
-    modalReviewTitle: "Отзыв клиента:",
-    modalBtnText: "Забронировать похожий проект",
-    items: [
-      {
-        id: "emerald-gala",
-        title: "Изумрудный гала-приём под шатром",
-        category: "Свадьба под ключ",
-        location: "Частная усадьба",
-        guests: "150+ гостей",
-        budget: "от $180k",
-        span: "col-span-2 row-span-2",
-        description:
-          "Шатёр целиком задрапировали изумрудным бархатом и шёлком — вплоть до скатертей и салфеток на каждом столе, в тон кованым канделябрам и цветочным композициям из бордовых и бургунди роз. Танцпол с зеркальным принтом отражал свет, а сцена с живым бэндом стала центром вечера. Полная застройка: драпировка, свет, флористика, меблировка, кейтеринг. Подробнее об организации под ключ: /ru/services/turnkey.",
-        review:
-          "«Мы хотели не просто свадьбу, а атмосферу — и получили именно её, вплоть до цвета скатертей. Гости говорят, что это было похоже на кино.»",
-        client: "Мишель и Сон",
-        images: [
-          "/images/portfolio/portfolio-emerald-gala-1.webp",
-          "/images/portfolio/portfolio-emerald-gala-2.webp",
-          "/images/portfolio/portfolio-emerald-gala-3.webp",
-          "/images/portfolio/portfolio-emerald-gala-4.webp",
-        ],
-      },
-      {
-        id: "beach-ceremony",
-        title: "Церемония и приём на берегу океана",
-        category: "Церемония и приём",
-        location: "Побережье",
-        guests: "80+ гостей",
-        budget: "$150k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Арка из белых орхидей и роз встала прямо на песке, у самой кромки воды — гости рассаживались на невысоких велюровых пуфах вместо привычных стульев, чтобы ничего не перекрывало вид на океан. После церемонии те же гости пересели за круглые столы чуть дальше по берегу — с той же цветочной палитрой, но уже в формате ужина на закате.",
-        review:
-          "«Мы хотели, чтобы море было главным гостем на церемонии — команда выстроила всё вокруг этого, а не вокруг декораций.»",
-        client: "Анна и Карен",
-        images: [
-          "/images/portfolio/portfolio-beach-ceremony-1.webp",
-          "/images/portfolio/portfolio-beach-ceremony-2.webp",
-          "/images/portfolio/portfolio-beach-ceremony-3.webp",
-          "/images/portfolio/portfolio-beach-ceremony-4.webp",
-          "/images/portfolio/portfolio-beach-ceremony-5.webp",
-        ],
-      },
-      {
-        id: "purple-estate",
-        title: "Свадьба в усадьбе: от лаунжа до танцев до рассвета",
-        category: "Декор и флористика",
-        location: "Загородная усадьба",
-        guests: "100+ гостей",
-        budget: "$120k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Одна усадьба, два образа: днём — сиреневые портьеры под прозрачным навесом, плетёные стулья и лаунж-зона у беседки для коктейльной части; ночью та же локация превращалась в танцпол с пурпурной архитектурной подсветкой. Пятиярусный торт на подиуме из аллиума стал точкой притяжения для фото весь день.",
-        review:
-          "«Больше всего впечатлило, что одно и то же место утром и ночью выглядело как два разных мероприятия. Ничего не пришлось перевозить.»",
-        client: "Мария К.",
-        images: [
-          "/images/portfolio/portfolio-purple-estate-1.webp",
-          "/images/portfolio/portfolio-purple-estate-2.webp",
-          "/images/portfolio/portfolio-purple-estate-3.webp",
-          "/images/portfolio/portfolio-purple-estate-4.webp",
-          "/images/portfolio/portfolio-purple-estate-5.webp",
-        ],
-      },
-      {
-        id: "oak-reception",
-        title: "Ужин под вековыми дубами",
-        category: "Свадьба под ключ",
-        location: "Историческая усадьба",
-        guests: "120+ гостей",
-        budget: "от $200k",
-        span: "col-span-2 row-span-1",
-        description:
-          "Прозрачный шатёр поставили так, чтобы кроны столетних дубов с испанским мхом стали частью интерьера, а не фоном за его пределами. Гости ужинали за длинными столами прямо под ветвями, марокканские фонари и гирлянда из ламп на цепях свисали сквозь листву — свет шатра проходил сквозь неё, создавая эффект, который не сделать никаким искусственным декором.",
-        review:
-          "«Именно ради этих деревьев мы выбрали площадку — и команда не спрятала их шатром, а построила вечер вокруг них.»",
-        client: "Эмили и Джексон",
-        images: [
-          "/images/portfolio/portfolio-oak-reception-1.webp",
-          "/images/portfolio/portfolio-oak-reception-2.webp",
-          "/images/portfolio/portfolio-oak-reception-3.webp",
-          "/images/portfolio/portfolio-oak-reception-4.webp",
-        ],
-      },
-      {
-        id: "desert-dinner",
-        title: "Гала-ужин в пустыне",
-        category: "Частный вечер",
-        location: "Пустыня",
-        guests: "16 гостей",
-        budget: "$60k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Камерный ужин на бархане: пагода-шатры с гирляндами, бордовый текстиль, ковры и живая музыка под открытым небом. Формат для тех, кому важнее близость гостей друг к другу, чем масштаб события — с тостами, нарезкой торта и танцами прямо на песке.",
-        review:
-          "«Пятнадцать человек, которых мы любим, живая музыка и пустыня вместо привычного зала — идеальный вечер.»",
-        client: "Дарья и Никита",
-        images: [
-          "/images/portfolio/portfolio-desert-dinner-1.webp",
-          "/images/portfolio/portfolio-desert-dinner-2.webp",
-          "/images/portfolio/portfolio-desert-dinner-3.webp",
-          "/images/portfolio/portfolio-desert-dinner-4.webp",
-          "/images/portfolio/portfolio-desert-dinner-5.webp",
-        ],
-      },
-      {
-        id: "bamboo-bar",
-        title: "Барная зона во внутреннем дворе",
-        category: "Кейтеринг и бар",
-        location: "Городской особняк",
-        guests: "120+ гостей",
-        budget: "$130k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Барная стойка ручной работы на фоне кирпичной стены и высокого бамбука — часть кейтеринг-программы мероприятия, где зона напитков продумана как отдельное пространство, а не приставной стол.",
-        review:
-          "«Бар выглядел так, будто стоит там годами, а не привезён на один вечер.»",
-        client: "Организационный комитет",
-        images: [
-          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
-          "/images/portfolio/portfolio-bamboo-bar-card.webp",
-        ],
-      },
-    ],
-  },
-  eng: {
-    sectionTag: "Featured Cases",
-    heading: "Completed Projects",
-    subtitle: "Swipe through the cards to view project details and client reviews.",
-    modalGuests: "Scale:",
-    modalBudget: "Budget:",
-    modalAbout: "About the project:",
-    modalReviewTitle: "Client Review:",
-    modalBtnText: "Book a similar project",
-    items: [
-      {
-        id: "emerald-gala",
-        title: "Emerald Gala Reception Under a Marquee",
-        category: "Turnkey Wedding",
-        location: "Private Estate",
-        guests: "150+ guests",
-        budget: "from $180k",
-        span: "col-span-2 row-span-2",
-        description:
-          "The marquee was fully draped in emerald velvet and silk — down to the tablecloths and napkins at every table — matched with wrought-iron candelabras and centrepieces of burgundy and merlot roses. A mirror-print dance floor reflected the light, and a live band stage anchored the evening. Full build: drapery, lighting, florals, furniture, catering. More on our turnkey planning: /eng/services/turnkey.",
-        review:
-          "«We wanted an atmosphere, not just a wedding — and we got exactly that, down to the tablecloth colour. Guests say it felt like a film set.»",
-        client: "Michelle & Seon",
-        images: [
-          "/images/portfolio/portfolio-emerald-gala-1.webp",
-          "/images/portfolio/portfolio-emerald-gala-2.webp",
-          "/images/portfolio/portfolio-emerald-gala-3.webp",
-          "/images/portfolio/portfolio-emerald-gala-4.webp",
-        ],
-      },
-      {
-        id: "beach-ceremony",
-        title: "Ceremony and Reception on the Ocean Shore",
-        category: "Ceremony & Reception",
-        location: "Coastal Shoreline",
-        guests: "80+ guests",
-        budget: "$150k",
-        span: "col-span-1 row-span-1",
-        description:
-          "An arch of white orchids and roses stood right on the sand at the water's edge — guests were seated on low velvet ottomans instead of chairs so nothing blocked the ocean view. After the ceremony, the same guests moved to round tables further down the beach — same floral palette, now a sunset dinner.",
-        review:
-          "«We wanted the ocean to be the main guest at the ceremony — the team built everything around that, not around decor.»",
-        client: "Anna & Karen",
-        images: [
-          "/images/portfolio/portfolio-beach-ceremony-1.webp",
-          "/images/portfolio/portfolio-beach-ceremony-2.webp",
-          "/images/portfolio/portfolio-beach-ceremony-3.webp",
-          "/images/portfolio/portfolio-beach-ceremony-4.webp",
-          "/images/portfolio/portfolio-beach-ceremony-5.webp",
-        ],
-      },
-      {
-        id: "purple-estate",
-        title: "An Estate Wedding: Lounge by Day, Dancing by Night",
-        category: "Decor & Florals",
-        location: "Country Estate",
-        guests: "100+ guests",
-        budget: "$120k",
-        span: "col-span-1 row-span-1",
-        description:
-          "One estate, two looks: by day, lilac drapery under a clear canopy, rattan chairs and a lounge area by the pergola for the cocktail hour; by night, the same location became a dance floor under purple architectural lighting. A five-tier cake on an allium-flower plinth was the photo focal point all day long.",
-        review:
-          "«What struck us most is that the same place looked like two different events, morning and night. Nothing had to be moved.»",
-        client: "Maria K.",
-        images: [
-          "/images/portfolio/portfolio-purple-estate-1.webp",
-          "/images/portfolio/portfolio-purple-estate-2.webp",
-          "/images/portfolio/portfolio-purple-estate-3.webp",
-          "/images/portfolio/portfolio-purple-estate-4.webp",
-          "/images/portfolio/portfolio-purple-estate-5.webp",
-        ],
-      },
-      {
-        id: "oak-reception",
-        title: "Dinner Beneath Centuries-Old Oaks",
-        category: "Turnkey Wedding",
-        location: "Historic Estate",
-        guests: "120+ guests",
-        budget: "from $200k",
-        span: "col-span-2 row-span-1",
-        description:
-          "The clear-top marquee was positioned so the canopy of century-old oaks draped in Spanish moss became part of the interior, not a backdrop outside it. Guests dined at long tables directly under the branches, Moroccan lanterns and a chain of hanging bulbs threaded through the foliage — tent light filtering through it in a way no artificial decor could replicate.",
-        review:
-          "«We chose the venue for these exact trees — the team didn't hide them behind a tent, they built the evening around them.»",
-        client: "Emily & Jackson",
-        images: [
-          "/images/portfolio/portfolio-oak-reception-1.webp",
-          "/images/portfolio/portfolio-oak-reception-2.webp",
-          "/images/portfolio/portfolio-oak-reception-3.webp",
-          "/images/portfolio/portfolio-oak-reception-4.webp",
-        ],
-      },
-      {
-        id: "desert-dinner",
-        title: "Gala Dinner in the Desert",
-        category: "Private Evening",
-        location: "Desert",
-        guests: "16 guests",
-        budget: "$60k",
-        span: "col-span-1 row-span-1",
-        description:
-          "An intimate dinner set on a dune: pagoda tents strung with lights, burgundy linens, rugs, and live music under the open sky. A format for those who value closeness among guests over sheer scale — with toasts, cake-cutting, and dancing right on the sand.",
-        review:
-          "«Fifteen people we love, live music, and the desert instead of a ballroom — a perfect evening.»",
-        client: "Daria & Nikita",
-        images: [
-          "/images/portfolio/portfolio-desert-dinner-1.webp",
-          "/images/portfolio/portfolio-desert-dinner-2.webp",
-          "/images/portfolio/portfolio-desert-dinner-3.webp",
-          "/images/portfolio/portfolio-desert-dinner-4.webp",
-          "/images/portfolio/portfolio-desert-dinner-5.webp",
-        ],
-      },
-      {
-        id: "bamboo-bar",
-        title: "Courtyard Bar Setup",
-        category: "Catering & Bar",
-        location: "Urban Estate",
-        guests: "120+ guests",
-        budget: "$130k",
-        span: "col-span-1 row-span-1",
-        description:
-          "A handcrafted bar counter set against a brick wall and tall bamboo — part of the event's catering programme, where the drinks zone was designed as its own space rather than a side table.",
-        review:
-          "«The bar looked like it had stood there for years, not been delivered for one evening.»",
-        client: "Event committee",
-        images: [
-          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
-          "/images/portfolio/portfolio-bamboo-bar-card.webp",
-        ],
-      },
-    ],
-  },
-  esp: {
-    sectionTag: "Casos destacados",
-    heading: "Proyectos Realizados",
-    subtitle:
-      "Desliza las tarjetas para ver los detalles del proyecto y la reseña del cliente.",
-    modalGuests: "Escala:",
-    modalBudget: "Presupuesto:",
-    modalAbout: "Sobre el proyecto:",
-    modalReviewTitle: "Reseña del cliente:",
-    modalBtnText: "Reservar un proyecto similar",
-    items: [
-      {
-        id: "emerald-gala",
-        title: "Recepción de gala esmeralda bajo una carpa",
-        category: "Boda integral",
-        location: "Finca privada",
-        guests: "150+ invitados",
-        budget: "desde $180k",
-        span: "col-span-2 row-span-2",
-        description:
-          "La carpa se vistió por completo en terciopelo y seda esmeralda, hasta los manteles y servilletas de cada mesa, a juego con candelabros de hierro forjado y centros de rosas burdeos y merlot. Una pista con efecto espejo reflejaba la luz, y el escenario con banda en vivo fue el centro de la noche. Montaje completo: drapeado, iluminación, floristería, mobiliario, catering.",
-        review:
-          "«Queríamos una atmósfera, no solo una boda, y eso obtuvimos, hasta en el color de los manteles. Los invitados dicen que parecía una película.»",
-        client: "Michelle y Seon",
-        images: [
-          "/images/portfolio/portfolio-emerald-gala-1.webp",
-          "/images/portfolio/portfolio-emerald-gala-2.webp",
-          "/images/portfolio/portfolio-emerald-gala-3.webp",
-          "/images/portfolio/portfolio-emerald-gala-4.webp",
-        ],
-      },
-      {
-        id: "beach-ceremony",
-        title: "Ceremonia y recepción en la orilla del océano",
-        category: "Ceremonia y recepción",
-        location: "Costa frente al mar",
-        guests: "80+ invitados",
-        budget: "$150k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Un arco de orquídeas y rosas blancas se alzó justo en la arena, junto al agua: los invitados se sentaron en pufs bajos de terciopelo en lugar de sillas, para que nada bloqueara la vista al océano. Tras la ceremonia, los mismos invitados pasaron a mesas redondas más adelante en la playa, con la misma paleta floral, ahora como cena al atardecer.",
-        review:
-          "«Queríamos que el océano fuera el invitado principal de la ceremonia, y el equipo construyó todo alrededor de eso, no de la decoración.»",
-        client: "Anna y Karen",
-        images: [
-          "/images/portfolio/portfolio-beach-ceremony-1.webp",
-          "/images/portfolio/portfolio-beach-ceremony-2.webp",
-          "/images/portfolio/portfolio-beach-ceremony-3.webp",
-          "/images/portfolio/portfolio-beach-ceremony-4.webp",
-          "/images/portfolio/portfolio-beach-ceremony-5.webp",
-        ],
-      },
-      {
-        id: "purple-estate",
-        title: "Boda en una finca: lounge de día, baile de noche",
-        category: "Decoración y floristería",
-        location: "Finca de campo",
-        guests: "100+ invitados",
-        budget: "$120k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Una misma finca, dos looks: de día, cortinas lilas bajo un techo transparente, sillas de ratán y una zona lounge junto a la pérgola para el cóctel; de noche, el mismo lugar se convertía en pista de baile con iluminación arquitectónica púrpura. Un pastel de cinco pisos sobre un pedestal de aliums fue el punto focal de fotos durante todo el día.",
-        review:
-          "«Lo que más nos impactó es que el mismo lugar parecía dos eventos distintos, de día y de noche. No hubo que mover nada.»",
-        client: "Maria K.",
-        images: [
-          "/images/portfolio/portfolio-purple-estate-1.webp",
-          "/images/portfolio/portfolio-purple-estate-2.webp",
-          "/images/portfolio/portfolio-purple-estate-3.webp",
-          "/images/portfolio/portfolio-purple-estate-4.webp",
-          "/images/portfolio/portfolio-purple-estate-5.webp",
-        ],
-      },
-      {
-        id: "oak-reception",
-        title: "Cena bajo robles centenarios",
-        category: "Boda integral",
-        location: "Finca histórica",
-        guests: "120+ invitados",
-        budget: "desde $200k",
-        span: "col-span-2 row-span-1",
-        description:
-          "La carpa de techo transparente se ubicó de modo que la copa de robles centenarios cubiertos de musgo español formara parte del interior, no un telón de fondo fuera de él. Los invitados cenaron en mesas largas bajo las ramas, con faroles marroquíes y una cadena de bombillas colgando entre el follaje: la luz de la carpa se filtraba entre ellas de una forma que ningún decorado artificial podría replicar.",
-        review:
-          "«Elegimos el lugar por estos árboles, y el equipo no los escondió detrás de una carpa: construyó la velada alrededor de ellos.»",
-        client: "Emily y Jackson",
-        images: [
-          "/images/portfolio/portfolio-oak-reception-1.webp",
-          "/images/portfolio/portfolio-oak-reception-2.webp",
-          "/images/portfolio/portfolio-oak-reception-3.webp",
-          "/images/portfolio/portfolio-oak-reception-4.webp",
-        ],
-      },
-      {
-        id: "desert-dinner",
-        title: "Cena de gala en el desierto",
-        category: "Velada privada",
-        location: "Desierto",
-        guests: "16 invitados",
-        budget: "$60k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Una cena íntima instalada sobre una duna: carpas tipo pagoda con luces, mantelería burdeos, alfombras y música en vivo bajo el cielo abierto. Un formato para quienes valoran la cercanía entre invitados por encima de la escala, con brindis, corte de pastel y baile directamente sobre la arena.",
-        review:
-          "«Quince personas que amamos, música en vivo y el desierto en lugar de un salón: una velada perfecta.»",
-        client: "Daria y Nikita",
-        images: [
-          "/images/portfolio/portfolio-desert-dinner-1.webp",
-          "/images/portfolio/portfolio-desert-dinner-2.webp",
-          "/images/portfolio/portfolio-desert-dinner-3.webp",
-          "/images/portfolio/portfolio-desert-dinner-4.webp",
-          "/images/portfolio/portfolio-desert-dinner-5.webp",
-        ],
-      },
-      {
-        id: "bamboo-bar",
-        title: "Barra en el patio interior",
-        category: "Catering y barra",
-        location: "Residencia urbana",
-        guests: "120+ invitados",
-        budget: "$130k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Una barra artesanal contra un muro de ladrillo y bambú alto: parte del programa de catering del evento, donde la zona de bebidas se diseñó como un espacio propio y no como una mesa auxiliar.",
-        review:
-          "«La barra parecía llevar años ahí, no haber llegado para una sola noche.»",
-        client: "Comité organizador",
-        images: [
-          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
-          "/images/portfolio/portfolio-bamboo-bar-card.webp",
-        ],
-      },
-    ],
-  },
-  arm: {
-    sectionTag: "Ընտրված գործեր",
-    heading: "Իրականացված նախագծեր",
-    subtitle:
-      "Սահեցրեք քարտերը՝ նախագծի մանրամասները և հաճախորդի կարծիքը տեսնելու համար:",
-    modalGuests: "Մասշտաբ՝",
-    modalBudget: "Բյուջե՝",
-    modalAbout: "Նախագծի մասին՝",
-    modalReviewTitle: "Հաճախորդի կարծիքը՝",
-    modalBtnText: "Ամրագրել նմանատիպ նախագիծ",
-    items: [
-      {
-        id: "emerald-gala",
-        title: "Զմրուխտագույն գալա-երեկույթ վրանի տակ",
-        category: "Հարսանիք բանալի ձեռքին",
-        location: "Մասնավոր կալվածք",
-        guests: "150+ հյուր",
-        budget: "$180k-ից",
-        span: "col-span-2 row-span-2",
-        description:
-          "Վրանն ամբողջությամբ ձևավորվեց զմրուխտագույն թավշով և մետաքսով՝ ներառյալ սեղանապատերն ու անձեռոցիկները յուրաքանչյուր սեղանի վրա, ներդաշնակ դարբնոցային մոմակալների և բորդո վարդերի կոմպոզիցիաների հետ։ Հայելային տպագրությամբ պարահրապարակն արտացոլում էր լույսը, իսկ կենդանի խմբի բեմը դարձավ երեկոյի կենտրոնը։",
-        review:
-          "«Ուզում էինք ոչ թե պարզապես հարսանիք, այլ մթնոլորտ, և ստացանք հենց դա՝ մինչև սեղանապատերի գույնը։ Հյուրերն ասում են, որ նման էր կինոնկարի։»",
-        client: "Միշել և Սեոն",
-        images: [
-          "/images/portfolio/portfolio-emerald-gala-1.webp",
-          "/images/portfolio/portfolio-emerald-gala-2.webp",
-          "/images/portfolio/portfolio-emerald-gala-3.webp",
-          "/images/portfolio/portfolio-emerald-gala-4.webp",
-        ],
-      },
-      {
-        id: "beach-ceremony",
-        title: "Արարողություն և ընդունելություն օվկիանոսի ափին",
-        category: "Արարողություն և ընդունելություն",
-        location: "Առափնյա գոտի",
-        guests: "80+ հյուր",
-        budget: "$150k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Սպիտակ որխիդեաներից և վարդերից կամարը կանգնեցվեց ուղիղ ավազի վրա՝ ջրի եզրին. հյուրերը նստած էին ցածր թավշյա պուֆերի վրա՝ աթոռների փոխարեն, որպեսզի ոչինչ չփակի օվկիանոսի տեսարանը։ Արարողությունից հետո նույն հյուրերը տեղափոխվեցին կլոր սեղանների մոտ՝ լողափի երկայնքով, նույն ծաղկային գունապնակով, բայց արդեն որպես մայրամուտի ընթրիք։",
-        review:
-          "«Ուզում էինք, որ օվկիանոսը լինի արարողության գլխավոր հյուրը, և թիմը ամեն ինչ կառուցեց դրա շուրջ, ոչ թե դեկորի։»",
-        client: "Աննա և Կարեն",
-        images: [
-          "/images/portfolio/portfolio-beach-ceremony-1.webp",
-          "/images/portfolio/portfolio-beach-ceremony-2.webp",
-          "/images/portfolio/portfolio-beach-ceremony-3.webp",
-          "/images/portfolio/portfolio-beach-ceremony-4.webp",
-          "/images/portfolio/portfolio-beach-ceremony-5.webp",
-        ],
-      },
-      {
-        id: "purple-estate",
-        title: "Հարսանիք կալվածքում՝ լաունջ ցերեկը, պար գիշերը",
-        category: "Դեկոր և ֆլորիստիկա",
-        location: "Գյուղական կալվածք",
-        guests: "100+ հյուր",
-        budget: "$120k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Մեկ կալվածք, երկու տեսք. ցերեկը՝ մանուշակագույն վարագույրներ թափանցիկ ծածկի տակ, հյուսած աթոռներ և լաունջ գոտի բարավորի մոտ՝ կոկտեյլային մասի համար. գիշերը նույն վայրը վերածվում էր պարահրապարակի՝ մանուշակագույն ճարտարապետական լուսավորությամբ։",
-        review:
-          "«Ամենաշատը տպավորեց այն, որ նույն վայրն առավոտյան ու գիշերը երկու տարբեր միջոցառում էր հիշեցնում։ Ոչինչ չէր պահանջվել տեղափոխել։»",
-        client: "Մարիա Կ.",
-        images: [
-          "/images/portfolio/portfolio-purple-estate-1.webp",
-          "/images/portfolio/portfolio-purple-estate-2.webp",
-          "/images/portfolio/portfolio-purple-estate-3.webp",
-          "/images/portfolio/portfolio-purple-estate-4.webp",
-          "/images/portfolio/portfolio-purple-estate-5.webp",
-        ],
-      },
-      {
-        id: "oak-reception",
-        title: "Ընթրիք դարավոր կաղնիների տակ",
-        category: "Հարսանիք բանալի ձեռքին",
-        location: "Պատմական կալվածք",
-        guests: "120+ հյուր",
-        budget: "$200k-ից",
-        span: "col-span-2 row-span-1",
-        description:
-          "Թափանցիկ վրանը տեղադրվեց այնպես, որ իսպանական մամուռով ծածկված դարավոր կաղնիների պսակը դառնա ինտերիերի մաս, ոչ թե ֆոն։ Հյուրերն ընթրում էին երկար սեղանների շուրջ՝ ուղիղ ճյուղերի տակ, մարոկկոյական լապտերներով և կախովի լամպերի շղթայով՝ տերևների միջով։",
-        review:
-          "«Հենց այս ծառերի համար ընտրեցինք հարթակը, և թիմը դրանք չծածկեց վրանով, այլ կառուցեց երեկոն դրանց շուրջ։»",
-        client: "Էմիլի և Ջեքսոն",
-        images: [
-          "/images/portfolio/portfolio-oak-reception-1.webp",
-          "/images/portfolio/portfolio-oak-reception-2.webp",
-          "/images/portfolio/portfolio-oak-reception-3.webp",
-          "/images/portfolio/portfolio-oak-reception-4.webp",
-        ],
-      },
-      {
-        id: "desert-dinner",
-        title: "Գալա-ընթրիք անապատում",
-        category: "Մասնավոր երեկո",
-        location: "Անապատ",
-        guests: "16 հյուր",
-        budget: "$60k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Ինտիմ ընթրիք ավազաբլրի վրա՝ պագոդա-վրաններ լույսերով, բորդո տեքստիլ, գորգեր և կենդանի երաժշտություն բաց երկնքի տակ։ Ձևաչափ նրանց համար, ովքեր կարևորում են հյուրերի մերձեցումը, ոչ թե մասշտաբը՝ կենացով, տորթի կտրմամբ և պարով ուղիղ ավազի վրա։",
-        review:
-          "«Տասնհինգ մարդ, ում սիրում ենք, կենդանի երաժշտություն և անապատը՝ սովորական դահլիճի փոխարեն։ Կատարյալ երեկո։»",
-        client: "Դարիա և Նիկիտա",
-        images: [
-          "/images/portfolio/portfolio-desert-dinner-1.webp",
-          "/images/portfolio/portfolio-desert-dinner-2.webp",
-          "/images/portfolio/portfolio-desert-dinner-3.webp",
-          "/images/portfolio/portfolio-desert-dinner-4.webp",
-          "/images/portfolio/portfolio-desert-dinner-5.webp",
-        ],
-      },
-      {
-        id: "bamboo-bar",
-        title: "Բարային գոտի ներքին բակում",
-        category: "Քեյթերինգ և բար",
-        location: "Քաղաքային առանձնատուն",
-        guests: "120+ հյուր",
-        budget: "$130k",
-        span: "col-span-1 row-span-1",
-        description:
-          "Ձեռագործ բարի պահարան՝ աղյուսե պատի և բարձր բամբուկի ֆոնին. խմիչքների գոտին նախագծված է որպես առանձին տարածք, ոչ թե կողային սեղան։",
-        review:
-          "«Բարը կարծես տարիներ շարունակ այնտեղ էր կանգնած, ոչ թե բերված մեկ երեկոյի համար։»",
-        client: "Կազմակերպչական խումբ",
-        images: [
-          "/images/portfolio/portfolio-bamboo-bar-hero.webp",
-          "/images/portfolio/portfolio-bamboo-bar-card.webp",
-        ],
-      },
-    ],
-  },
-}[lang as "ru" | "eng" | "esp" | "arm"] || {
-  sectionTag: "Избранные кейсы",
-  heading: "Реализованные проекты",
-  subtitle:
-    "Листайте карточки, чтобы посмотреть детали проектов и отзывы клиентов.",
-  modalGuests: "Масштаб:",
-  modalBudget: "Бюджет:",
-  modalAbout: "О проекте:",
-  modalReviewTitle: "Отзыв клиента:",
-  modalBtnText: "Забронировать похожий проект",
-  items: [],
+type FormatItem = {
+  id: string;
+  title: string;
+  format: string;
+  location: string;
+  description: string;
+  guests: string;
+  budget: string;
+  hasBeforeAfter: boolean;
+  before?: string[];
+  after?: string[];
+  images: string[];
 };
 
+const t = {
+  ru: {
+    sectionTag: "Форматы",
+    heading: "Атмосфера и форматы",
+    subtitle:
+      "Реальные решения, которые мы собираем для свадеб, корпоративов и частных вечеров. Без выдуманных историй — только настроение и то, что можем сделать.",
+    beforeLabel: "До",
+    afterLabel: "После",
+    cta: "Запросить похожее",
+    modalAbout: "О формате",
+    modalGuests: "Гости (ориентир)",
+    modalBudget: "Бюджет (ориентир)",
+    modalDisclaimer: "Цифры примерные, для ознакомления. Итоговая смета зависит от локации, сезона и состава услуг.",
+    modalBtnText: "Запросить похожее",
+    items: [
+      {
+        id: "tent",
+        title: "Шатёр под ключ",
+        format: "Шатёр",
+        location: "Ереван",
+        description:
+          "Монтаж пола, каркаса и покрытия — и готовое пространство с декором, светом и мебелью. От пустой площадки до вечернего приёма.",
+        guests: "40–120",
+        budget: "от $450 / сутки",
+        hasBeforeAfter: true,
+        before: [
+          "/images/formats/tent/before-1.jpg",
+          "/images/formats/tent/before-2.jpg",
+        ],
+        after: [
+          "/images/formats/tent/after-1.jpg",
+          "/images/formats/tent/after-2.jpg",
+        ],
+        images: [
+          "/images/formats/tent/before-1.jpg",
+          "/images/formats/tent/before-2.jpg",
+          "/images/formats/tent/after-1.jpg",
+          "/images/formats/tent/after-2.jpg",
+        ],
+      },
+      {
+        id: "tablesetting",
+        title: "Сервировка стола",
+        format: "Сервировка",
+        location: "Ереван",
+        description:
+          "Скатерти, посуда, флористика и текстиль в единой палитре. От камерного ужина до длинных семейных столов.",
+        guests: "12–80",
+        budget: "от $55 / гость",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/tablesetting/1.jpg",
+          "/images/formats/tablesetting/2.jpg",
+          "/images/formats/tablesetting/3.jpg",
+          "/images/formats/tablesetting/4.jpg",
+        ],
+      },
+      {
+        id: "light",
+        title: "Свет и атмосфера",
+        format: "Свет",
+        location: "Тбилиси",
+        description:
+          "Архитектурная подсветка, гирлянды, споты и цвет. Днём нейтрально — вечером другой характер пространства.",
+        guests: "30–150",
+        budget: "от $800 / проект",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/light/1.jpg",
+          "/images/formats/light/2.jpg",
+          "/images/formats/light/3.jpg",
+          "/images/formats/light/4.jpg",
+        ],
+      },
+      {
+        id: "openair",
+        title: "Open-air",
+        format: "Open-air",
+        location: "Бали",
+        description:
+          "Площадка на природе или во дворе: прозрачный шатёр, мебель, флористика. Работаем с видом, а не против него.",
+        guests: "40–100",
+        budget: "от $3 500 / проект",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/openair/1.jpg",
+          "/images/formats/openair/2.jpg",
+          "/images/formats/openair/3.jpg",
+          "/images/formats/openair/4.jpg",
+        ],
+      },
+      {
+        id: "decor",
+        title: "Декор и флористика",
+        format: "Декор",
+        location: "Ереван",
+        description:
+          "Композиции на столах, арки, инсталляции. Палитра под локацию и формат — от минимализма до насыщенных букетов.",
+        guests: "20–120",
+        budget: "от $1 200 / проект",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/decor/1.jpg",
+          "/images/formats/decor/2.jpg",
+          "/images/formats/decor/3.jpg",
+          "/images/formats/decor/4.jpg",
+        ],
+      },
+      {
+        id: "bar",
+        title: "Бар и лаунж",
+        format: "Бар",
+        location: "Прага",
+        description:
+          "Барная стойка, мягкая зона, освещение. Пространство, где гости проводят время между основной программой.",
+        guests: "30–100",
+        budget: "от $600 / вечер",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/bar/1.jpg",
+          "/images/formats/bar/2.jpg",
+          "/images/formats/bar/3.jpg",
+          "/images/formats/bar/4.jpg",
+        ],
+      },
+      {
+        id: "evening",
+        title: "Вечерняя атмосфера",
+        format: "Вечер",
+        location: "Ереван",
+        description:
+          "Танцпол, свет, живая музыка. Момент, когда формат перестаёт быть «расстановкой» и становится праздником.",
+        guests: "50–150",
+        budget: "от $2 000 / проект",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/evening/1.jpg",
+          "/images/formats/evening/2.jpg",
+          "/images/formats/evening/3.jpg",
+          "/images/formats/evening/4.jpg",
+        ],
+      },
+    ] as FormatItem[],
+  },
+  eng: {
+    sectionTag: "Formats",
+    heading: "Atmosphere & Formats",
+    subtitle:
+      "Real setups we build for weddings, corporates and private evenings. No made-up stories — just mood and what we can deliver.",
+    beforeLabel: "Before",
+    afterLabel: "After",
+    cta: "Request similar",
+    modalAbout: "About the format",
+    modalGuests: "Guests (approx.)",
+    modalBudget: "Budget (approx.)",
+    modalDisclaimer: "Figures are approximate, for reference only. Final quote depends on location, season and service mix.",
+    modalBtnText: "Request similar",
+    items: [
+      {
+        id: "tent",
+        title: "Turnkey Tent",
+        format: "Tent",
+        location: "Yerevan",
+        description:
+          "Floor, frame and cover install — then a finished space with decor, light and furniture. From empty site to evening reception.",
+        guests: "40–120",
+        budget: "from $450 / day",
+        hasBeforeAfter: true,
+        before: [
+          "/images/formats/tent/before-1.jpg",
+          "/images/formats/tent/before-2.jpg",
+        ],
+        after: [
+          "/images/formats/tent/after-1.jpg",
+          "/images/formats/tent/after-2.jpg",
+        ],
+        images: [
+          "/images/formats/tent/before-1.jpg",
+          "/images/formats/tent/before-2.jpg",
+          "/images/formats/tent/after-1.jpg",
+          "/images/formats/tent/after-2.jpg",
+        ],
+      },
+      {
+        id: "tablesetting",
+        title: "Table Setting",
+        format: "Table setting",
+        location: "Yerevan",
+        description:
+          "Linens, tableware, florals and textiles in one palette. From an intimate dinner to long family tables.",
+        guests: "12–80",
+        budget: "from $55 / guest",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/tablesetting/1.jpg",
+          "/images/formats/tablesetting/2.jpg",
+          "/images/formats/tablesetting/3.jpg",
+          "/images/formats/tablesetting/4.jpg",
+        ],
+      },
+      {
+        id: "light",
+        title: "Light & Atmosphere",
+        format: "Light",
+        location: "Tbilisi",
+        description:
+          "Architectural lighting, string lights, spots and colour. Neutral by day — a different character by night.",
+        guests: "30–150",
+        budget: "from $800 / project",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/light/1.jpg",
+          "/images/formats/light/2.jpg",
+          "/images/formats/light/3.jpg",
+          "/images/formats/light/4.jpg",
+        ],
+      },
+      {
+        id: "openair",
+        title: "Open-air",
+        format: "Open-air",
+        location: "Bali",
+        description:
+          "Outdoor or courtyard site: clear tent, furniture, florals. We work with the view, not against it.",
+        guests: "40–100",
+        budget: "from $3,500 / project",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/openair/1.jpg",
+          "/images/formats/openair/2.jpg",
+          "/images/formats/openair/3.jpg",
+          "/images/formats/openair/4.jpg",
+        ],
+      },
+      {
+        id: "decor",
+        title: "Decor & Florals",
+        format: "Decor",
+        location: "Yerevan",
+        description:
+          "Table arrangements, arches, installations. Palette matched to the venue and format.",
+        guests: "20–120",
+        budget: "from $1,200 / project",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/decor/1.jpg",
+          "/images/formats/decor/2.jpg",
+          "/images/formats/decor/3.jpg",
+          "/images/formats/decor/4.jpg",
+        ],
+      },
+      {
+        id: "bar",
+        title: "Bar & Lounge",
+        format: "Bar",
+        location: "Prague",
+        description:
+          "Bar counter, soft seating, lighting. A space where guests spend time between the main programme.",
+        guests: "30–100",
+        budget: "from $600 / evening",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/bar/1.jpg",
+          "/images/formats/bar/2.jpg",
+          "/images/formats/bar/3.jpg",
+          "/images/formats/bar/4.jpg",
+        ],
+      },
+      {
+        id: "evening",
+        title: "Evening Atmosphere",
+        format: "Evening",
+        location: "Yerevan",
+        description:
+          "Dance floor, light, live music. The moment the setup becomes a celebration.",
+        guests: "50–150",
+        budget: "from $2,000 / project",
+        hasBeforeAfter: false,
+        images: [
+          "/images/formats/evening/1.jpg",
+          "/images/formats/evening/2.jpg",
+          "/images/formats/evening/3.jpg",
+          "/images/formats/evening/4.jpg",
+        ],
+      },
+    ] as FormatItem[],
+  },
+} as const;
+
+const dict = (t as Record<string, typeof t.ru>)[lang] || t.ru;
 const bookingHref = `/${lang}/booking`;
 ---
 
-<section id="portfolio" class="portfolio-section" lang={lang}>
+<section id="portfolio" class="formats-section" lang={lang}>
   <div class="container">
     <div class="section-header">
-      <span class="section-tag">{t.sectionTag}</span>
-      <h2 class="font-serif">{t.heading}</h2>
-      <p class="subtitle font-light">{t.subtitle}</p>
+      <span class="section-tag">{dict.sectionTag}</span>
+      <h2 class="font-serif">{dict.heading}</h2>
+      <p class="subtitle font-light">{dict.subtitle}</p>
     </div>
 
-    <div class="portfolio-swiper-wrap">
-      <div class="portfolio-nav">
-        <button
-          class="portfolio-nav-btn portfolio-nav-prev"
-          type="button"
-          aria-label="Предыдущий кейс"
-        >
+    <div class="formats-swiper-wrap">
+      <div class="formats-nav">
+        <button class="formats-nav-btn formats-nav-prev" type="button" aria-label="Prev">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-
-        <div class="portfolio-pagination"></div>
-
-        <button
-          class="portfolio-nav-btn portfolio-nav-next"
-          type="button"
-          aria-label="Следующий кейс"
-        >
+        <div class="formats-pagination"></div>
+        <button class="formats-nav-btn formats-nav-next" type="button" aria-label="Next">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
@@ -601,84 +346,87 @@ const bookingHref = `/${lang}/booking`;
           slidesPerView: 1,
           spaceBetween: 24,
           allowTouchMove: true,
-          navigation: {
-            prevEl: '.portfolio-nav-prev',
-            nextEl: '.portfolio-nav-next',
-          },
-          pagination: {
-            el: '.portfolio-pagination',
-            clickable: true,
-          },
+          navigation: { prevEl: ".formats-nav-prev", nextEl: ".formats-nav-next" },
+          pagination: { el: ".formats-pagination", clickable: true },
           loop: false,
           grabCursor: false,
-          breakpoints: {
-            0: { allowTouchMove: true },
-            901: { allowTouchMove: false },
-          },
+          breakpoints: { 0: { allowTouchMove: true }, 901: { allowTouchMove: false } },
         }}
       >
         <SwiperWrapper>
           {
-            t.items.map((item) => (
+            dict.items.map((item) => (
               <SwiperSlide>
                 <article
-                  class="case-card"
+                  class="format-card"
                   role="button"
                   tabindex="0"
                   aria-label={item.title}
                   data-title={item.title}
-                  data-category={item.category}
+                  data-format={item.format}
                   data-location={item.location}
+                  data-description={item.description}
                   data-guests={item.guests}
                   data-budget={item.budget}
-                  data-description={item.description}
-                  data-review={item.review}
-                  data-client={item.client}
-                  data-image={item.images[0]}
                   data-images={JSON.stringify(item.images)}
                 >
-                  <div class="case-gallery" data-count={item.images.length}>
-                    {item.images.map((img, idx) => (
-                      <div class="case-image">
-                        <img
-                          src={img}
-                          alt={`${item.title} — фото ${idx + 1}`}
-                          loading="lazy"
-                        />
-                        <span class="photo-counter">
-                          {idx + 1} / {item.images.length}
-                        </span>
+                  {item.hasBeforeAfter && item.before && item.after ? (
+                    <div class="ba-grid">
+                      <div class="ba-col ba-before">
+                        <span class="ba-label">{dict.beforeLabel}</span>
+                        <div class="ba-photos">
+                          {item.before.map((src, i) => (
+                            <div class="ba-photo">
+                              <img src={src} alt={`${item.title} — ${dict.beforeLabel} ${i + 1}`} loading="lazy" />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                      <div class="ba-col ba-after">
+                        <span class="ba-label">{dict.afterLabel}</span>
+                        <div class="ba-photos">
+                          {item.after.map((src, i) => (
+                            <div class="ba-photo">
+                              <img src={src} alt={`${item.title} — ${dict.afterLabel} ${i + 1}`} loading="lazy" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div class={`photo-grid count-${Math.min(item.images.length, 4)}`}>
+                      {item.images.slice(0, 4).map((src, i) => (
+                        <div class="grid-photo">
+                          <img src={src} alt={`${item.title} — ${i + 1}`} loading="lazy" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                  <div class="case-info">
-                    <div class="case-top">
-                      <span class="card-category">{item.category}</span>
+                  <div class="format-info">
+                    <div class="format-top">
+                      <span class="card-format">{item.format}</span>
                       <span class="card-location">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                      {item.location}
-                    </span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        {item.location}
+                      </span>
                     </div>
 
                     <h3 class="font-serif">{item.title}</h3>
+                    <p class="format-description">{item.description}</p>
 
-                    <p class="case-description">{item.description}</p>
-
-                    <div class="case-meta">
-                      <span>
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <div class="format-meta" title={dict.modalDisclaimer}>
+                      <span class="meta-item">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         {item.guests}
                       </span>
-                      <span>
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                        {item.budget}
-                      </span>
+                      <span class="meta-dot">·</span>
+                      <span class="meta-item meta-budget">{item.budget}</span>
                     </div>
 
-                    <div class="case-cta">
-                      <span>Подробнее</span>
-                      <span class="case-arrow">→</span>
+                    <div class="format-cta">
+                      <span>{dict.cta}</span>
+                      <span class="format-arrow">→</span>
                     </div>
                   </div>
                 </article>
@@ -691,85 +439,53 @@ const bookingHref = `/${lang}/booking`;
   </div>
 </section>
 
-<div class="portfolio-modal-overlay" id="portfolio-modal" aria-hidden="true">
-  <div class="portfolio-modal-content" role="dialog" aria-modal="true">
-    <button
-      class="modal-close"
-      id="close-portfolio-modal"
-      type="button"
-      aria-label="Close"
-    >
-      &times;
-    </button>
+<div class="formats-modal-overlay" id="formats-modal" aria-hidden="true">
+  <div class="formats-modal-content" role="dialog" aria-modal="true">
+    <button class="modal-close" id="close-formats-modal" type="button" aria-label="Close">&times;</button>
 
     <div class="modal-gallery">
       <div class="modal-gallery-track" data-modal-track></div>
-
-      <button
-        class="modal-gallery-arrow modal-gallery-prev"
-        type="button"
-        aria-label="Предыдущее фото"
-        data-modal-prev
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+      <button class="modal-gallery-arrow modal-gallery-prev" type="button" data-modal-prev aria-label="Prev">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
-
-      <button
-        class="modal-gallery-arrow modal-gallery-next"
-        type="button"
-        aria-label="Следующее фото"
-        data-modal-next
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+      <button class="modal-gallery-arrow modal-gallery-next" type="button" data-modal-next aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
-
       <div class="modal-gallery-indicator">
         <span class="modal-gallery-dots" data-modal-dots></span>
         <span class="modal-gallery-counter">
-          <span data-modal-current>1</span>
-          <span class="modal-gallery-counter-sep">/</span>
-          <span data-modal-total>1</span>
+          <span data-modal-current>1</span><span class="modal-gallery-counter-sep">/</span><span data-modal-total>1</span>
         </span>
       </div>
-
-      <span class="modal-tag" id="modal-category">Категория</span>
+      <span class="modal-tag" id="modal-format">Формат</span>
     </div>
 
     <div class="modal-body">
-      <h2 id="modal-title" class="font-serif">Название проекта</h2>
+      <h2 id="modal-title" class="font-serif">Название</h2>
       <p class="modal-location">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
         <span id="modal-location">Локация</span>
       </p>
 
-      <div class="modal-info-grid">
+      <div class="modal-meta-row">
         <div>
-          <span>{t.modalGuests}</span>
-          <strong id="modal-guests">-</strong>
+          <span class="meta-label">{dict.modalGuests}</span>
+          <strong id="modal-guests">—</strong>
         </div>
         <div>
-          <span>{t.modalBudget}</span>
-          <strong id="modal-budget">-</strong>
+          <span class="meta-label">{dict.modalBudget}</span>
+          <strong id="modal-budget">—</strong>
         </div>
       </div>
+      <p class="modal-disclaimer">{dict.modalDisclaimer}</p>
 
       <div class="modal-section">
-        <h4>{t.modalAbout}</h4>
+        <h4>{dict.modalAbout}</h4>
         <p id="modal-description">Описание...</p>
       </div>
 
-      <div class="modal-review-box">
-        <h4>{t.modalReviewTitle}</h4>
-        <p id="modal-review">«Отзыв»</p>
-        <span class="modal-client" id="modal-client">Имя клиента</span>
-      </div>
-
       <div class="modal-footer">
-        <a href={bookingHref} class="modal-book-btn">{t.modalBtnText}</a>
+        <a href={bookingHref} class="modal-book-btn">{dict.modalBtnText}</a>
       </div>
     </div>
   </div>
@@ -780,19 +496,16 @@ const bookingHref = `/${lang}/booking`;
   set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: t.heading,
-    itemListElement: t.items.map((item, i) => ({
+    name: dict.heading,
+    itemListElement: dict.items.map((item, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
         "@type": "CreativeWork",
         name: item.title,
         description: item.description,
-        about: item.category,
-        locationCreated: {
-          "@type": "Place",
-          name: item.location,
-        },
+        about: item.format,
+        locationCreated: { "@type": "Place", name: item.location },
         image: `${SITE_URL}${item.images[0]}`,
       },
     })),
@@ -800,24 +513,20 @@ const bookingHref = `/${lang}/booking`;
 />
 
 <script is:inline>
-  /* ==== Модалка с галереей ==== */
-  function initPortfolioModal() {
-    const cards = document.querySelectorAll(".case-card");
-    const modal = document.getElementById("portfolio-modal");
-    const closeBtn = document.getElementById("close-portfolio-modal");
+  function initFormatsModal() {
+    const cards = document.querySelectorAll(".format-card");
+    const modal = document.getElementById("formats-modal");
+    const closeBtn = document.getElementById("close-formats-modal");
     if (!modal || !closeBtn) return;
-    if (modal.dataset.portfolioBound === "1") return;
-    modal.dataset.portfolioBound = "1";
+    if (modal.dataset.formatsBound === "1") return;
+    modal.dataset.formatsBound = "1";
 
     const mTitle = document.getElementById("modal-title");
-    const mCategory = document.getElementById("modal-category");
+    const mFormat = document.getElementById("modal-format");
     const mLocation = document.getElementById("modal-location");
     const mGuests = document.getElementById("modal-guests");
     const mBudget = document.getElementById("modal-budget");
     const mDescription = document.getElementById("modal-description");
-    const mReview = document.getElementById("modal-review");
-    const mClient = document.getElementById("modal-client");
-
     const track = modal.querySelector("[data-modal-track]");
     const prevBtn = modal.querySelector("[data-modal-prev]");
     const nextBtn = modal.querySelector("[data-modal-next]");
@@ -839,9 +548,7 @@ const bookingHref = `/${lang}/booking`;
       const total = slideCount();
       if (curEl) curEl.textContent = String(total ? i + 1 : 0);
       if (totalEl) totalEl.textContent = String(total);
-      if (dotsWrap) {
-        Array.from(dotsWrap.children).forEach((d, k) => d.classList.toggle("is-active", k === i));
-      }
+      if (dotsWrap) Array.from(dotsWrap.children).forEach((d, k) => d.classList.toggle("is-active", k === i));
       if (prevBtn) prevBtn.disabled = i <= 0;
       if (nextBtn) nextBtn.disabled = i >= total - 1;
     }
@@ -852,23 +559,18 @@ const bookingHref = `/${lang}/booking`;
       track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
       setActive(i);
     }
-    function next() { goTo(currentIndex() + 1); }
-    function prev() { goTo(currentIndex() - 1); }
 
     function refreshNav(total) {
       const single = total <= 1;
       if (prevBtn) prevBtn.style.display = single ? "none" : "";
       if (nextBtn) nextBtn.style.display = single ? "none" : "";
       if (indicator) indicator.style.display = single ? "none" : "";
-      if (totalEl) totalEl.textContent = String(total);
-      if (curEl) curEl.textContent = total ? "1" : "0";
       if (dotsWrap) {
         dotsWrap.innerHTML = "";
         for (let k = 0; k < total; k++) {
           const dot = document.createElement("button");
           dot.type = "button";
           dot.className = "modal-gallery-dot" + (k === 0 ? " is-active" : "");
-          dot.setAttribute("aria-label", "Photo " + (k + 1));
           dot.addEventListener("click", () => goTo(k));
           dotsWrap.appendChild(dot);
         }
@@ -896,19 +598,14 @@ const bookingHref = `/${lang}/booking`;
 
     function openFromCard(card) {
       mTitle.textContent = card.dataset.title || "";
-      mCategory.textContent = card.dataset.category || "";
+      mFormat.textContent = card.dataset.format || "";
       mLocation.textContent = card.dataset.location || "";
-      mGuests.textContent = card.dataset.guests || "";
-      mBudget.textContent = card.dataset.budget || "";
+      mGuests.textContent = card.dataset.guests || "—";
+      mBudget.textContent = card.dataset.budget || "—";
       mDescription.textContent = card.dataset.description || "";
-      mReview.textContent = card.dataset.review || "";
-      mClient.textContent = card.dataset.client || "";
-
       let images = [];
-      try { images = JSON.parse(card.dataset.images || "[]"); } catch (e) { images = []; }
-      if (!images.length && card.dataset.image) images = [card.dataset.image];
+      try { images = JSON.parse(card.dataset.images || "[]"); } catch (e) {}
       buildGallery(images);
-
       modal.classList.add("active");
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -920,38 +617,23 @@ const bookingHref = `/${lang}/booking`;
       document.body.style.overflow = "";
     }
 
-    if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prev(); });
-    if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); next(); });
-
+    if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); goTo(currentIndex() - 1); });
+    if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); goTo(currentIndex() + 1); });
     if (track) {
-      let scrollT = null;
+      let t = null;
       track.addEventListener("scroll", () => {
-        if (scrollT) clearTimeout(scrollT);
-        scrollT = setTimeout(() => setActive(currentIndex()), 80);
+        if (t) clearTimeout(t);
+        t = setTimeout(() => setActive(currentIndex()), 80);
       }, { passive: true });
-
-      let downX = 0, downY = 0, dragging = false;
-      track.addEventListener("pointerdown", (e) => {
-        downX = e.clientX; downY = e.clientY; dragging = false;
-      });
-      track.addEventListener("pointermove", (e) => {
-        if (Math.abs(e.clientX - downX) > 8 || Math.abs(e.clientY - downY) > 8) dragging = true;
-      });
-      track.addEventListener("click", (e) => {
-        if (dragging) return;
-        if (!e.target.closest("img")) return;
-        if (slideCount() <= 1) return;
-        next();
-      });
     }
 
     cards.forEach((card) => {
       if (card.dataset.modalInit === "1") return;
       card.dataset.modalInit = "1";
-      let startX = 0, startY = 0, moved = false;
-      card.addEventListener("pointerdown", (e) => { startX = e.clientX; startY = e.clientY; moved = false; });
+      let sx = 0, sy = 0, moved = false;
+      card.addEventListener("pointerdown", (e) => { sx = e.clientX; sy = e.clientY; moved = false; });
       card.addEventListener("pointermove", (e) => {
-        if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) moved = true;
+        if (Math.abs(e.clientX - sx) > 8 || Math.abs(e.clientY - sy) > 8) moved = true;
       });
       card.addEventListener("click", () => { if (!moved) openFromCard(card); });
       card.addEventListener("keydown", (e) => {
@@ -964,92 +646,20 @@ const bookingHref = `/${lang}/booking`;
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
   }
 
-  /**
-   * На мобилке в карточке видно только первое фото (grid схлопнут в block + overflow:hidden).
-   * Циклически показываем следующие кадры внутри .case-gallery.
-   */
-  function initGalleryAutoScroll() {
-    const galleries = document.querySelectorAll(".case-gallery");
-    if (!galleries.length) return;
-
-    const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
-
-    galleries.forEach((gallery) => {
-      if (gallery.dataset.autoInit === "1") return;
-      gallery.dataset.autoInit = "1";
-
-      const images = Array.from(gallery.querySelectorAll(".case-image"));
-      if (images.length <= 1) return;
-
-      let idx = 0;
-      let timer = null;
-
-      const show = (i) => {
-        images.forEach((el, n) => {
-          el.style.display = n === i ? "block" : "none";
-        });
-        const counter = images[i]?.querySelector(".photo-counter");
-        // counters hidden on mobile by CSS; no-op
-      };
-
-      const start = () => {
-        if (!isMobile()) {
-          images.forEach((el) => { el.style.display = ""; });
-          if (timer) { clearInterval(timer); timer = null; }
-          return;
-        }
-        show(0);
-        if (timer) clearInterval(timer);
-        timer = setInterval(() => {
-          if (!isMobile()) return;
-          idx = (idx + 1) % images.length;
-          show(idx);
-        }, 3200);
-      };
-
-      // Pause when card not visible / tab hidden
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden && timer) { clearInterval(timer); timer = null; }
-        else start();
-      });
-
-      start();
-      window.addEventListener("resize", () => {
-        // debounce lightly
-        clearTimeout(gallery._resizeT);
-        gallery._resizeT = setTimeout(start, 150);
-      });
-    });
-  }
-
-  function bootPortfolio() {
-    initPortfolioModal();
-    initGalleryAutoScroll();
-  }
-
-  document.addEventListener("DOMContentLoaded", bootPortfolio);
-  document.addEventListener("astro:page-load", bootPortfolio);
-  bootPortfolio();
+  function boot() { initFormatsModal(); }
+  document.addEventListener("DOMContentLoaded", boot);
+  document.addEventListener("astro:page-load", boot);
+  boot();
 </script>
 
 <style>
-  .portfolio-section {
+  .formats-section {
     padding: 6rem 0;
     background: #f7faf9;
     color: var(--fg, #04100d);
   }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 3.5rem;
-  }
-
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+  .section-header { text-align: center; margin-bottom: 3.5rem; }
   .section-tag {
     display: inline-block;
     background: rgba(13, 148, 136, 0.1);
@@ -1063,292 +673,172 @@ const bookingHref = `/${lang}/booking`;
     margin-bottom: 1rem;
     border: 1px solid rgba(13, 148, 136, 0.2);
   }
-
   .section-header h2 {
     font-size: clamp(2rem, 4vw, 2.75rem);
     color: var(--fg, #04100d);
     margin-bottom: 0.75rem;
     font-weight: 500;
   }
-
   .subtitle {
     color: var(--fg-soft, rgba(4, 16, 13, 0.72));
     font-size: 1.05rem;
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
     line-height: 1.6;
   }
 
-  /* Навигация над кейсами */
-  .portfolio-swiper-wrap {
-    width: 100%;
-    position: relative;
-  }
-
-  .portfolio-nav {
-    width: 100%;
+  .formats-swiper-wrap { width: 100%; position: relative; }
+  .formats-nav {
     display: flex !important;
     align-items: center;
     justify-content: center;
     gap: 1.75rem;
     margin: 0 auto 2rem;
-    padding: 0;
-    box-sizing: border-box;
   }
-
-  .portfolio-nav-btn {
-    flex: 0 0 auto;
-    width: 58px;
-    height: 58px;
+  .formats-nav-btn {
+    width: 58px; height: 58px;
     border-radius: 50%;
     border: 1px solid rgba(13, 148, 136, 0.22);
-    background: linear-gradient(180deg, #ffffff 0%, #eaf2f0 100%);
+    background: linear-gradient(180deg, #fff 0%, #eaf2f0 100%);
     color: #0d9488;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    padding: 0;
     cursor: pointer;
-    position: relative;
-    margin: 0 !important;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 1),
-      inset 0 -3px 6px rgba(13, 148, 136, 0.10),
-      0 10px 22px -10px rgba(13, 148, 136, 0.55),
-      0 4px 10px -3px rgba(10, 40, 34, 0.12);
-    transition:
-      transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      background 0.28s ease,
-      color 0.28s ease;
-    -webkit-tap-highlight-color: transparent;
-    transform: translateZ(0);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 22px -10px rgba(13, 148, 136, 0.55);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
   }
-
-  .portfolio-nav-btn svg {
-    width: 20px;
-    height: 20px;
-    display: block;
-    stroke: currentColor;
-    transition: transform 0.28s ease;
-  }
-
-  .portfolio-nav-btn:hover:not(.swiper-button-disabled) {
+  .formats-nav-btn svg { width: 20px; height: 20px; }
+  .formats-nav-btn:hover:not(.swiper-button-disabled) {
     transform: translateY(-4px) scale(1.04);
-    color: #0f766e;
-    background: linear-gradient(180deg, #ffffff 0%, #e0ebe8 100%);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 1),
-      inset 0 -3px 6px rgba(13, 148, 136, 0.14),
-      0 18px 36px -12px rgba(13, 148, 136, 0.65),
-      0 8px 16px -5px rgba(10, 40, 34, 0.16);
   }
-
-  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-prev svg { transform: translateX(-2px); }
-  .portfolio-nav-btn:hover:not(.swiper-button-disabled).portfolio-nav-next svg { transform: translateX(2px); }
-
-  .portfolio-nav-btn:active:not(.swiper-button-disabled) {
-    transform: translateY(-1px) scale(0.97);
-    box-shadow:
-      inset 0 2px 6px rgba(13, 148, 136, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      0 4px 10px -4px rgba(13, 148, 136, 0.35);
-  }
-
-  .portfolio-nav-btn:focus-visible {
-    outline: 2px solid #0d9488;
-    outline-offset: 3px;
-  }
-
-  .portfolio-nav-btn.swiper-button-disabled,
-  .portfolio-nav-btn[disabled] {
-    cursor: not-allowed;
-    opacity: 0.45;
-    color: rgba(4, 16, 13, 0.45);
-    background: linear-gradient(180deg, #f4f7f6 0%, #e8eeec 100%);
-    border-color: rgba(4, 16, 13, 0.1);
-    transform: none;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      inset 0 -2px 4px rgba(4, 16, 13, 0.05),
-      0 3px 8px -4px rgba(10, 40, 34, 0.15);
-  }
-
-  .portfolio-pagination {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    width: auto !important;
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 0.25rem;
-    bottom: auto !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-  }
-
-  .portfolio-pagination :global(.swiper-pagination-bullet) {
-    width: 10px !important;
-    height: 10px !important;
+  .formats-nav-btn.swiper-button-disabled { opacity: 0.45; cursor: not-allowed; }
+  .formats-pagination { display: flex !important; align-items: center; justify-content: center; }
+  .formats-pagination :global(.swiper-pagination-bullet) {
+    width: 10px !important; height: 10px !important;
     border-radius: 50% !important;
     background: rgba(4, 16, 13, 0.22) !important;
     opacity: 1 !important;
     margin: 0 5px !important;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    box-shadow:
-      inset 0 1px 2px rgba(0, 0, 0, 0.12),
-      0 1px 0 rgba(255, 255, 255, 0.6);
-    vertical-align: middle;
   }
-
-  .portfolio-pagination :global(.swiper-pagination-bullet:hover) {
-    background: rgba(13, 148, 136, 0.55) !important;
-    transform: scale(1.25);
-  }
-
-  .portfolio-pagination :global(.swiper-pagination-bullet-active) {
+  .formats-pagination :global(.swiper-pagination-bullet-active) {
     background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%) !important;
     width: 34px !important;
     border-radius: 6px !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.5),
-      0 6px 14px -4px rgba(13, 148, 136, 0.65),
-      0 2px 4px -1px rgba(10, 40, 34, 0.15);
   }
-
-  /* Swiper */
-  .portfolio-swiper-wrap :global(.swiper) {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-  }
-
-  .portfolio-swiper-wrap :global(.swiper-wrapper) {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: stretch;
-    transition-property: transform;
-    width: 100%;
-    box-sizing: content-box;
-  }
-
-  .portfolio-swiper-wrap :global(.swiper-slide) {
+  .formats-swiper-wrap :global(.swiper) { width: 100%; overflow: hidden; }
+  .formats-swiper-wrap :global(.swiper-slide) {
     flex-shrink: 0 !important;
     width: 100% !important;
     height: auto;
     display: flex;
-    box-sizing: border-box;
-    position: relative;
   }
 
-  .case-card {
-    display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    background: #ffffff;
+  .format-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
     border-radius: 24px;
     overflow: hidden;
     border: 1px solid rgba(4, 16, 13, 0.06);
     box-shadow: 0 20px 40px -25px rgba(10, 40, 34, 0.18);
-    min-height: 520px;
     width: 100%;
     cursor: pointer;
-    transition:
-      transform 0.35s ease,
-      box-shadow 0.35s ease,
-      border-color 0.35s ease;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   }
-
-  .case-card:hover {
+  .format-card:hover {
     transform: translateY(-3px);
     border-color: rgba(13, 148, 136, 0.35);
     box-shadow: 0 30px 60px -30px rgba(13, 148, 136, 0.25);
   }
+  .format-card:focus-visible { outline: 2px solid #0d9488; outline-offset: 3px; }
 
-  .case-card:focus-visible {
-    outline: 2px solid #0d9488;
-    outline-offset: 3px;
-  }
-
-  /* Bento-галерея (десктоп) */
-  .case-gallery {
+  .ba-grid {
     display: grid;
-    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
     padding: 8px;
     background: #eef4f2;
-    min-height: 520px;
-    box-sizing: border-box;
+    min-height: 340px;
   }
-
-  .case-gallery[data-count="1"] { grid-template-columns: 1fr; }
-  .case-gallery[data-count="2"] { grid-template-columns: 1fr 1fr; }
-  .case-gallery[data-count="3"] {
-    grid-template-columns: 1.5fr 1fr;
-    grid-template-rows: 1fr 1fr;
+  .ba-col { position: relative; display: flex; flex-direction: column; gap: 6px; }
+  .ba-label {
+    position: absolute;
+    top: 10px; left: 10px;
+    z-index: 2;
+    background: rgba(4, 16, 13, 0.72);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
   }
-  .case-gallery[data-count="3"] > .case-image:nth-child(1) { grid-row: span 2; }
-  .case-gallery[data-count="4"] {
-    grid-template-columns: 1.4fr 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-  .case-gallery[data-count="5"],
-  .case-gallery[data-count="6"] {
-    grid-template-columns: 1.4fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-  .case-gallery[data-count="5"] > .case-image:nth-child(1),
-  .case-gallery[data-count="6"] > .case-image:nth-child(1) { grid-row: span 2; }
-  .case-gallery[data-count="7"],
-  .case-gallery[data-count="8"] {
-    grid-template-columns: 1.4fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-  .case-gallery[data-count="7"] > .case-image:nth-child(n + 7),
-  .case-gallery[data-count="8"] > .case-image:nth-child(n + 7) { display: none; }
-
-  .case-image {
-    position: relative;
+  .ba-after .ba-label { background: rgba(13, 148, 136, 0.9); }
+  .ba-photos { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; }
+  .ba-photo {
+    flex: 1;
+    min-height: 140px;
+    border-radius: 14px;
     overflow: hidden;
-    border-radius: 16px;
     background: #dbe5e2;
   }
-
-  .case-image img {
-    width: 100%;
-    height: 100%;
+  .ba-photo img {
+    width: 100%; height: 100%;
     object-fit: cover;
     display: block;
     transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  .format-card:hover .ba-photo img { transform: scale(1.04); }
 
-  .case-card:hover .case-image img { transform: scale(1.05); }
+  .photo-grid {
+    display: grid;
+    gap: 6px;
+    padding: 8px;
+    background: #eef4f2;
+    min-height: 320px;
+  }
+  .photo-grid.count-1 { grid-template-columns: 1fr; }
+  .photo-grid.count-2 { grid-template-columns: 1fr 1fr; }
+  .photo-grid.count-3 {
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .photo-grid.count-3 > .grid-photo:first-child { grid-row: span 2; }
+  .photo-grid.count-4 {
+    grid-template-columns: 1.3fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .photo-grid.count-4 > .grid-photo:first-child { grid-row: span 2; }
+  .grid-photo {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #dbe5e2;
+    min-height: 120px;
+  }
+  .grid-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .format-card:hover .grid-photo img { transform: scale(1.04); }
 
-  .photo-counter { display: none; }
-
-  /* Инфо кейса */
-  .case-info {
-    padding: 2.5rem 2.25rem;
+  .format-info {
+    padding: 1.5rem 1.75rem 1.75rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 0.9rem;
+    gap: 0.55rem;
   }
-
-  .case-top {
+  .format-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
   }
-
-  .card-category {
+  .card-format {
     font-size: 0.72rem;
     color: #0d9488;
     text-transform: uppercase;
@@ -1359,44 +849,52 @@ const bookingHref = `/${lang}/booking`;
     border-radius: 30px;
     border: 1px solid rgba(13, 148, 136, 0.2);
   }
-
   .card-location {
     font-size: 0.82rem;
     color: rgba(4, 16, 13, 0.62);
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
   }
-
-  .case-info h3 {
-    font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+  .format-info h3 {
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
     color: #04100d;
     font-weight: 500;
-    line-height: 1.2;
+    line-height: 1.25;
     margin: 0;
   }
-
-  .case-description {
-    font-size: 0.92rem;
-    line-height: 1.55;
+  .format-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
     color: rgba(4, 16, 13, 0.72);
     margin: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  .case-meta {
+  .format-meta {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.4rem;
     flex-wrap: wrap;
-    font-size: 0.85rem;
-    color: rgba(4, 16, 13, 0.72);
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(4, 16, 13, 0.08);
+    font-size: 0.78rem;
+    color: rgba(4, 16, 13, 0.5);
+    padding-top: 0.35rem;
   }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .meta-item svg { opacity: 0.6; }
+  .meta-dot { opacity: 0.4; }
+  .meta-budget { font-weight: 500; color: rgba(4, 16, 13, 0.55); }
 
-  .case-cta {
-    margin-top: 0.5rem;
+  .format-cta {
+    margin-top: 0.25rem;
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
@@ -1405,31 +903,26 @@ const bookingHref = `/${lang}/booking`;
     font-size: 0.9rem;
     transition: gap 0.3s ease;
   }
-
-  .case-arrow {
+  .format-arrow {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     border-radius: 50%;
     background: rgba(13, 148, 136, 0.12);
     border: 1px solid rgba(13, 148, 136, 0.3);
     transition: all 0.3s ease;
   }
-
-  .case-card:hover .case-cta { gap: 0.9rem; }
-  .case-card:hover .case-arrow {
+  .format-card:hover .format-cta { gap: 0.9rem; }
+  .format-card:hover .format-arrow {
     background: #0d9488;
     color: #fff;
     border-color: #0d9488;
     transform: translateX(3px);
   }
 
-  /* ==== Модалка ==== */
-  .portfolio-modal-overlay {
-    position: fixed;
-    inset: 0;
+  .formats-modal-overlay {
+    position: fixed; inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
     z-index: 9999;
@@ -1441,10 +934,8 @@ const bookingHref = `/${lang}/booking`;
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
-
-  .portfolio-modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-  .portfolio-modal-content {
+  .formats-modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .formats-modal-content {
     background: #161619;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
@@ -1459,18 +950,15 @@ const bookingHref = `/${lang}/booking`;
     max-height: min(90vh, 720px);
     overflow-y: auto;
   }
+  .formats-modal-overlay.active .formats-modal-content { transform: translateY(0); }
 
-  .portfolio-modal-overlay.active .portfolio-modal-content { transform: translateY(0); }
-
-  /* Галерея в модалке */
   .modal-gallery {
     position: relative;
     width: 100%;
-    height: 280px;
+    height: 340px;
     background: #0f0f12;
     overflow: hidden;
   }
-
   .modal-gallery-track {
     display: flex;
     height: 100%;
@@ -1479,46 +967,23 @@ const bookingHref = `/${lang}/booking`;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
   }
-
   .modal-gallery-track::-webkit-scrollbar { display: none; }
-
   .modal-gallery-slide {
     flex: 0 0 100%;
     height: 100%;
     scroll-snap-align: start;
-    position: relative;
   }
-
   .modal-gallery-slide img {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: cover;
     display: block;
-    user-select: none;
-    -webkit-user-drag: none;
   }
-
-  .modal-gallery::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 100px;
-    background: linear-gradient(180deg, rgba(22, 22, 25, 0) 0%, rgba(22, 22, 25, 1) 100%);
-    pointer-events: none;
-    z-index: 2;
-  }
-
   .modal-gallery-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 38px;
-    height: 38px;
+    width: 38px; height: 38px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: rgba(0, 0, 0, 0.42);
@@ -1528,34 +993,12 @@ const bookingHref = `/${lang}/booking`;
     justify-content: center;
     cursor: pointer;
     z-index: 4;
-    backdrop-filter: blur(6px);
-    transition: all 0.22s ease;
     padding: 0;
-    opacity: 0.85;
-    -webkit-tap-highlight-color: transparent;
   }
-
-  .modal-gallery-arrow svg {
-    width: 16px;
-    height: 16px;
-    display: block;
-    stroke: currentColor;
-  }
-
-  .modal-gallery-arrow:hover:not(:disabled) {
-    background: rgba(13, 148, 136, 0.9);
-    border-color: rgba(13, 148, 136, 1);
-    opacity: 1;
-    transform: translateY(-50%) scale(1.06);
-  }
-
-  .modal-gallery-arrow:disabled {
-    opacity: 0;
-    pointer-events: none;
-  }
-
+  .modal-gallery-arrow svg { width: 16px; height: 16px; }
   .modal-gallery-prev { left: 0.6rem; }
   .modal-gallery-next { right: 0.6rem; }
+  .modal-gallery-arrow:disabled { opacity: 0; pointer-events: none; }
 
   .modal-gallery-indicator {
     position: absolute;
@@ -1568,158 +1011,109 @@ const bookingHref = `/${lang}/booking`;
     padding: 5px 12px;
     border-radius: 20px;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(6px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 5;
-    pointer-events: auto;
   }
-
-  .modal-gallery-dots {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
+  .modal-gallery-dots { display: flex; gap: 5px; }
   .modal-gallery-dot {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     border: none;
     padding: 0;
     background: rgba(255, 255, 255, 0.35);
     cursor: pointer;
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
-  .modal-gallery-dot:hover {
-    background: rgba(94, 234, 212, 0.75);
-    transform: scale(1.2);
-  }
-
   .modal-gallery-dot.is-active {
     background: #5eead4;
     width: 16px;
     border-radius: 3px;
-    transform: none;
   }
-
   .modal-gallery-counter {
     font-size: 0.72rem;
     font-weight: 600;
-    color: #ffffff;
-    letter-spacing: 0.04em;
-    font-variant-numeric: tabular-nums;
+    color: #fff;
     display: flex;
-    align-items: center;
     gap: 3px;
   }
-
-  .modal-gallery-counter-sep {
-    opacity: 0.5;
-  }
-
   .modal-gallery .modal-tag {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
+    top: 1rem; left: 1rem;
     z-index: 5;
     background: rgba(13, 148, 136, 0.85);
     border: 1px solid rgba(94, 234, 212, 0.5);
-    color: #ffffff;
+    color: #fff;
     padding: 0.3rem 0.75rem;
     border-radius: 20px;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
-    backdrop-filter: blur(6px);
   }
-
   .modal-close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 1rem; right: 1rem;
     background: rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border-radius: 50%;
     font-size: 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
     z-index: 10;
-    transition: background 0.2s;
-    backdrop-filter: blur(4px);
   }
-
-  .modal-close:hover { background: rgba(0, 0, 0, 0.85); }
-
   .modal-body { padding: 1.5rem 1.75rem 1.75rem; }
-
-  .portfolio-modal-content h2 {
+  .formats-modal-content h2 {
     font-size: 1.65rem;
     color: #fff;
     margin-bottom: 0.2rem;
     font-weight: 400;
   }
+  .modal-location {
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
 
-  .modal-location { color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.25rem; }
-
-  .modal-info-grid {
+  .modal-meta-row {
     display: flex;
     gap: 1.5rem;
     background: rgba(255, 255, 255, 0.04);
-    padding: 0.85rem 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.5rem;
     font-size: 0.85rem;
   }
-
-  .modal-info-grid span {
-    color: #ffffff;
+  .meta-label {
     display: block;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.7rem;
     margin-bottom: 0.15rem;
-    font-size: 0.75rem;
-    opacity: 0.9;
+  }
+  .modal-meta-row strong { color: #fff; font-weight: 600; }
+
+  .modal-disclaimer {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.4;
+    margin: 0 0 1.25rem;
   }
 
-  .modal-info-grid strong { color: #ffffff; font-weight: 600; }
-
-  .modal-section { margin-bottom: 1.25rem; }
-
-  .modal-section h4,
-  .modal-review-box h4 {
+  .modal-section { margin-bottom: 1.5rem; }
+  .modal-section h4 {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #a1a1aa;
     margin-bottom: 0.35rem;
   }
-
   .modal-section p { color: #d4d4d8; line-height: 1.5; font-size: 0.9rem; }
-
-  .modal-review-box {
-    background: rgba(13, 148, 136, 0.08);
-    border-left: 3px solid #0d9488;
-    padding: 1rem;
-    border-radius: 0 10px 10px 0;
-    margin-bottom: 1.5rem;
-  }
-
-  .modal-review-box p {
-    font-style: italic;
-    color: #e4e4e7;
-    margin-bottom: 0.35rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-
-  .modal-client { font-size: 0.8rem; color: #5eead4; font-weight: 500; }
 
   .modal-book-btn {
     display: block;
@@ -1733,218 +1127,21 @@ const bookingHref = `/${lang}/booking`;
     text-decoration: none;
     font-size: 0.95rem;
     box-shadow: 0 8px 24px rgba(13, 148, 136, 0.3);
-    transition: background 0.2s, box-shadow 0.2s;
   }
+  .modal-book-btn:hover { background: #0f766e; }
 
-  .modal-book-btn:hover {
-    background: #0f766e;
-    box-shadow: 0 10px 28px rgba(13, 148, 136, 0.35);
-  }
-
-  /* ==== Мобильный ==== */
   @media (max-width: 900px) {
-    .portfolio-section { padding: 4rem 0; }
-
-    .portfolio-nav {
-      gap: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-    .portfolio-nav-btn { width: 50px; height: 50px; }
-    .portfolio-nav-btn svg { width: 18px; height: 18px; }
-    .portfolio-pagination :global(.swiper-pagination-bullet) {
-      width: 9px !important;
-      height: 9px !important;
-      margin: 0 4px !important;
-    }
-    .portfolio-pagination :global(.swiper-pagination-bullet-active) {
-      width: 28px !important;
-    }
-
-    .case-card { grid-template-columns: 1fr; min-height: auto; }
-
-    /* На мобильном — одно фото на карточке */
-    .case-gallery,
-    .case-gallery[data-count="1"],
-    .case-gallery[data-count="2"],
-    .case-gallery[data-count="3"],
-    .case-gallery[data-count="4"],
-    .case-gallery[data-count="5"],
-    .case-gallery[data-count="6"],
-    .case-gallery[data-count="7"],
-    .case-gallery[data-count="8"] {
-      display: block !important;
-      grid-template-columns: none !important;
-      grid-template-rows: none !important;
-      height: 300px;
-      padding: 0;
-      gap: 0;
-      overflow: hidden;
-      min-height: 0;
-      transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .case-gallery > .case-image {
-      display: block !important;
-      grid-row: auto !important;
-      grid-column: auto !important;
-      border-radius: 0;
-      height: 300px !important;
-      width: 100%;
-    }
-
-    .case-gallery > .case-image:first-child {
-      display: block !important;
-    }
-
-    .photo-counter { display: none !important; }
-
-    .case-info { padding: 1.5rem 1.25rem 2rem; }
-    .case-info h3 { font-size: 1.4rem; }
-    .case-description { -webkit-line-clamp: 3; font-size: 0.88rem; }
-  }
-
-  @media (max-width: 480px) {
-    .case-gallery { height: 260px; }
-    .portfolio-nav-btn { width: 44px; height: 44px; }
-    .portfolio-nav-btn svg { width: 16px; height: 16px; }
-    .portfolio-pagination :global(.swiper-pagination-bullet) {
-      width: 8px !important;
-      height: 8px !important;
-      margin: 0 3px !important;
-    }
-    .portfolio-pagination :global(.swiper-pagination-bullet-active) {
-      width: 22px !important;
-    }
-
+    .formats-section { padding: 4rem 0; }
+    .formats-nav { gap: 1.25rem; margin-bottom: 1.5rem; }
+    .formats-nav-btn { width: 50px; height: 50px; }
+    .ba-grid, .photo-grid { min-height: 240px; }
+    .ba-photo, .grid-photo { min-height: 100px; }
+    .format-info { padding: 1.25rem 1.25rem 1.5rem; }
+    .format-info h3 { font-size: 1.3rem; }
     .modal-gallery { height: 220px; }
-    .modal-body { padding: 1.25rem 1.25rem 1.5rem; }
-    .portfolio-modal-content h2 { font-size: 1.4rem; }
-    .modal-gallery-arrow { width: 34px; height: 34px; }
   }
-
-  /* ==== Модалка: большое фото (галерея) ==== */
-  .portfolio-modal-content .modal-gallery {
-    height: 340px;
-  }
-
-  @media (max-width: 900px) {
-    .portfolio-modal-content .modal-gallery {
-      height: 220px;
-      overflow: hidden;
-      background: #0f0f12;
-    }
-    .portfolio-modal-content .modal-gallery-track {
-      display: flex !important;
-      flex-direction: row !important;
-      transform: none !important;
-      transition: none !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      scroll-snap-type: x mandatory !important;
-      scroll-behavior: smooth;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-    }
-    .portfolio-modal-content .modal-gallery-track::-webkit-scrollbar { display: none; }
-    .portfolio-modal-content .modal-gallery-slide {
-      flex: 0 0 100% !important;
-      width: 100% !important;
-      height: 100% !important;
-      overflow: hidden;
-      scroll-snap-align: start !important;
-    }
-    .portfolio-modal-content .modal-gallery-slide img {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover !important;
-      display: block !important;
-    }
-    .portfolio-modal-content .modal-gallery::after { display: none !important; }
-  }
-
-.card-location,
-.case-meta span,
-.modal-location {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-}
-.card-location svg,
-.case-meta svg,
-.modal-location svg {
-  flex-shrink: 0;
-}
-
-  /* ==== FINAL modal gallery override ==== */
-  .portfolio-modal-content .modal-gallery {
-    height: 340px !important;
-    overflow: hidden !important;
-    position: relative !important;
-    background: #0f0f12 !important;
-  }
-  .portfolio-modal-content .modal-gallery-track {
-    display: flex !important;
-    flex-direction: row !important;
-    height: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scroll-snap-type: x mandatory !important;
-    scroll-behavior: smooth !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
-    transform: none !important;
-    transition: none !important;
-    will-change: auto !important;
-  }
-  .portfolio-modal-content .modal-gallery-track::-webkit-scrollbar { display: none !important; }
-  .portfolio-modal-content .modal-gallery-slide {
-    display: block !important;
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    scroll-snap-align: start !important;
-    position: relative !important;
-  }
-  .portfolio-modal-content .modal-gallery-slide img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-  }
-  .portfolio-modal-content .modal-gallery-arrow {
-    display: inline-flex !important;
-  }
-  .portfolio-modal-content .modal-gallery-indicator {
-    display: flex !important;
-  }
-
-  @media (max-width: 900px) {
-    .portfolio-modal-content .modal-gallery {
-      height: 220px !important;
-      overflow: hidden !important;
-      max-height: none !important;
-    }
-    .portfolio-modal-content .modal-gallery-track {
-      display: flex !important;
-      flex-direction: row !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      height: 100% !important;
-      transform: none !important;
-      transition: none !important;
-    }
-    .portfolio-modal-content .modal-gallery-slide {
-      display: block !important;
-      flex: 0 0 100% !important;
-      width: 100% !important;
-      height: 100% !important;
-      scroll-snap-align: start !important;
-    }
-    .portfolio-modal-content .modal-gallery-slide img {
-      height: 100% !important;
-      object-fit: cover !important;
-      display: block !important;
-    }
+  @media (max-width: 480px) {
+    .ba-grid, .photo-grid { min-height: 200px; }
+    .formats-nav-btn { width: 44px; height: 44px; }
   }
 </style>
