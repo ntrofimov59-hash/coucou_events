@@ -56,6 +56,25 @@ const ACK_WORDS = new Set([
   'այո','լավ','հասկացա','շնորհակալություն','պարզ','իհարկե',
 ]);
 
+
+function isInterestSignal(text) {
+  const t = String(text || '').toLowerCase().trim();
+  if (!t || t.length > 40) return false;
+  const signals = [
+    // RU
+    'давайте', 'давай', 'интересно', 'интересно да', 'хорошо давайте', 'ок давайте',
+    'можно смету', 'пришлите смету', 'хочу смету', 'да, интересно',
+    // EN
+    'sounds good', 'let\'s do it', 'ok let\'s', 'interested', 'send a quote',
+    'please send', 'yes please', 'go ahead',
+    // ES
+    'me interesa', 'suena bien', 'envíame', 'mandame presupuesto', 'vamos',
+    // HY
+    'լավ է', 'հետաքրքիր է', 'ուղարկեք', 'արեք',
+  ];
+  return signals.some(s => t.includes(s));
+}
+
 export function isPureAck(text) {
   const t = String(text || '').toLowerCase().trim();
   if (!t) return true;
@@ -86,14 +105,142 @@ export function isSpam(text) {
 // ====================== ЭТАПЫ ======================
 function inferStage(profile, session) {
   const has = (k) => profile?.[k] && String(profile[k]).trim();
-  // Если в сессии уже есть ходы — это НЕ приветствие
-  const hasHistory = session?.turns?.length > 0;
-  if (!has('name')) return hasHistory ? 'qualification' : 'greeting';
-  if (!has('service') || !has('city')) return 'qualification';
-  if (!has('eventDate') || !has('guests')) return 'qualification';
+  const hasHistory = (session?.turns?.length || 0) > 0;
+  const hasManagerMsgs = (session?.managerMessages?.length || 0) > 0;
+
+  // Если менеджер уже писал или есть история — это НЕ greeting
+  if (!hasHistory && !hasManagerMsgs) return 'greeting';
+
+  if (!has('city') || !has('eventDate')) return 'qualification';
+  if (!has('service') || !has('guests')) return 'qualification';
   if (!has('budget')) return 'proposal';
   return 'closing';
 }
+
+// ====================== LEAD SCORING ======================
+function scoreLead(profile, session) {
+  let score = 0;
+  const has = (k) => profile?.[k] && String(profile[k]).trim();
+
+  if (has('city')) score += 20;
+  if (has('eventDate')) score += 25;
+  if (has('service')) score += 15;
+  if (has('guests')) score += 15;
+  if (has('budget')) score += 15;
+  if (has('name')) score += 5;
+  if (has('phone')) score += 10;
+
+  if (has('eventDate')) {
+    try {
+      const d = new Date(profile.eventDate);
+      const days = (d - Date.now()) / (1000 * 60 * 60 * 24);
+      if (days > 0 && days <= 60) score += 15;
+    } catch {}
+  }
+
+  const turns = session?.turns?.length || 0;
+  if (turns >= 3) score += 10;
+  if (turns >= 6) score += 10;
+
+  if (score >= 70) return 'hot';
+  if (score >= 40) return 'warm';
+  return 'cold';
+}
+
+// ====================== ЧТО СПРОСИТЬ ДАЛЬШЕ ======================
+function getMissingHint(profile, lang = 'ru') {
+  const has = (k) => profile?.[k] && String(profile[k]).trim();
+  const hints = {
+    ru: {
+      city_date: 'Сейчас важнее всего узнать дату мероприятия и город. Спроси именно это (можно одним вопросом).',
+      service: 'Уточни, что именно нужно: аренда шатра, свадьба под ключ, корпоратив или другой формат.',
+      guests: 'Спроси примерное количество гостей.',
+      budget: 'Мягко спроси ориентир по бюджету (можно диапазон).',
+      name: 'Можно вежливо спросить имя, если ещё не знаешь.',
+      next_step: 'Данных достаточно. Предложи конкретный следующий шаг: предварительную смету или короткий созвон.',
+    },
+    en: {
+      city_date: 'Most important now: event date and city. Ask for both (one question is fine).',
+      service: 'Clarify what is needed: tent rental, full wedding, corporate, or another format.',
+      guests: 'Ask for the approximate number of guests.',
+      budget: 'Softly ask for a budget range.',
+      name: 'You can politely ask for the name if still unknown.',
+      next_step: 'You have enough data. Propose a concrete next step: preliminary quote or a short call.',
+    },
+    es: {
+      city_date: 'Lo más importante ahora: fecha del evento y ciudad. Pregunta ambas cosas.',
+      service: 'Aclara qué necesita: alquiler de carpa, boda integral, corporativo u otro formato.',
+      guests: 'Pregunta el número aproximado de invitados.',
+      budget: 'Pregunta suavemente el presupuesto orientativo.',
+      name: 'Puedes pedir el nombre educadamente si aún no lo sabes.',
+      next_step: 'Ya tienes datos suficientes. Propón un siguiente paso concreto: presupuesto preliminar o una llamada corta.',
+    },
+    hy: {
+      city_date: 'Ամենակարևորը հիմա՝ միջոցառման ամսաթիվ և քաղաք։ Հարցրու երկուսն էլ (կարող է մեկ հարցով)։',
+      service: 'Ճշտիր՝ ինչ է պետք՝ վրանի վարձույթ, հարսանիք բանալիով, կորպորատիվ, թե այլ ձևաչափ։',
+      guests: 'Հարցրու հյուրերի մոտավոր քանակը։',
+      budget: 'Մեղմ հարցրու բյուջեի մասին (կարող է միջակայք)։',
+      name: 'Կարող ես քաղաքավարի հարցնել անունը, եթե դեռ չգիտես։',
+      next_step: 'Տվյալները բավարար են։ Առաջարկիր կոնկրետ հաջորդ քայլ՝ նախնական նախահաշիվ կամ կարճ զանգ։',
+    },
+  };
+  const h = hints[lang] || hints.ru;
+  if (!has('city') || !has('eventDate')) return h.city_date;
+  if (!has('service')) return h.service;
+  if (!has('guests')) return h.guests;
+  if (!has('budget')) return h.budget;
+  if (!has('name')) return h.name;
+  return h.next_step;
+}
+
+// ====================== ПОДСКАЗКА ПО ТИПУ УСЛУГИ ======================
+function getServiceHint(service, lang = 'ru') {
+  const hints = {
+    ru: {
+      tents: 'Клиент про шатёр. Уточни дату, город, гостей, нужен ли только шатёр или полный пакет (свет, пол, мебель). Предложи рассчитать размер и стоимость.',
+      wedding: 'Это свадьба. Будь особенно внимательна и тёплой. Уточни дату, город, формат, гостей, бюджет. Предложи 2–3 варианта или созвон.',
+      corporate: 'Корпоратив. Стиль чуть более деловой. Уточни дату, город, формат, количество участников, бюджет.',
+      catering: 'Кейтеринг. Уточни дату, город, гостей, формат (фуршет/банкет), есть ли уже площадка.',
+      turnkey: 'Мероприятие под ключ. Уточни дату, город, тип события, гостей и бюджет.',
+      default: 'Уточни ключевые детали и веди к смете или созвону.',
+    },
+    en: {
+      tents: 'Client asks about tents. Clarify date, city, guests, tent only or full package. Offer to calculate size and price.',
+      wedding: 'This is a wedding. Be warm and attentive. Clarify date, city, format, guests, budget. Offer 2–3 options or a call.',
+      corporate: 'Corporate event. Slightly more business-like. Clarify date, city, format, headcount, budget.',
+      catering: 'Catering. Clarify date, city, guests, format, whether venue is booked.',
+      turnkey: 'Turnkey event. Clarify date, city, type, guests, budget.',
+      default: 'Clarify key details and move toward a quote or call.',
+    },
+    es: {
+      tents: 'El cliente pregunta por carpas. Aclara fecha, ciudad, invitados, solo carpa o paquete completo. Ofrece calcular tamaño y precio.',
+      wedding: 'Es una boda. Sé cálida y atenta. Aclara fecha, ciudad, formato, invitados, presupuesto. Ofrece 2–3 opciones o una llamada.',
+      corporate: 'Evento corporativo. Estilo un poco más formal. Aclara fecha, ciudad, formato, número de participantes, presupuesto.',
+      catering: 'Catering. Aclara fecha, ciudad, invitados, formato, si ya hay venue.',
+      turnkey: 'Evento llave en mano. Aclara fecha, ciudad, tipo, invitados y presupuesto.',
+      default: 'Aclara los detalles clave y lleva hacia presupuesto o llamada.',
+    },
+    hy: {
+      tents: 'Հաճախորդը վրանի մասին է։ Ճշտիր ամսաթիվ, քաղաք, հյուրեր, միայն վրա՞ն, թե ամբողջ փաթեթ։ Առաջարկիր հաշվել չափը և արժեքը։',
+      wedding: 'Սա հարսանիք է։ Եղիր ուշադիր և տաք։ Ճշտիր ամսաթիվ, քաղաք, ձևաչափ, հյուրեր, բյուջե։ Առաջարկիր 2–3 տարբերակ կամ զանգ։',
+      corporate: 'Կորպորատիվ։ Ոճը մի փոքր ավելի գործնական։ Ճշտիր ամսաթիվ, քաղաք, ձևաչափ, մասնակիցների քանակ, բյուջե։',
+      catering: 'Քեյթերինգ։ Ճշտիր ամսաթիվ, քաղաք, հյուրեր, ձևաչափ, արդյոք կա հարթակ։',
+      turnkey: 'Միջոցառում բանալիով։ Ճշտիր ամսաթիվ, քաղաք, տեսակ, հյուրեր և բյուջե։',
+      default: 'Ճշտիր հիմնական մանրամասները և տանիր նախահաշվի կամ զանգի։',
+    },
+  };
+  const map = hints[lang] || hints.ru;
+  return map[service] || map.default;
+}
+
+
+// ====================== ЧТО СПРОСИТЬ ДАЛЬШЕ ======================
+
+
+// ====================== ПОДСКАЗКА ПО ТИПУ УСЛУГИ ======================
+
+
+
 
 // ====================== ИЗВЛЕЧЕНИЕ ПРОФИЛЯ ======================
 const CITY_LIST = [
@@ -105,8 +252,20 @@ const CITY_LIST = [
   'Կասաբլանկա','Մարաքեշ','Փհուկետ',
 ];
 const NAME_BLACKLIST = new Set([
+  // Приветствия
   'привет','здравствуйте','добрый','день','вечер','утро','хорошо','спасибо',
   'hello','hi','thanks','please','hola','gracias','բարև','շնորհակալություն',
+  // RU — частые глаголы/начала фраз (иначе ловятся как имя)
+  'ищу','ищем','нужен','нужна','нужно','нужны','хочу','хотим','хотел','хотела','хотелось',
+  'планирую','планируем','интересует','подскажите','скажите','можно','требуется','требуются',
+  'рассматриваю','рассматриваем','подбираю','подбираем','думаю','думаем',
+  'надо','есть','мне','нам','вас','все','это','будет','для','про','по','у','на',
+  // EN
+  'want','need','looking','searching','planning','interested','considering',
+  // ES
+  'quiero','necesito','busco','buscamos','buscando','planeo','interesado','interesada',
+  // HY
+  'ուզում','պետք','փնտրում','կարիք','հետաքրքրված',
 ]);
 
 export function extractProfileFromText(text) {
@@ -119,37 +278,80 @@ function extractProfile(text) {
   if (!t) return out;
   const lower = t.toLowerCase();
 
-  let m = t.match(/(?:меня\s+зовут|мо[её]\s+имя|my\s+name\s+is|me\s+llamo|i\s+am|i'm)\s+([\p{Lu}][\p{Ll}]{1,24})/iu);
+  // --- Имя ---
+  let m = t.match(/(?:меня\s+зовут|мо[её]\s+имя|my\s+name\s+is|me\s+llamo|i\s+am|i'm|это|я)\s+([\p{Lu}][\p{Ll}]{1,24})/iu);
   if (!m) m = t.match(/меня\s+([\p{Lu}][\p{Ll}]{1,24})\s+зовут/iu);
+  if (!m) m = t.match(/^([\p{Lu}][\p{Ll}]{1,20})[\s,!.]/u);
   if (m) {
     const cand = m[1];
-    if (!NAME_BLACKLIST.has(cand.toLowerCase())) out.name = cand;
+    if (!NAME_BLACKLIST.has(cand.toLowerCase()) && cand.length >= 2) {
+      out.name = cand;
+    }
   }
 
+  // --- Услуга ---
   if (/шат[её]р|тент|tents?|marquee|carpa|վրան/i.test(t)) out.service = 'tents';
   else if (/свадьб|wedding|boda|հարսանիք/i.test(t)) out.service = 'wedding';
-  else if (/корпоратив|corporate|corporativo|կորպորատիվ/i.test(t)) out.service = 'corporate';
+  else if (/корпоратив|corporate|corporativo|կորպորատիվ|тимбилдинг|team.?build/i.test(t)) out.service = 'corporate';
   else if (/кейтер|catering|քեյթ/i.test(t)) out.service = 'catering';
   else if (/декор|decor|դեկոր/i.test(t)) out.service = 'decor';
   else if (/фото|видео|photo|video|foto/i.test(t)) out.service = 'photo-video';
   else if (/музык|dj|артист|шоу|entertainment|music|show/i.test(t)) out.service = 'entertainment';
   else if (/трансфер|transfer|traslado/i.test(t)) out.service = 'transfer';
+  else if (/под\s*ключ|turnkey|мероприятие|event|банкет/i.test(t)) out.service = 'turnkey';
 
+  // --- Город ---
   for (const c of CITY_LIST) {
     if (lower.includes(c.toLowerCase())) { out.city = c; break; }
   }
 
-  const g = t.match(/(\d{1,5})\s*(?:гост|guest|invitad|հյուր|человек|people|personas)/i);
-  if (g) out.guests = g[1];
-
-  const d = t.match(/\b(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})\b/);
-  if (d) {
-    const iso = normalizeDate(d[0]);
-    if (iso) out.eventDate = iso;
+  // --- Гости ---
+  m = t.match(/(\d{1,4})\s*[-–]?\s*(\d{1,4})?\s*(?:гост|guest|invitad|հյուր|человек|people|personas|чел\b)/i);
+  if (m) {
+    out.guests = m[2] ? `${m[1]}-${m[2]}` : m[1];
+  } else {
+    m = t.match(/(?:гост|guest|invitad|հյուր|человек|people).*?(\d{1,4})/i);
+    if (m) out.guests = m[1];
   }
 
-  const b = t.match(/(?:бюджет|budget|presupuesto|բյուջե)\D{0,15}(\d[\d\s,.]{1,12})/i);
-  if (b) out.budget = b[1].replace(/[\s,]/g, '');
+  // --- Дата ---
+  m = t.match(/\b(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})\b/);
+  if (m) {
+    const iso = normalizeDate(m[0]);
+    if (iso) out.eventDate = iso;
+  }
+  if (!out.eventDate) {
+    const monthMap = {
+      январ: '01', феврал: '02', март: '03', апрел: '04', ма: '05', июн: '06',
+      июл: '07', август: '08', сентябр: '09', октябр: '10', ноябр: '11', декабр: '12',
+      january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
+      july: '07', august: '08', september: '09', october: '10', november: '11', december: '12',
+    };
+    for (const [key, mm] of Object.entries(monthMap)) {
+      if (lower.includes(key)) {
+        const yearMatch = t.match(/(20\d{2})/);
+        const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
+        out.eventDate = `${year}-${mm}-01`;
+        break;
+      }
+    }
+  }
+
+  // --- Бюджет ---
+  m = t.match(/(?:бюджет|budget|presupuesto|բյուջե|до|около|примерно)\D{0,20}(\d[\d\s.,]{2,12})/i);
+  if (m) {
+    out.budget = m[1].replace(/[\s,]/g, '');
+  } else {
+    m = t.match(/(\d[\d\s]{2,10})\s*(?:\$|usd|доллар|евро|€)/i);
+    if (m) out.budget = m[1].replace(/\s/g, '');
+  }
+
+  // --- Телефон ---
+  m = t.match(/(?:\+?\d[\d\s\-()]{8,18}\d)/);
+  if (m) {
+    const digits = m[0].replace(/\D/g, '');
+    if (digits.length >= 10 && digits.length <= 15) out.phone = digits;
+  }
 
   return out;
 }
@@ -191,7 +393,13 @@ function normalizeDate(raw) {
 }
 
 function needsAutoSave(profile) {
-  return profile.name && profile.city && profile.service;
+  // Сохраняем раньше: достаточно города + (услуги или даты)
+  // Имя желательно, но не обязательно
+  if (!profile) return false;
+  const has = (k) => profile[k] && String(profile[k]).trim();
+  if (has('city') && (has('service') || has('eventDate'))) return true;
+  if (has('name') && has('city') && has('service')) return true;
+  return false;
 }
 
 function profileSignature(profile) {
@@ -429,6 +637,27 @@ export async function generateReply(sessionKey, userMessage) {
   const stage = objection ? 'objections' : inferStage(session.profile, session);
   console.log(`🎯 Stage: ${stage} | profile: ${p.name || '—'} | ${p.city || '—'} | ${p.service || '—'}`);
 
+  // Lead scoring + эскалация hot-лидов
+  const leadScore = (typeof scoreLead === 'function') ? scoreLead(session.profile, session) : 'cold';
+  console.log(`🔥 Lead score: ${leadScore}`);
+
+  if (leadScore === 'hot' && !session.hotNotified) {
+    session.hotNotified = true;
+    store.saveSession(sessionKey);
+    try {
+      notifyManager({
+        reason: `Hot lead (score high). Stage: ${stage}`,
+        sessionKey,
+        lastMessages: (session.turns || []).slice(-3).map(t => ({
+          role: 'user', content: t.user || ''
+        })),
+        profile: session.profile,
+      });
+    } catch (e) {
+      console.warn('hot notify failed:', e.message);
+    }
+  }
+
   // RAG + objection hint
   const useKnowledge = (userMessage || '').length >= 30;
   const knowledge = useKnowledge ? searchKnowledge(userMessage, { lang, max: 2 }) : '';
@@ -441,23 +670,53 @@ export async function generateReply(sessionKey, userMessage) {
     const recent = session.managerMessages.slice(-5);
     managerContext = '\n\n=== ПОСЛЕДНИЕ СООБЩЕНИЯ МЕНЕДЖЕРА В ЧАТЕ (уже отправлены клиенту) ===\n'
       + recent.map(m => `• ${m.text}`).join('\n')
-      + '\n\nКлиент видел эти сообщения. Учитывай их в контексте, но НЕ повторяй дословно.';
+      + '\n\nВАЖНО: Менеджер уже общается с клиентом. Ты продолжаешь диалог, а не начинаешь заново. НЕ ЗДОРОВАЙСЯ. НЕ ПРЕДСТАВЛЯЙСЯ. Отвечай по существу, учитывая, что клиент уже видел сообщения менеджера.';
   }
 
+  // Динамическая подсказка: что спросить дальше
+  
+  // Антизацикливание: если уже много ходов, а ключевых полей мало — давим на прогресс
+  const turnCount = session?.turns?.length || 0;
+  let progressHint = '';
+  if (turnCount >= 4) {
+    const has = (k) => session.profile?.[k] && String(session.profile[k]).trim();
+    const missing = [];
+    if (!has('city')) missing.push('город');
+    if (!has('eventDate')) missing.push('дата');
+    if (!has('service')) missing.push('услуга');
+    if (!has('guests')) missing.push('гости');
+    if (missing.length >= 2) {
+      progressHint = `Диалог уже ${turnCount} ходов, а ключевые данные всё ещё не собраны (${missing.join(', ')}). Спроси самое важное одним вопросом и мягко предложи следующий шаг.`;
+    } else if (turnCount >= 6 && has('city') && has('eventDate')) {
+      progressHint = `Уже ${turnCount} ходов. Данных достаточно для следующего шага. Предложи смету или короткий созвон, не затягивай квалификацию.`;
+    }
+  }
+
+  const interest = (typeof isInterestSignal === 'function') && isInterestSignal(userMessage);
+  const missingHint = (typeof getMissingHint === 'function') ? getMissingHint(session.profile, lang) : '';
+  const serviceHint = (typeof getServiceHint === 'function') ? getServiceHint(session.profile?.service, lang) : '';
   const systemPrompt = buildSystemPrompt({ lang, stage, profile: session.profile, knowledge, objectionHint })
     + managerContext
-    + `\n\n=== CRITICAL LANGUAGE RULE ===\nReply ONLY in ${LANG_NAMES[lang] || 'Russian'}. Even if the prior history is in another language, your NEXT reply MUST be in ${LANG_NAMES[lang] || 'Russian'}.`
+    + `\n\n=== SERVICE CONTEXT ===\n${serviceHint}\n\n=== PROGRESS CHECK ===\n${progressHint || '(диалог в нормальном темпе)'}\n\n=== INTEREST SIGNAL ===\n${interest ? 'Клиент проявил интерес / готов двигаться дальше. Если данных хватает — сразу предлагай смету или созвон. Если нет — быстро добери недостающее и предлагай шаг.' : '(обычный ход)'}\n\n=== ЧТО СПРОСИТЬ ДАЛЬШЕ (приоритет) ===\n${missingHint}`
+    + `\n\n=== NO GREETING FORCE ===
+Если в истории диалога есть ХОТЬ ОДНО сообщение ИЛИ есть сообщения менеджера — КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО:
+- здороваться
+- представляться
+- писать «Здравствуйте», «Добрый день», «Чем могу помочь»
+Сразу отвечай по существу последнего сообщения клиента.
+
+=== CRITICAL LANGUAGE RULE ===\nReply ONLY in ${LANG_NAMES[lang] || 'Russian'}. Even if the prior history is in another language, your NEXT reply MUST be in ${LANG_NAMES[lang] || 'Russian'}.`
     + `\n\n=== LENGTH RULE ===\nWrite 2-4 short sentences. No long bullet lists, no headers.`
     + `\n\n=== HIDDEN CRM BLOCK ===\nIf you learned new info about the client (name, city, service, date, guests, budget, phone), append on a NEW LINE at the very END of your reply a single line:\n<!--CRM:{"clientName":"...","city":"...","service":"...","eventDate":"YYYY-MM-DD","guests":"...","budget":"...","phone":"...","details":"..."}-->\nOnly include fields you actually learned. If nothing new — do NOT add the line. This line is stripped before sending to the user.`
 
-  const messages = store.buildMessages(sessionKey, systemPrompt, 6);
+  const messages = store.buildMessages(sessionKey, systemPrompt, 8);
   messages.push({ role: 'user', content: userMessage });
 
   let completion;
   try {
     completion = await callGroq({
       model: MODEL, messages,
-      temperature: 0.4, max_tokens: 400,
+      temperature: 0.55, max_tokens: 420,
       reasoning_effort: 'low',
     });
   } catch (err) {
@@ -468,7 +727,7 @@ export async function generateReply(sessionKey, userMessage) {
       completion = await groq.chat.completions.create({
         model: 'openai/gpt-oss-20b',
         messages,
-        temperature: 0.4, max_tokens: 300,
+        temperature: 0.5, max_tokens: 320,
         reasoning_effort: 'low',
       });
       if (completion?.usage) {
@@ -523,16 +782,20 @@ export async function generateReply(sessionKey, userMessage) {
 
   if (!finalText) finalText = pickFallback(lang, (session?.turns?.length || 0) > 0);
   store.pushTurn(sessionKey, userMessage, finalText);
+  // Запоминаем этап — помогает не зацикливаться
+  try {
+    store.setStage(sessionKey, stage);
+  } catch (e) {}
   return finalText;
 }
 
 // ====================== ВОЗРАЖЕНИЯ ======================
 const OBJECTION_PLAYBOOK = {
   expensive: {
-    ru: 'Клиент считает, что дорого. НЕ оправдывайся. Дай 1 сильный аргумент и уточни бюджетный ориентир.',
-    en: 'Client thinks it is expensive. DO NOT apologize. Give one strong argument and ask for their budget range.',
-    es: 'El cliente cree que es caro. NO te disculpes. Da un argumento sólido y pregunta el presupuesto.',
-    hy: 'Հաճախորդը կարծում է, որ թանկ է։ ՄԻ՛ արդարացիր։ Տուր մեկ ուժեղ փաստարկ և հարցրու բյուջեն։',
+    ru: 'Клиент считает, что дорого. НЕ оправдывайся. Дай 1 сильный аргумент ценности (опыт, под ключ, 15 городов). Затем мягко уточни бюджетный ориентир и предложи созвон или предварительную смету.',
+    en: 'Client thinks it is expensive. DO NOT apologize. Give one strong value argument (experience, turnkey, 15 cities), then ask for their budget range and offer a short call or preliminary quote.',
+    es: 'El cliente piensa que es caro. NO te disculpes. Da un argumento fuerte de valor (experiencia, llave en mano, 15 ciudades). Luego pregunta suavemente por el rango de presupuesto y ofrece una llamada corta o un presupuesto preliminar.',
+    hy: 'Հաճախորդը կարծում է, որ թանկ է։ ՄԻ՛ արդարացիր։ Տուր մեկ ուժեղ արժեքային փաստարկ (փորձ, բանալիով, 15 քաղաք)։ Ապա մեղմորեն պարզիր բյուջեի միջակայքը և առաջարկիր կարճ զանգ կամ նախնական նախահաշիվ։',
   },
   think: {
     ru: 'Клиент хочет подумать. Не дави. Предложи конкретный следующий шаг — короткое КП на 2-3 варианта.',
@@ -572,10 +835,18 @@ function detectObjection(text) {
 
 // ====================== ВХОДЯЩИЕ ======================
 const REJECT = {
-  ru: `Здравствуйте. Я Анна, менеджер Coucou Events.\n\nЯ помогаю с организацией мероприятий и арендой шатров. Если у вас есть запрос по этой теме — напишите, буду рада помочь.`,
-  en: `Hello. I'm Anna, manager at Coucou Events.\n\nI help with event organization and tent rentals. If you have a request on this topic — write to me, I'll be glad to help.`,
-  es: `Hola. Soy Anna, gerente de Coucou Events.\n\nAyudo con organización de eventos y alquiler de carpas. Si tienes una consulta sobre este tema — escríbeme, con gusto te ayudo.`,
-  hy: `Բարև Ձեզ։ Ես Աննան եմ՝ Coucou Events-ի մենեջեր։\n\nՕգնում եմ միջոցառումների կազմակերպման և վրանների վարձույթի հարցերում։ Եթե այս թեմայով հարց ունեք՝ գրեք, ուրախ կլինեմ օգնել։`,
+  ru: `Здравствуйте! Я Анна, менеджер Coucou Events.
+Помогаю с организацией мероприятий, свадьбами и арендой шатров.
+Если у вас есть запрос — напишите дату и город, сразу сориентирую.`,
+  en: `Hello! I'm Anna, manager at Coucou Events.
+I help with events, weddings and tent rentals.
+If you have a request — share the date and city, and I'll guide you right away.`,
+  es: `¡Hola! Soy Anna, gerente de Coucou Events.
+Ayudo con eventos, bodas y alquiler de carpas.
+Si tienes una consulta — escribe fecha y ciudad, y te oriento de inmediato.`,
+  hy: `Բարև Ձեզ։ Ես Աննան եմ՝ Coucou Events-ի մենեջեր։
+Օգնում եմ միջոցառումների, հարսանիքների և վրանների հարցերում։
+Եթե հարց ունեք — գրեք ամսաթիվ և քաղաք, անմիջապես կկողմնորոշեմ։`,
 };
 
 // Вежливые отказы для медиа без текста
@@ -593,7 +864,11 @@ export function mediaRefusal(sessionKey) {
 }
 
 export function humanDelay(text) {
-  const delay = Math.min(900 + String(text || '').length * 15, 4000);
+  // Более естественная задержка: базовая + от длины + небольшой рандом
+  const len = String(text || '').length;
+  const base = 700 + Math.min(len * 18, 2800);
+  const jitter = Math.floor(Math.random() * 600); // 0–600 мс
+  const delay = Math.min(base + jitter, 4500);
   return new Promise(r => setTimeout(r, delay));
 }
 
@@ -607,11 +882,18 @@ export async function handleIncoming(sessionKey, text, sendFn) {
     return;
   }
 
-  // 0b. Явный чёрный список — трудоустройство, реклама, спам
+  // 0b. Явный чёрный список — трудоустройство, реклама, спам (молчим)
   if (isIrrelevant(text)) {
     console.log(`🚫 Irrelevant (job/ad/spam), skip LLM`);
     stats.spam++;
-    return; // молчим
+    return;
+  }
+
+  // 0c. Жёсткий спам-фильтр
+  if (isSpam(text)) {
+    console.log(`🚫 Spam keywords, skip LLM`);
+    stats.spam++;
+    return;
   }
 
   // 1. Команды клиента: opt-out / opt-in
@@ -646,14 +928,21 @@ export async function handleIncoming(sessionKey, text, sendFn) {
     text = merged + '\n---\n' + text;
   }
 
-  // 3. Отсев нерелевантного для новых сессий
+  // 3. Отсев нерелевантного ТОЛЬКО для совсем новых сессий
   const existing = store.getSession(sessionKey);
-  if (!existing && !isRelevantMessage(text)) {
-    const reject = REJECT.ru;
+  const hasContext = existing && (
+    (existing.turns && existing.turns.length > 0) ||
+    (existing.managerMessages && existing.managerMessages.length > 0)
+  );
+  if (!existing && !hasContext && !isRelevantMessage(text)) {
+    const guessLang = (typeof resolveLanguage === 'function') ? resolveLanguage(text, 'ru') : 'ru';
+    const reject = REJECT[guessLang] || REJECT.ru;
     await humanDelay(reject);
     await sendFn(reject);
     return;
   }
+  // Если есть контекст (менеджер уже писал / была история) — не отвергаем, отвечаем по существу
+
 
   stats.relevant++;
 
@@ -693,7 +982,6 @@ export async function handleIncoming(sessionKey, text, sendFn) {
   console.log(`💬 Ответ:\n${reply}\n`);
   logStat();
 }
-
 
 // Обёртка с очередью: если Notion падает — сохраняем локально и ретраим
 export async function saveOrUpdateLead(args) {

@@ -66,3 +66,21 @@ pnpm-debug.log*
 
 # OS
 .DS_Store
+
+# === Agent backups (создаются патчами 2026-09-24) ===
+agent/*.bak
+agent/*.bak.*
+agent/*.bak-*
+agent/*.bak[0-9]*
+agent/*.pre-dedup
+agent/*.broken
+agent/*.nline
+agent/**/*.bak.*
+agent/prompts/*.bak_langs
+
+# === Одноразовые патч-скрипты ===
+patch_*.py
+fix_*.py
+
+# === Архив логов ===
+logs-archive/

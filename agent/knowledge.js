@@ -75,15 +75,16 @@ function tokenize(text) {
 
 // Определяем, какая услуга упомянута
 const SERVICE_HINTS = {
-  marquees:     ['шат', 'тент', 'каркас', 'tent', 'marquee', 'carpa', 'վրան'],
-  catering:     ['кейтер', 'еда', 'меню', 'catering', 'food', 'menu', 'comida', 'քեյթ', 'սնունդ'],
-  decor:        ['декор', 'оформлен', 'цвет', 'decor', 'flowers', 'decoración', 'դեկոր'],
-  'photo-video':['фото', 'видео', 'съемк', 'photo', 'video', 'foto', 'լուսանկ', 'տեսանկ'],
-  entertainment:['музык', 'dj', 'артист', 'шоу', 'entertainment', 'music', 'show', 'երաժշտ', 'շոու'],
-  transfer:     ['трансфер', 'автобус', 'перевоз', 'transfer', 'bus', 'traslado', 'տրանսֆեր'],
-  turnkey:      ['под ключ', 'организац', 'мероприят', 'full service', 'turnkey', 'llave en mano', 'բանալիով'],
+  marquees:     ['шат', 'тент', 'каркас', 'tent', 'marquee', 'carpa', 'վրան', 'аренд шатр'],
+  catering:     ['кейтер', 'еда', 'меню', 'catering', 'food', 'menu', 'comida', 'քեյթ', 'սնունդ', 'банкет', 'фуршет'],
+  decor:        ['декор', 'оформлен', 'цвет', 'decor', 'flowers', 'decoración', 'դեկոր', 'цветы', 'оформление'],
+  'photo-video':['фото', 'видео', 'съемк', 'photo', 'video', 'foto', 'լուսանկ', 'տեսանկ', 'фотограф'],
+  entertainment:['музык', 'dj', 'артист', 'шоу', 'entertainment', 'music', 'show', 'երաժշտ', 'շոու', 'ведущий'],
+  transfer:     ['трансфер', 'автобус', 'перевоз', 'transfer', 'bus', 'traslado', 'տրանսֆեր', 'транспорт'],
+  turnkey:      ['под ключ', 'организац', 'мероприят', 'full service', 'turnkey', 'llave en mano', 'բանալիով', 'полное'],
   biotoilets:   ['туалет', 'биотуалет', 'toilet', 'baño', 'զուգարան'],
   ceremony:     ['свадьб', 'церемони', 'wedding', 'ceremony', 'boda', 'ceremonia', 'հարսանիք', 'արարողություն'],
+  corporate:    ['корпоратив', 'тимбилдинг', 'corporate', 'team build', 'կորպորատիվ', 'team-building'],
 };
 
 function detectServiceSlug(text) {
@@ -119,7 +120,7 @@ export function searchKnowledge(query, { lang, max = 3 } = {}) {
   });
 
   const top = scored
-    .filter(s => s.score > 5)              // отсекаем мусор
+    .filter(s => s.score > 3)              // отсекаем мусор
     .sort((a, b) => b.score - a.score)
     .slice(0, max);
 
