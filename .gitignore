@@ -106,3 +106,4 @@ patch_*.py
 fix_*.py
 apply-agent-fixes.sh
 *.tar.gz
+src.backup-*/
