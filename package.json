@@ -23,6 +23,7 @@
     "@notionhq/client": "^5.24.0",
     "astro": "^7.1.0",
     "astro-swiper": "^2.10.0",
+    "better-sqlite3": "^13.0.3",
     "docxtemplater": "^3.69.3",
     "dotenv": "^17.4.2",
     "imapflow": "^1.6.6",
