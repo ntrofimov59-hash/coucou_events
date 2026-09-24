@@ -312,10 +312,22 @@ export async function startTelegram() {
         await client.sendMessage(Number(chatId.toString()), { message: `Статус бота: ${paused ? 'на паузе' : 'активен'}` });
         return;
       }
-      // Обычный ответ менеджера → авто-пауза
+      // Обычный ответ менеджера → авто-пауза + сохраняем в контекст сессии
       if (text.length > 0) {
         control.pause(key, 24 * 60 * 60 * 1000);
-        console.log(`👤 Manager replied → auto-pause 24h: ${key}`);
+        // Важно: сохраняем сообщение менеджера, чтобы бот не здоровался заново
+        try {
+          store.pushManagerMessage(key, text, Date.now());
+          // Помечаем, что диалог уже идёт (не greeting)
+          const sess = store.getSession(key);
+          if (sess && (!sess.turns || sess.turns.length === 0)) {
+            // Создаём фейковый ход, чтобы history не была пустой
+            store.pushTurn(key, '(диалог начат менеджером)', text);
+          }
+        } catch (e) {
+          console.warn('pushManagerMessage failed:', e.message);
+        }
+        console.log(`👤 Manager replied → auto-pause 24h + saved to context: ${key}`);
       }
     } catch (e) {
       console.error('outgoing handler error:', e.message);
