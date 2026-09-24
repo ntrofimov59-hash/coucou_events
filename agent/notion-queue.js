@@ -1,7 +1,8 @@
 // agent/notion-queue.js — отложенная очередь для лидов, если Notion недоступен
+// ВАЖНО: импортируем saveOrUpdateLeadDirect, а не обёртку — иначе бесконечный enqueue
 import fs from 'fs';
 import path from 'path';
-import { saveOrUpdateLead as directSave } from './core.js';
+import { saveOrUpdateLeadDirect } from './core.js';
 
 const QUEUE_PATH = path.resolve(
   new URL('./data/', import.meta.url).pathname,
@@ -36,7 +37,6 @@ function writeQueue(items) {
 export function enqueue(args) {
   const items = readQueue();
   items.push({ ...args, enqueuedAt: Date.now() });
-  // ограничиваем 500 записей
   if (items.length > 500) items.splice(0, items.length - 500);
   writeQueue(items);
   console.log(`📥 notion-queue: enqueued (${items.length} в очереди)`);
@@ -51,16 +51,16 @@ export async function flushQueue() {
 
   for (const item of items) {
     const { enqueuedAt, ...args } = item;
-    // Если висит дольше 24 часов — выкидываем (устарел)
     if (Date.now() - enqueuedAt > 24 * 60 * 60 * 1000) {
       console.warn(`notion-queue: drop stale (${new Date(enqueuedAt).toISOString()})`);
       continue;
     }
     try {
-      await directSave(args);
+      await saveOrUpdateLeadDirect(args);
       flushed++;
       console.log(`📤 notion-queue: flushed [${args.clientName || '—'}]`);
     } catch (e) {
+      console.error(`notion-queue: flush failed:`, e.message);
       remaining.push(item);
     }
   }

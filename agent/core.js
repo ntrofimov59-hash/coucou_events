@@ -1,5 +1,5 @@
 // agent/core.js — мозги агента: LLM, CRM, этапы, языки, RAG
-import { groq, MODEL, LANG_NAMES } from './config.js';
+import { groq, MODEL, LANG_NAMES, MAX_TURNS_IN_WINDOW } from './config.js';
 import { resolveLanguage } from './language.js';
 import { buildSystemPrompt } from './prompts/index.js';
 import { searchKnowledge } from './knowledge.js';
@@ -428,6 +428,11 @@ async function findLeadInNotion(phone, name, city) {
   }
 }
 
+function isMissingPropertyError(e) {
+  const msg = String(e?.message || e || '');
+  return /is not a property that exists|Could not find property|property.*does not exist|validation_error/i.test(msg);
+}
+
 export async function saveOrUpdateLeadDirect(args) {
   try {
     const existing = await findLeadInNotion(args.phone, args.clientName, args.city);
@@ -447,14 +452,29 @@ export async function saveOrUpdateLeadDirect(args) {
     if (formattedDate) properties['Date'] = { date: { start: formattedDate } };
     if (!isNaN(numericBudget) && numericBudget) properties['Budget'] = { number: numericBudget };
 
-    if (existing) {
-      await updatePage(existing.id, properties);
-      console.log(`🔄 Лид обновлён [${source}]`);
-    } else {
-      await createPage(properties);
-      console.log(`💾 Новый лид [${source}]`);
+    async function write(props) {
+      if (existing) {
+        await updatePage(existing.id, props);
+        console.log(`🔄 Лид обновлён [${source}]`);
+      } else {
+        await createPage(props);
+        console.log(`💾 Новый лид [${source}]`);
+      }
     }
-    stats.saved++;
+
+    try {
+      await write(properties);
+      stats.saved++;
+    } catch (e) {
+      if (isMissingPropertyError(e)) {
+        console.warn('⚠️ Notion: поле Source отсутствует — пишем без него');
+        const { Source, ...withoutSource } = properties;
+        await write(withoutSource);
+        stats.saved++;
+      } else {
+        console.error('Ошибка CRM:', e.message);
+      }
+    }
   } catch (e) {
     console.error('Ошибка CRM:', e.message);
   }
@@ -709,7 +729,8 @@ export async function generateReply(sessionKey, userMessage) {
     + `\n\n=== LENGTH RULE ===\nWrite 2-4 short sentences. No long bullet lists, no headers.`
     + `\n\n=== HIDDEN CRM BLOCK ===\nIf you learned new info about the client (name, city, service, date, guests, budget, phone), append on a NEW LINE at the very END of your reply a single line:\n<!--CRM:{"clientName":"...","city":"...","service":"...","eventDate":"YYYY-MM-DD","guests":"...","budget":"...","phone":"...","details":"..."}-->\nOnly include fields you actually learned. If nothing new — do NOT add the line. This line is stripped before sending to the user.`
 
-  const messages = store.buildMessages(sessionKey, systemPrompt, 8);
+  const windowTurns = Math.min(MAX_TURNS_IN_WINDOW || 12, 8);
+  const messages = store.buildMessages(sessionKey, systemPrompt, windowTurns);
   messages.push({ role: 'user', content: userMessage });
 
   let completion;
@@ -963,7 +984,7 @@ export async function handleIncoming(sessionKey, text, sendFn) {
     store.setClosedWon(sessionKey, true); // менеджер ведёт сам
     // Ack на языке клиента (берём из сессии или ru по умолчанию)
     const sess2 = store.getSession(sessionKey);
-    const ackLang = sess2?.lang || 'ru';
+    const ackLang = sess2?.lang || resolveLanguage(text, null) || 'ru';
     const ESC_ACK = {
       ru: 'Передаю ваш запрос старшему менеджеру — он свяжется с вами в течение часа.',
       en: 'Passing your request to a senior manager — they will reach out within an hour.',

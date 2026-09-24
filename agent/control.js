@@ -1,5 +1,5 @@
 // agent/control.js — управление паузой бота в чате
-// Модель: "менеджер активен" → окно 30 мин от последнего исходящего.
+// Модель: "менеджер активен" → окно MANAGER_ACTIVE_WINDOW_MS от последнего исходящего.
 // Если клиент пишет вне окна — агент отвечает.
 
 const MANAGER_ACTIVE_WINDOW_MS = Number(process.env.MANAGER_ACTIVE_WINDOW_MS || 60 * 60 * 1000); // 60 мин
@@ -48,7 +48,6 @@ export function popPendingWhilePaused(sessionKey) {
 export function getManagerActivity(sessionKey) {
   const until = paused.get(sessionKey);
   if (!until) return 0;
-  // paused = now + окно → lastActivity = until - окно
   return until - MANAGER_ACTIVE_WINDOW_MS;
 }
 
@@ -70,3 +69,5 @@ export function parseClientCommand(text) {
 export function status() {
   return { paused: paused.size, optOut: clientOptOut.size, pending: pendingWhilePaused.size };
 }
+
+export { MANAGER_ACTIVE_WINDOW_MS };
