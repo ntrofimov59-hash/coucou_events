@@ -128,7 +128,7 @@ text
 - **Домен:** `coucou-events.com` (верифицирован в Brevo)
 - **Поддомен для приёма:** `reply.coucou-events.com` (MX → inbound1.sendinblue.com)
 - **Porkbun Email Forwarding:**
-  - `info@coucou-events.com` → `coucou.events11@gmail.com` (старое, работает)
+  - `info@coucou-events.com` → `your-forward@example.com` (старое, работает)
   - `info@coucou-events.com` → `inbox@reply.coucou-events.com` (новое, для агента)
 - **Поток:**
   1. Письмо на `info@` → Porkbun → Brevo Inbound
@@ -156,14 +156,14 @@ Brevo (email)
 BREVO_API_KEY # xkeysib-...
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=2525 # 587/465 закрыты VPS, 2525 открыт
-SMTP_USER=b531f6001@smtp-brevo.com
+SMTP_USER=your-smtp-user@smtp-brevo.com
 SMTP_PASS=xsmtpsib-... # SMTP Key (не API key!)
-SMTP_FROM="Coucou Events coucou.events11@gmail.com"
+SMTP_FROM="Coucou Events your-forward@example.com"
 
 Website
 INBOUND_WEBHOOK_SECRET=<hex 32 bytes> # Bearer для Brevo
 INBOUND_FROM_EMAIL=info@coucou-events.com
-FORWARD_EMAIL=coucou.events11@gmail.com
+FORWARD_EMAIL=your-forward@example.com
 AGENT_HTTP_PORT=3001
 AGENT_HTTP_SECRET=<hex 32 bytes>
 
@@ -302,6 +302,6 @@ git push origin main         # после коммита
 
 GitHub: https://github.com/ntrofimov59-hash/coucou_events
 
-VPS: root@coucou-agent-vps (Ubuntu, Node 22, PM2, Nginx, ModSecurity)
+VPS: your-server (Ubuntu, Node 22, PM2, Nginx)
 
-Клиентская почта: info@coucou-events.com → coucou.events11@gmail.com
+Клиентская почта: info@coucou-events.com → your-forward@example.com
