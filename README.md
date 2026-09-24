@@ -1,158 +1,98 @@
-# Coucou Events — AI Sales Agent
+# Coucou Events
 
-> 🇷🇺 Russian version: [README.ru.md](README.ru.md)
+**AI-powered event agency platform** — multilingual sales website + autonomous sales agent that qualifies leads across Telegram, WhatsApp, Email and web forms, writes to Notion CRM, and hands off hot leads to humans.
 
-![status](https://img.shields.io/badge/status-production-brightgreen)
-![node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
-![license](https://img.shields.io/badge/license-BSL%201.1-orange)
-
-**AI-driven sales manager for premium event agencies.** Handles inbound leads across 4 channels, qualifies them in 4 languages, writes structured data to Notion CRM, auto-replies to email, and escalates hot leads to a human manager — end-to-end.
-
-Built for **Coucou Events** — an event agency operating in 15 cities across Europe, the Middle East, and Asia.
+**Live site:** [coucou-events.com](https://coucou-events.com)  
+**Product status:** Production (VPS + PM2)
 
 ---
 
-## Features
+## What this is
 
-- **Multi-channel intake** — Telegram (gramJS / MTProto), WhatsApp (whatsapp-web.js), Email (Brevo webhook), Website form
-- **4 languages** — Russian, English, Spanish, Armenian, with automatic detection per message
-- **LLM pipeline** — Groq openai/gpt-oss-120b with automatic fallback to gpt-oss-20b
-- **Lead scoring** — hot / warm / cold by city, date, service, guests, budget, contact
-- **Auto-escalation** — hot leads trigger an instant notification to a human manager via Telegram
-- **Notion CRM (v5 API)** — two-way sync, retry queue on network / 5xx failures
-- **RAG** — retrieval over a service knowledge base (MDX, 36 documents)
-- **Objection handling** — playbooks for price / think / compare / later / busy in 4 languages
-- **Manager takeover** — a human can pause the bot per session; the bot resumes on command
+Coucou Events is not a demo chatbot. It is an operating system for an event business:
 
----
+| Layer | Role |
+|--------|------|
+| **Website** (Astro) | Multilingual marketing site, booking & contact forms, service content |
+| **Sales Agent** (Node.js) | 24/7 manager “Anna” — qualifies, answers objections, saves leads, escalates |
+| **CRM** (Notion) | Lead pipeline with stage, budget, city, language, source |
+| **Channels** | Telegram · WhatsApp · Email (Brevo) · Website APIs |
 
-## Architecture
+### Agent capabilities
 
-    User
-     |
-     +--- Telegram ----+
-     +--- WhatsApp ----+---> agent/ ---> Groq LLM (gpt-oss-120b)
-     +--- Email -------+         |
-     +--- Website -----+         +---> Notion CRM (v5 API)
-                                 +---> RAG (MDX, 36 docs)
-                                 +---> Brevo (email reply)
+- **4 languages:** Russian, English, Spanish, Armenian
+- **Funnel logic:** greeting → qualification → proposal → objections → closing
+- **Lead scoring** + one-shot **hot-lead** alerts to the manager
+- **Human takeover:** manager messages pause the bot; history stays in context
+- **Voice messages** → Groq Whisper transcription
+- **SQLite** session store + analytics events
+- **Cost controls:** token / Whisper / email daily limits + alerts
+- **Fail-safe CRM:** Notion queue with retry when the API is down
 
-Full breakdown: docs/ARCHITECTURE.md
+Technical deep-dive for operators: **[AGENTS.md](./AGENTS.md)**.
 
 ---
 
-## Quick Start
+## Architecture (simplified)
+Client
+├─ Website forms ──► /api/contact | /api/booking ──► Telegram + Notion + auto-reply
+├─ Telegram / WhatsApp / Email ──► agent-v2.js ──► Groq LLM
+│                                      ├─ SQLite sessions + events
+│                                      ├─ Notion CRM
+│                                      └─ RAG (service MDX)
+└─ Manager ──► /stop /start /status · manual replies (bot pauses)
+text---
 
-Requirements: Node >= 20, pnpm >= 9, pm2 (global)
+## Tech stack
 
-    git clone https://github.com/ntrofimov59-hash/coucou_events.git
-    cd coucou_events
-    pnpm install
-
-    cp .env.example .env
-    # fill in: GROQ_API_KEY, NOTION_TOKEN, NOTION_DB_ID,
-    #          BOOKING_BOT_TOKEN, BOOKING_CHAT_ID
-
-    pm2 start ecosystem.config.cjs
-    pm2 logs coucou-agent-v2
-
-Full setup guide: docs/SETUP.md
-
----
-
-## Documentation
-
-- Architecture: docs/ARCHITECTURE.md
-- Setup: docs/SETUP.md
-- API: docs/API.md
-- Roadmap: docs/ROADMAP.md
-- Pitch: docs/PITCH.md
-- Changelog: CHANGELOG.md
+| Area | Stack |
+|------|--------|
+| Frontend | Astro 7, Solid, Tailwind, MDX |
+| Agent | Node.js ≥22, PM2 |
+| LLM | Groq (`openai/gpt-oss-120b` + fallback) |
+| CRM | Notion API v5 |
+| Messaging | GramJS (Telegram), whatsapp-web.js, Brevo |
+| Storage | SQLite (sessions + analytics) |
+| Infra | Ubuntu VPS, Nginx, Docker-ready |
 
 ---
 
-## Tech Stack
+## Quick start (development)
 
-- Runtime: Node.js >= 20 (ESM)
-- LLM: Groq (openai/gpt-oss-120b + fallback gpt-oss-20b)
-- Telegram: gramJS (MTProto)
-- WhatsApp: whatsapp-web.js
-- Email: Brevo (webhook + reply API)
-- CRM: Notion API v5
-- Web: Astro + Tailwind CSS
-- Process manager: pm2
-- Deploy: Ubuntu VPS (Docker optional)
-
----
-
-## License
-
-Business Source License 1.1 — source-available. Non-production use is free;
-commercial use requires a license. Converts to Apache 2.0 on 2029-09-25.
-
-See LICENSE for full terms.
-
----
-
-## Author
-
-Nikita Trofimov — @ntrofimov59-hash
-
-(c) 2025-2026 Nikita Trofimov. All rights reserved.
-                          │
-                     ┌────▼────┐
-                     │ agent/  │
-                     └────┬────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-   Groq LLM          Notion CRM        RAG (MDX)
-(gpt-oss-120b)       (v5 API)         36 docs
-        │
-        └──► Brevo (email reply)
-Full breakdown: docs/ARCHITECTURE.md
-
-Quick Start
-Requirements: Node ≥ 20 · pnpm ≥ 9 · pm2 (global)
-
-bash
-git clone https://github.com/ntrofimov59-hash/coucou_events.git
-cd coucou_events
+```bash
 pnpm install
+cp .env.example .env   # fill secrets — never commit .env
 
-cp .env.example .env
-# fill in: GROQ_API_KEY, NOTION_TOKEN, NOTION_DB_ID,
-#          BOOKING_BOT_TOKEN, BOOKING_CHAT_ID
+# Website
+pnpm dev               # http://localhost:4321
 
-pm2 start ecosystem.config.cjs
-pm2 logs coucou-agent-v2
-Full setup guide: docs/SETUP.md
+# Agent (separate process)
+node agent-v2.js
+# or: pm2 start ecosystem.config.cjs
+Production details: AGENTS.md.
 
-Documentation
-Doc	Description
-Architecture	Modules, data flow, LLM pipeline
-Setup	Environment, dependencies, deploy
-API	HTTP endpoints, webhooks
-Roadmap	What's done, what's next
-Pitch	Product / market / team
-Changelog	Version history
-Tech Stack
-Layer	Tech
-Runtime	Node.js ≥ 20 (ESM)
-LLM	Groq (openai/gpt-oss-120b + fallback gpt-oss-20b)
-Telegram	gramJS (MTProto)
-WhatsApp	whatsapp-web.js
-Email	Brevo (webhook + reply API)
-CRM	Notion API v5
-Web	Astro + Tailwind CSS
-Process manager	pm2
-Deploy	Ubuntu VPS (Docker optional)
+Repository structure
+text├── agent/              # Sales agent modules
+├── agent-v2.js         # Agent entrypoint
+├── src/                # Astro site
+├── AGENTS.md           # Operator & architecture docs
+├── ecosystem.config.cjs
+├── docker-compose.yml
+└── .env.example
+
+Security
+
+Secrets only via environment variables (see .env.example)
+Agent HTTP API bound to 127.0.0.1 with shared secret
+Report vulnerabilities: SECURITY.md
+
+Runtime secrets, session databases, and customer PII are not committed.
+
 License
-Business Source License 1.1 — source-available. Non-production use is free; commercial use requires a license. Converts to Apache 2.0 on 2029-09-25.
+Proprietary. All rights reserved. See LICENSE.
+Unauthorized copying, distribution, or commercial use without a written agreement is prohibited.
 
-See LICENSE.
+Contact
 
-Author
-Nikita Trofimov — @ntrofimov59-hash
-
-© 2025–2026 Nikita Trofimov. All rights reserved.
+Product: coucou-events.com
+GitHub: ntrofimov59-hash/coucou_events

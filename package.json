@@ -1,7 +1,7 @@
 {
-  "name": "event-premium",
+  "name": "coucou-events",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "agent": "node agent-v2.js",
+    "start:agent": "node agent-v2.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.3",
@@ -47,5 +49,14 @@
   },
   "devDependencies": {
     "typescript": "^7.0.2"
+  },
+  "description": "Coucou Events — multilingual event agency website and AI sales agent (Telegram, WhatsApp, Email, Notion CRM)",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Coucou Events",
+  "homepage": "https://coucou-events.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ntrofimov59-hash/coucou_events.git"
   }
 }
