@@ -107,3 +107,30 @@ fix_*.py
 apply-agent-fixes.sh
 *.tar.gz
 src.backup-*/
+
+# === Project cleanup (2026-09-25) ===
+# одноразовые файлы
+apply-*.sh
+cat
+previous_metrics.json
+
+# бэкапы и архивы
+*.bak
+*.bak.*
+*.bak-*
+*.bak[0-9]*
+agent/core.js.bak*
+agent/*.bak*
+src.bak-*
+src/*.bak*
+
+# данные
+agent/data/
+agent/data/*.json
+*.tmp
+
+# agent data
+agent/data/
+*.db
+*.db-wal
+*.db-shm

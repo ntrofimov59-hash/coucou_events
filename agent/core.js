@@ -675,6 +675,7 @@ export async function generateReply(sessionKey, userMessage) {
     session.hotNotified = true;
     store.saveSession(sessionKey);
     try {
+      store.logEvent(sessionKey, 'hot', { stage, score: leadScore, profile: session.profile });
       notifyManager({
         reason: `Hot lead (score high). Stage: ${stage}`,
         sessionKey,
@@ -1006,6 +1007,7 @@ export async function handleIncoming(sessionKey, text, sendFn) {
       ])),
       profile: sess?.profile || {},
     });
+    try { store.logEvent(sessionKey, 'escalate', { reason: 'wants_human' }); } catch {}
     control.pause(sessionKey, 60 * 60 * 1000); // 1 час
     store.setClosedWon(sessionKey, true); // менеджер ведёт сам
     // Ack на языке клиента (берём из сессии или ru по умолчанию)

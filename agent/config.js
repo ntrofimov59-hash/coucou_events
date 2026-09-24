@@ -28,6 +28,7 @@ export const DATABASE_ID = process.env.NOTION_DATABASE_ID;
 
 export const DATA_DIR = new URL('./data/', import.meta.url).pathname;
 export const SESSIONS_FILE = DATA_DIR + 'sessions.json';
+export const SESSIONS_DB = DATA_DIR + 'sessions.db';
 
 // TTL: через сколько мс считаем сессию «холодной» и убираем из памяти
 export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 дней

@@ -3,6 +3,7 @@ import http from 'http';
 import { processInboundEmail } from './email-inbound.js';
 import { stats, logStat } from './core.js';
 import * as usage from './usage.js';
+import * as store from './store.js';
 
 const PORT = Number(process.env.AGENT_HTTP_PORT || 3001);
 const SECRET = process.env.AGENT_HTTP_SECRET || '';
@@ -25,7 +26,6 @@ function json(res, status, obj) {
 export function startHttpServer() {
   const server = http.createServer(async (req, res) => {
     try {
-      // auth
       const auth = req.headers['x-agent-secret'] || '';
       if (SECRET && auth !== SECRET) return json(res, 401, { ok: false, error: 'unauthorized' });
 
@@ -39,8 +39,21 @@ export function startHttpServer() {
         return json(res, 200, result);
       }
 
-      if (req.method === 'GET' && req.url === '/health') {
-        return json(res, 200, { ok: true, stats, usage: usage.getUsage() });
+      if (req.method === 'GET' && (req.url === '/health' || req.url?.startsWith('/health?'))) {
+        let analytics = null;
+        try { analytics = store.getAnalytics(7); } catch (e) { analytics = { error: e.message }; }
+        return json(res, 200, {
+          ok: true,
+          stats,
+          usage: usage.getUsage(),
+          store: store.getStats(),
+          analytics,
+        });
+      }
+
+      if (req.method === 'GET' && req.url?.startsWith('/analytics')) {
+        const days = Number(new URL(req.url, 'http://x').searchParams.get('days') || 7);
+        return json(res, 200, { ok: true, analytics: store.getAnalytics(days) });
       }
 
       if (req.method === 'POST' && req.url === '/usage/email') {
