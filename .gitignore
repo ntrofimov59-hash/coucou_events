@@ -84,3 +84,25 @@ fix_*.py
 
 # === Архив логов ===
 logs-archive/
+
+# Agent backups (our session 2026-09-24)
+agent/*.bak
+agent/*.bak.*
+agent/*.bak-*
+agent/*.bak[0-9]*
+agent/*.pre-*
+agent/*.broken
+agent/*.nline
+agent/*.ours
+agent/*.patched-by-global
+agent/*.ours.bak
+agent/*.patched.bak
+agent/core.js.ours*
+agent/core.js.patched*
+agent.backup-*/
+
+# Одноразовые патч-скрипты и архив
+patch_*.py
+fix_*.py
+apply-agent-fixes.sh
+*.tar.gz
