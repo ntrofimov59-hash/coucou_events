@@ -322,10 +322,18 @@ function extractProfile(text) {
   }
   if (!out.eventDate) {
     const monthMap = {
-      январ: '01', феврал: '02', март: '03', апрел: '04', ма: '05', июн: '06',
+      // RU (длинные ключи первыми — иначе «ма» ловит «мама»)
+      январ: '01', феврал: '02', март: '03', апрел: '04', май: '05', июн: '06',
       июл: '07', август: '08', сентябр: '09', октябр: '10', ноябр: '11', декабр: '12',
+      // EN
       january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
       july: '07', august: '08', september: '09', october: '10', november: '11', december: '12',
+      // ES
+      enero: '01', febrero: '02', marzo: '03', abril: '04', mayo: '05', junio: '06',
+      julio: '07', agosto: '08', septiembre: '09', octubre: '10', noviembre: '11', diciembre: '12',
+      // HY (латиница транслит не нужен — армянские корни)
+      հունվար: '01', փետրվար: '02', մարտ: '03', ապրիլ: '04', մայիս: '05', հունիս: '06',
+      հուլիս: '07', օգոստոս: '08', սեպտեմբեր: '09', հոկտեմբեր: '10', նոյեմբեր: '11', դեկտեմբեր: '12',
     };
     for (const [key, mm] of Object.entries(monthMap)) {
       if (lower.includes(key)) {
@@ -473,10 +481,12 @@ export async function saveOrUpdateLeadDirect(args) {
         stats.saved++;
       } else {
         console.error('Ошибка CRM:', e.message);
+        throw e; // чтобы saveOrUpdateLead → notion-queue
       }
     }
   } catch (e) {
     console.error('Ошибка CRM:', e.message);
+    throw e; // сеть / 5xx → enqueue
   }
 }
 
@@ -922,14 +932,30 @@ export async function handleIncoming(sessionKey, text, sendFn) {
   if (clientCmd === 'optout') {
     control.setClientOptOut(sessionKey, true);
     console.log(`🚫 ${sessionKey}: client opt-out`);
-    await sendFn('Поняла, больше не пишу. Если понадобится — напишите «начать», и я снова на связи.');
+    const sess = store.getSession(sessionKey);
+    const l = sess?.lang || resolveLanguage(text, null) || 'ru';
+    const OPT_OUT = {
+      ru: 'Поняла, больше не пишу. Если понадобится — напишите «начать», и я снова на связи.',
+      en: "Got it — I won't message you again. Write «start» anytime if you need me.",
+      es: 'Entendido, no te escribo más. Si me necesitas, escribe «empezar».',
+      hy: 'Հասկացա, այլևս չեմ գրի։ Եթե պետք լինի — գրեք «սկսել».',
+    };
+    await sendFn(OPT_OUT[l] || OPT_OUT.ru);
     return;
   }
   if (clientCmd === 'optin') {
     control.setClientOptOut(sessionKey, false);
     control.resume(sessionKey);
     console.log(`✅ ${sessionKey}: client opt-in`);
-    await sendFn('Снова на связи! Чем могу помочь?');
+    const sess = store.getSession(sessionKey);
+    const l = sess?.lang || resolveLanguage(text, null) || 'ru';
+    const OPT_IN = {
+      ru: 'Снова на связи! Чем могу помочь?',
+      en: "I'm back! How can I help?",
+      es: '¡De nuevo en línea! ¿En qué puedo ayudarte?',
+      hy: 'Կրկին կապի մեջ եմ։ Ինչո՞վ կարող եմ օգնել։',
+    };
+    await sendFn(OPT_IN[l] || OPT_IN.ru);
     return;
   }
 
