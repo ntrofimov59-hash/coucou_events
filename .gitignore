@@ -134,3 +134,10 @@ agent/data/
 *.db
 *.db-wal
 *.db-shm
+
+# Agent backups (SQLite era)
+agent.data.backup-*/
+agent/*.migrated.bak
+agent/data/sessions.json.migrated.bak
+agent/data/*.db
+agent/data/*.db-*
