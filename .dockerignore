@@ -1,0 +1,7 @@
+.git
+dist
+.astro
+.wwebjs_auth
+.wwebjs_cache
+*.bak
+*.bak2
