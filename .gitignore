@@ -3,30 +3,23 @@ dist/
 
 # generated types
 .astro/
-
 # dependencies
 node_modules/
-
 # logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
 # environment variables
 .env
 .env.production
-
 # macOS-specific files
 .DS_Store
-
 # jetbrains setting folder
 .idea/
-
 ## Panda
 styled-system
 styled-system-studio
-
 ## .env
 .env.env
 .env.local
@@ -35,38 +28,25 @@ styled-system-studio
 .wwebjs_auth/
 .wwebjs_cache/
 .wwebjs_cashe/
-.wwebjs_auth/
 gcp-key.json
 *.bak-*
 *.patch
-
 # backups
 *.bak
 *.bak[0-9]*
 *.bak[0-9][0-9]*
 agent/data/
-
 # Agent
-agent/data/
 agent/data/*.json
 .env.bak-*
 .env.*.bak
-
 # Backups of src
 src.bak-*/
 src.bak-*
-
 # Patch files
-*.patch
-
 # Logs
 *.log
-npm-debug.log*
-pnpm-debug.log*
-
 # OS
-.DS_Store
-
 # === Agent backups (создаются патчами 2026-09-24) ===
 agent/*.bak
 agent/*.bak.*
@@ -77,22 +57,13 @@ agent/*.broken
 agent/*.nline
 agent/**/*.bak.*
 agent/prompts/*.bak_langs
-
 # === Одноразовые патч-скрипты ===
 patch_*.py
 fix_*.py
-
 # === Архив логов ===
 logs-archive/
-
 # Agent backups (our session 2026-09-24)
-agent/*.bak
-agent/*.bak.*
-agent/*.bak-*
-agent/*.bak[0-9]*
 agent/*.pre-*
-agent/*.broken
-agent/*.nline
 agent/*.ours
 agent/*.patched-by-global
 agent/*.ours.bak
@@ -100,41 +71,26 @@ agent/*.patched.bak
 agent/core.js.ours*
 agent/core.js.patched*
 agent.backup-*/
-
 # Одноразовые патч-скрипты и архив
-patch_*.py
-fix_*.py
 apply-agent-fixes.sh
 *.tar.gz
 src.backup-*/
-
 # === Project cleanup (2026-09-25) ===
 # одноразовые файлы
 apply-*.sh
 cat
 previous_metrics.json
-
 # бэкапы и архивы
-*.bak
 *.bak.*
-*.bak-*
-*.bak[0-9]*
 agent/core.js.bak*
 agent/*.bak*
-src.bak-*
 src/*.bak*
-
 # данные
-agent/data/
-agent/data/*.json
 *.tmp
-
 # agent data
-agent/data/
 *.db
 *.db-wal
 *.db-shm
-
 # Agent backups (SQLite era)
 agent.data.backup-*/
 agent/*.migrated.bak
