@@ -194,9 +194,19 @@ const isHome =
 
     <a href={prefix} class="header-logo-link" aria-label={t.toMain}>
       <img
-        src="/logo.svg"
+        class="logo-full"
+        src="/brand/logo-full.png?v=2"
         alt="Coucou"
-        width="120"
+        width="112"
+        height="36"
+        loading="eager"
+      />
+      <img
+        class="logo-mark"
+        src="/brand/logo-mark.png?v=2"
+        alt=""
+        aria-hidden="true"
+        width="40"
         height="40"
         loading="eager"
       />
@@ -270,7 +280,7 @@ const isHome =
       <div class="panel-header">
         <div class="panel-logo-wrap">
           <a href={prefix} class="panel-logo-link" aria-label={t.toMain}>
-            <img src="/logo.svg" alt="Coucou" class="panel-logo-img" />
+            <img src="/brand/logo-full.png?v=2" alt="Coucou" class="panel-logo-img" width="87" height="28" />
           </a>
         </div>
         <button
@@ -514,10 +524,27 @@ const isHome =
   }
   .header-logo-link img {
     display: block;
-    height: 32px;
-    width: auto;
     object-fit: contain;
-    mix-blend-mode: multiply;
+  }
+  .header-logo-link .logo-full {
+    height: 36px;
+    width: auto;
+  }
+  .header-logo-link .logo-mark {
+    display: none;
+    height: 40px;
+    width: 40px;
+  }
+  .site-header.is-scrolled .header-logo-link .logo-full {
+    display: none;
+  }
+  .site-header.is-scrolled .header-logo-link .logo-mark {
+    display: block;
+    animation: logo-mark-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes logo-mark-in {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
   }
   .desktop-nav {
     display: none;

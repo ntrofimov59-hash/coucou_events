@@ -33,7 +33,7 @@ export const CITIES = [
  * Кнопка на странице локации — только если URL не пустой.
  */
 export const CITY_INSTAGRAM: Record<string, string> = {
-  yerevan: "https://instagram.com/events.erevan",
+  yerevan: "https://instagram.com/events.yerevan",
   bali: "https://instagram.com/events.bali_coucou",
   tbilisi: "https://instagram.com/events.tbilisi_coucou",
   phuket: "https://instagram.com/events.phuket_coucou",
@@ -42,7 +42,7 @@ export const CITY_INSTAGRAM: Record<string, string> = {
   marrakech: "https://instagram.com/events.marrakech",
   casablanca: "https://instagram.com/events.casablanca_coucou",
   danang: "https://instagram.com/events.danang_coucou",
-  nhatrang: "https://instagram.com/events.nanchang",
+  nhatrang: "https://instagram.com/events.nha_trang",
   antalya: "",
   belgrade: "",
   budapest: "",
