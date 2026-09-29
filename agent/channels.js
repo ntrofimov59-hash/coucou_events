@@ -178,7 +178,7 @@ export function startWhatsApp() {
     console.log(`⏳ WhatsApp loading: ${percent}% ${message}`);
   });
 
-  // Исходящие (менеджер пишет сам из WhatsApp-клиента) → пауза
+// Исходящие (менеджер пишет сам из WhatsApp-клиента) → пауза
   waClient.on('message_create', async (msg) => {
     try {
       if (!msg.fromMe) return;
@@ -198,10 +198,23 @@ export function startWhatsApp() {
       if (cmd === 'stop') { control.pause(key); console.log(`⏸ WA Manager /stop: ${key}`); return; }
       if (cmd === 'start') { control.resume(key); console.log(`▶️ WA Manager /start: ${key}`); return; }
 
-      // Пауза на 30 мин + сохраняем сообщение в контекст сессии
+      // Создаём сессию, если её нет (менеджер написал первым)
+      let sess = store.getSession(key);
+      if (!sess) {
+        sess = store.createSession(key, { lang: 'ru', source: 'WhatsApp' });
+        console.log(`📝 WA session created by manager: ${key}`);
+      }
+
+      // Пауза + сохраняем сообщение менеджера в контекст
       control.pause(key);
       store.pushManagerMessage(key, txt, Date.now());
-      console.log(`👤 WA Manager replied → pause 30min, saved to context: ${key}`);
+
+      // Если turns пустые — добавляем фейковый ход, чтобы бот не здоровался заново
+      if (!sess.turns || sess.turns.length === 0) {
+        store.pushTurn(key, '(диалог начат менеджером)', txt);
+      }
+
+      console.log(`👤 WA Manager replied → pause, saved to context: ${key}`);
     } catch (e) { console.error('WA outgoing handler:', e.message); }
   });
 

@@ -141,3 +141,4 @@ agent/*.migrated.bak
 agent/data/sessions.json.migrated.bak
 agent/data/*.db
 agent/data/*.db-*
+/root/coucou-data/
