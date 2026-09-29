@@ -39,6 +39,22 @@ const IRRELEVANT_PATTERNS = [
   /(кредит|займ|invest|investitsii|инвестиц|казино|ставки\s+на\s+спорт|crypto|биткоин)/i,
 ];
 
+// Подрядчики / партнёры — НЕ клиенты. Свои услуги, музыка, фото, декор и т.п.
+const SUBCONTRACTOR_PATTERNS = [
+  /(хочу\s+сотрудничать|предлагаю\s+сотруднич|предлагаю\s+услуг|готов\s+сотрудничать|ищу\s+заказ|ищу\s+подработ|работаю\s+(фотограф|музыкант|гитар|dj|д[ие]джей|ведущ|тамада|декоратор|флорист|визажист|стилист))/i,
+  /(я\s+.{0,15}(фотограф|музыкант|гитарист|д[ие]джей|dj|певец|вокалист|ведущ|тамада|декоратор|флорист|визажист|стилист|артист|band|группа))/i,
+  /(i\s+(am|'m)\s+(a\s+)?(\w+\s+){0,4}(photographer|musician|guitarist|dj|singer|vocalist|mc|host|decorator|florist|makeup|stylist|band|artist|performer))/i,
+  /(i\s+(would\s+like\s+to|want\s+to|can|am\s+ready\s+to)\s+(cooperate|collaborate|work\s+with\s+you|join\s+your\s+team|perform))/i,
+  /(available\s+to\s+collaborate|available\s+for\s+(events|bookings|gigs|performances))/i,
+  /(soy\s+(fotógrafo|músico|guitarrista|dj|cantante|decorador|florista)|quiero\s+colaborar|ofrezco\s+mis\s+servicios)/i,
+  /(ուզում\s+եմ\s+համագործակցել|առաջարկում\s+եմ\s+(իմ\s+)?ծառայություններ|ես\s+(լուսանկարիչ|երաժիշտ|դիջեյ|երգիչ|դեկորատոր))/i,
+];
+
+export function isSubcontractor(text) {
+  const t = String(text || '');
+  return SUBCONTRACTOR_PATTERNS.some(re => re.test(t));
+}
+
 export function isIrrelevant(text) {
   const t = String(text || '');
   return IRRELEVANT_PATTERNS.some(re => re.test(t));
@@ -738,7 +754,7 @@ export async function generateReply(sessionKey, userMessage) {
 
 === CRITICAL LANGUAGE RULE ===\nReply ONLY in ${LANG_NAMES[lang] || 'Russian'}. Even if the prior history is in another language, your NEXT reply MUST be in ${LANG_NAMES[lang] || 'Russian'}.`
     + `\n\n=== LENGTH RULE ===\nWrite 2-4 short sentences. No long bullet lists, no headers.`
-    + `\n\n=== HIDDEN CRM BLOCK ===\nIf you learned new info about the client (name, city, service, date, guests, budget, phone), append on a NEW LINE at the very END of your reply a single line:\n<!--CRM:{"clientName":"...","city":"...","service":"...","eventDate":"YYYY-MM-DD","guests":"...","budget":"...","phone":"...","details":"..."}-->\nOnly include fields you actually learned. If nothing new — do NOT add the line. This line is stripped before sending to the user.`
+    + `\n\n=== HIDDEN CRM BLOCK ===\nIf you learned new info about the client (name, city, service, date, guests, budget, phone), append on a NEW LINE at the very END of your reply a single line:\n<!--CRM:{"clientName":"...","city":"...","service":"...","eventDate":"YYYY-MM-DD","guests":"...","budget":"...","phone":"...","details":"..."}-->\nOnly include fields you actually learned. If nothing new — do NOT add the line. CRITICAL: Never fill "eventDate" unless the CLIENT explicitly named a specific date. Do NOT invent dates, do NOT pick dates yourself, do NOT set eventDate based on relative terms like "next Friday". If the client did not name a concrete date — omit eventDate entirely. This line is stripped before sending to the user.`
 
   const windowTurns = Math.min(MAX_TURNS_IN_WINDOW || 12, 8);
   const messages = store.buildMessages(sessionKey, systemPrompt, windowTurns);
@@ -911,6 +927,29 @@ export async function handleIncoming(sessionKey, text, sendFn) {
   // 0a. Чистые подтверждения («ок», «спасибо», 👍) — только если сессия уже существует
   if (store.getSession(sessionKey) && isPureAck(text)) {
     console.log(`💤 Pure ack, skip LLM`);
+    return;
+  }
+
+  // 0a2. Подрядчики / партнёры — не лиды, передаём менеджеру
+  if (isSubcontractor(text)) {
+    console.log(`🤝 Subcontractor offer — передаю менеджеру`);
+    try {
+      const subSession = store.getSession(sessionKey) || { profile: {}, turns: [] };
+      subSession.stage = 'subcontractor';
+      subSession.profile = { ...(subSession.profile || {}), role: 'subcontractor' };
+      await store.save(sessionKey, subSession);
+    } catch (e) {
+      console.error('subcontractor save error:', e.message);
+    }
+    const l = store.getSession(sessionKey)?.lang || resolveLanguage(text, null) || 'ru';
+    const reply = {
+      ru: 'Спасибо за предложение! Я передам его менеджеру — он свяжется с вами напрямую.',
+      en: 'Thanks for the offer! I will pass it to our manager — they will reach out to you directly.',
+      es: 'Gracias por la oferta. Se la pasaré a nuestro gerente; se pondrá en contacto contigo directamente.',
+      hy: 'Շնորհակալություն առաջարկի համար։ Կփոխանցեմ մեր մենեջերին, նա ուղղակիորեն կկապվի ձեզ հետ։',
+    };
+    await sendFn(reply[l] || reply.ru);
+    stats.saved++;
     return;
   }
 
